@@ -202,16 +202,17 @@ function parseM3U(text, defaultCategory = 'nasional') {
 
 function getDefaultLockConfig() {
   return {
+    isConfigured: false,
     mode: 'pin',
-    hash: hashSecret('1234'),
-    hideAdultTab: false,
+    hash: null,
+    hideAdultTab: true,
   };
 }
 
 /**
  * Load lock configuration from storage.
  * @param {Storage} [storage]
- * @returns {{ mode: 'pin'|'pattern', hash: string, hideAdultTab: boolean }}
+ * @returns {{ isConfigured: boolean, mode: 'pin'|'pattern', hash: string|null, hideAdultTab: boolean }}
  */
 function loadLockConfig(storage) {
   const defaults = getDefaultLockConfig();
@@ -224,10 +225,11 @@ function loadLockConfig(storage) {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return defaults;
 
+    const isConfigured = Boolean(parsed.isConfigured);
     const mode = parsed.mode === 'pattern' ? 'pattern' : 'pin';
-    const hash = typeof parsed.hash === 'string' && parsed.hash ? parsed.hash : defaults.hash;
-    const hideAdultTab = Boolean(parsed.hideAdultTab);
-    return { mode, hash, hideAdultTab };
+    const hash = typeof parsed.hash === 'string' && parsed.hash ? parsed.hash : (isConfigured ? defaults.hash : null);
+    const hideAdultTab = parsed.hideAdultTab !== undefined ? Boolean(parsed.hideAdultTab) : defaults.hideAdultTab;
+    return { isConfigured, mode, hash, hideAdultTab };
   } catch (_err) {
     return defaults;
   }
@@ -235,15 +237,17 @@ function loadLockConfig(storage) {
 
 /**
  * Save lock configuration to storage.
- * @param {{ mode?: 'pin'|'pattern', hash?: string, hideAdultTab?: boolean }} cfg
+ * @param {{ isConfigured?: boolean, mode?: 'pin'|'pattern', hash?: string|null, hideAdultTab?: boolean }} cfg
  * @param {Storage} [storage]
- * @returns {{ mode: 'pin'|'pattern', hash: string, hideAdultTab: boolean }}
+ * @returns {{ isConfigured: boolean, mode: 'pin'|'pattern', hash: string|null, hideAdultTab: boolean }}
  */
 function saveLockConfig(cfg, storage) {
   const current = loadLockConfig(storage);
+  const isConfigured = cfg && typeof cfg.isConfigured === 'boolean' ? cfg.isConfigured : (cfg && cfg.hash ? true : current.isConfigured);
   const next = {
+    isConfigured,
     mode: cfg && cfg.mode === 'pattern' ? 'pattern' : cfg && cfg.mode === 'pin' ? 'pin' : current.mode,
-    hash: cfg && typeof cfg.hash === 'string' && cfg.hash ? cfg.hash : current.hash,
+    hash: cfg && cfg.hash !== undefined ? cfg.hash : current.hash,
     hideAdultTab: cfg && typeof cfg.hideAdultTab === 'boolean' ? cfg.hideAdultTab : current.hideAdultTab,
   };
   const store = storage !== undefined ? storage : getDefaultStorage();
@@ -260,11 +264,11 @@ function saveLockConfig(cfg, storage) {
 /**
  * Verify a PIN or D-Pad pattern string/array against lockConfig.
  * @param {string|string[]} input
- * @param {{ mode: string, hash: string }} lockConfig
+ * @param {{ isConfigured?: boolean, mode: string, hash: string }} lockConfig
  * @returns {boolean}
  */
 function verifyLockSecret(input, lockConfig) {
-  if (!lockConfig || typeof lockConfig.hash !== 'string' || !lockConfig.hash) {
+  if (!lockConfig || !lockConfig.isConfigured || typeof lockConfig.hash !== 'string' || !lockConfig.hash) {
     return false;
   }
   if (input == null) return false;
@@ -366,7 +370,8 @@ function saveFavorites(favIds, storage) {
 }
 
 function isAdultTabVisible(lockConfig, isUnlocked) {
-  if (!lockConfig || !lockConfig.hideAdultTab) return true;
+  if (!lockConfig) return false;
+  if (lockConfig.hideAdultTab) return false;
   return Boolean(isUnlocked);
 }
 
@@ -454,12 +459,6 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
   }
 
   function renderTabs() {
-    const adultTab = document.getElementById('tab-adult');
-    if (adultTab) {
-      adultTab.hidden = !isAdultTabVisible(lockConfig, isAdultUnlocked);
-      adultTab.textContent = isAdultUnlocked ? '🔓 18+ / Dewasa' : '🔒 18+ / Dewasa';
-    }
-
     document.querySelectorAll('.webtv-tab').forEach((tab) => {
       const cat = tab.dataset.category;
       const isSelected = cat === activeCategory;
@@ -473,12 +472,25 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     const emptyEl = document.getElementById('channel-empty');
     if (!grid) return;
 
-    const rawList = channelsByCat[activeCategory] || [];
-    const sorted = sortChannelsWithFavorites(rawList, favoriteIds);
+    let rawList = [];
+    if (activeCategory === 'favorit') {
+      const favSet = new Set(favoriteIds);
+      const all = (channelsByCat.nasional || []).concat(channelsByCat.internasional || []);
+      rawList = all.filter((ch) => favSet.has(ch.id));
+    } else {
+      rawList = channelsByCat[activeCategory] || [];
+    }
+
+    const sorted = activeCategory === 'favorit' ? rawList : sortChannelsWithFavorites(rawList, favoriteIds);
     grid.innerHTML = '';
 
     if (sorted.length === 0) {
-      if (emptyEl) emptyEl.hidden = false;
+      if (emptyEl) {
+        emptyEl.hidden = false;
+        emptyEl.textContent = activeCategory === 'favorit'
+          ? 'Belum ada channel favorit. Tekan ★ pada channel untuk menambahkannya ke sini.'
+          : 'Belum ada channel di kategori ini. Tambahkan atau impor playlist M3U melalui ⚙️ Pengaturan & Sandi.';
+      }
       return;
     }
     if (emptyEl) emptyEl.hidden = true;
@@ -780,6 +792,9 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     }
   }
 
+  let settingsPatternStep = 1; // 1: input, 2: confirm
+  let settingsPatternConfirmBuffer = [];
+
   function setSettingsStatus(msg, isSuccess) {
     const el = document.getElementById('settings-status');
     if (!el) return;
@@ -787,23 +802,80 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     el.style.color = isSuccess ? '#34d399' : '#f87171';
   }
 
+  function updateAdultSessionUI() {
+    const lockedPane = document.getElementById('adult-session-locked-pane');
+    const unlockedPane = document.getElementById('adult-session-unlocked-pane');
+    const container = document.getElementById('adult-channel-list-container');
+    if (lockedPane) lockedPane.hidden = isAdultUnlocked;
+    if (unlockedPane) unlockedPane.hidden = !isAdultUnlocked;
+
+    if (container) {
+      container.innerHTML = '';
+      if (!isAdultUnlocked) return;
+      const adultList = (channelsByCat.adult || []).filter((ch) => !ch.isPlaceholder && ch.url);
+      if (adultList.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-secondary);font-size:0.85rem;margin:0;">Belum ada channel dewasa aktif. Impor playlist M3U di bagian bawah dialog ini.</p>';
+        return;
+      }
+      adultList.forEach((ch) => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.justifyContent = 'space-between';
+        item.style.padding = '8px 10px';
+        item.style.borderBottom = '1px solid rgba(255,255,255,0.08)';
+        item.innerHTML = `
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;">
+            <span style="font-weight:700;color:#ffffff;font-size:0.9rem;">${escapeHtml(ch.name)}</span>
+            <span style="color:var(--text-secondary);font-size:0.75rem;display:block;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(ch.url)}</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-play-adult" style="font-size:0.8rem;padding:4px 10px;flex-shrink:0;">Putar</button>
+        `;
+        const playBtn = item.querySelector('.btn-play-adult');
+        playBtn.addEventListener('click', () => {
+          closeSettingsModal();
+          launchChannel(ch, adultList);
+        });
+        container.appendChild(item);
+      });
+    }
+  }
+
   // --- Settings & M3U Modal ---
   function openSettingsModal() {
     const modal = document.getElementById('webtv-settings-modal');
     if (!modal) return;
     lastFocusElement = document.activeElement;
-    settingsSelectedMode = lockConfig.mode;
+    settingsSelectedMode = lockConfig.mode || 'pin';
     settingsPatternBuffer = [];
+    settingsPatternConfirmBuffer = [];
+    settingsPatternStep = 1;
     setSettingsStatus('', false);
 
-    const hideToggle = document.getElementById('setting-hide-adult');
-    if (hideToggle) hideToggle.checked = lockConfig.hideAdultTab;
-
+    const currentSecGroup = document.getElementById('setting-current-sec-group');
+    const currentSecInput = document.getElementById('setting-current-secret');
+    const noteEl = document.getElementById('sec-config-note');
+    const saveLockBtn = document.getElementById('btn-save-lock');
     const newPinInput = document.getElementById('setting-new-pin');
+    const confirmPinInput = document.getElementById('setting-confirm-pin');
+
+    if (currentSecInput) currentSecInput.value = '';
     if (newPinInput) newPinInput.value = '';
+    if (confirmPinInput) confirmPinInput.value = '';
+
+    if (lockConfig.isConfigured) {
+      if (currentSecGroup) currentSecGroup.hidden = false;
+      if (noteEl) noteEl.textContent = 'Sandi sudah aktif. Masukkan sandi saat ini untuk mengubah sandi atau membuka menu rahasia.';
+      if (saveLockBtn) saveLockBtn.textContent = 'Ubah Sandi';
+    } else {
+      if (currentSecGroup) currentSecGroup.hidden = true;
+      if (noteEl) noteEl.textContent = 'Sandi belum dikonfigurasi. Buat Sandi Baru (Pilih Mode: PIN 4 Digit atau Pola D-Pad Remote).';
+      if (saveLockBtn) saveLockBtn.textContent = 'Simpan & Aktifkan Sandi';
+    }
 
     updateSettingsModeUI();
     updateSettingsPatternDisplay();
+    updateAdultSessionUI();
 
     if (typeof modal.showModal === 'function') {
       modal.showModal();
@@ -841,34 +913,45 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
 
   function updateSettingsPatternDisplay() {
     const el = document.getElementById('setting-pattern-preview');
-    if (!el) return;
-    if (settingsPatternBuffer.length === 0) {
-      el.innerHTML = '<span class="pattern-placeholder">Rekam 4–6 arah baru...</span>';
-      return;
+    const confirmEl = document.getElementById('setting-pattern-confirm-preview');
+    const confirmWrap = document.getElementById('setting-pattern-confirm-wrap');
+    const stepLabel = document.getElementById('setting-pattern-step-label');
+    const nextBtn = document.getElementById('btn-pattern-next-step');
+
+    if (el) {
+      if (settingsPatternBuffer.length === 0) {
+        el.innerHTML = '<span class="pattern-placeholder">Langkah 1: Rekam 4–6 arah pola...</span>';
+      } else {
+        el.innerHTML = settingsPatternBuffer
+          .map((dir) => `<span class="pattern-badge">${ARROW_GLYPHS[dir] || dir}</span>`)
+          .join('');
+      }
     }
-    el.innerHTML = settingsPatternBuffer
-      .map((dir) => `<span class="pattern-badge">${ARROW_GLYPHS[dir] || dir}</span>`)
-      .join('');
+
+    if (confirmWrap) confirmWrap.hidden = settingsPatternStep !== 2;
+    if (stepLabel) {
+      stepLabel.textContent = settingsPatternStep === 2
+        ? 'Langkah 2: Rekam Ulang Pola Arah untuk Konfirmasi'
+        : 'Langkah 1: Rekam Pola Arah (4–6 arah)';
+    }
+    if (nextBtn) {
+      nextBtn.textContent = settingsPatternStep === 2 ? 'Kembali ke Langkah 1' : 'Lanjut Konfirmasi';
+    }
+
+    if (confirmEl) {
+      if (settingsPatternConfirmBuffer.length === 0) {
+        confirmEl.innerHTML = '<span class="pattern-placeholder">Ulangi arah yang sama untuk konfirmasi...</span>';
+      } else {
+        confirmEl.innerHTML = settingsPatternConfirmBuffer
+          .map((dir) => `<span class="pattern-badge">${ARROW_GLYPHS[dir] || dir}</span>`)
+          .join('');
+      }
+    }
   }
 
   function selectCategory(cat) {
     if (cat === 'settings') {
-      if (!isAdultUnlocked) {
-        openLockModal(() => {
-          renderTabs();
-          openSettingsModal();
-        });
-      } else {
-        openSettingsModal();
-      }
-      return;
-    }
-    if (cat === 'adult' && !isAdultUnlocked) {
-      openLockModal(() => {
-        activeCategory = 'adult';
-        renderTabs();
-        renderChannelGrid();
-      });
+      openSettingsModal();
       return;
     }
     activeCategory = cat;
@@ -945,49 +1028,137 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
       btn.addEventListener('click', () => {
         const dir = btn.dataset.dir;
         if (dir === 'clear') {
-          settingsPatternBuffer = [];
-        } else if (settingsPatternBuffer.length < 6) {
-          settingsPatternBuffer.push(dir);
+          if (settingsPatternStep === 2) {
+            settingsPatternConfirmBuffer = [];
+          } else {
+            settingsPatternBuffer = [];
+          }
+        } else {
+          if (settingsPatternStep === 2) {
+            if (settingsPatternConfirmBuffer.length < 6) {
+              settingsPatternConfirmBuffer.push(dir);
+            }
+          } else {
+            if (settingsPatternBuffer.length < 6) {
+              settingsPatternBuffer.push(dir);
+            }
+          }
         }
         updateSettingsPatternDisplay();
       });
     });
 
+    const nextStepBtn = document.getElementById('btn-pattern-next-step');
+    if (nextStepBtn) {
+      nextStepBtn.addEventListener('click', () => {
+        if (settingsPatternStep === 1) {
+          if (settingsPatternBuffer.length < 4) {
+            setSettingsStatus('Langkah 1: Rekam minimal 4 arah pola terlebih dahulu.', false);
+            return;
+          }
+          settingsPatternStep = 2;
+          settingsPatternConfirmBuffer = [];
+          setSettingsStatus('Silakan ulangi pola yang sama untuk konfirmasi.', true);
+        } else {
+          settingsPatternStep = 1;
+        }
+        updateSettingsPatternDisplay();
+      });
+    }
+
     const saveLockBtn = document.getElementById('btn-save-lock');
     if (saveLockBtn) {
       saveLockBtn.addEventListener('click', () => {
-        const hideToggle = document.getElementById('setting-hide-adult');
-        const hideAdultTab = hideToggle ? hideToggle.checked : lockConfig.hideAdultTab;
-        let nextHash = lockConfig.hash;
-
-        if (settingsSelectedMode === 'pin') {
-          const pinVal = (document.getElementById('setting-new-pin')?.value || '').trim();
-          if (pinVal) {
-            if (!/^\d{4}$/.test(pinVal)) {
-              setSettingsStatus('PIN baru harus tepat 4 digit angka.', false);
-              return;
-            }
-            nextHash = hashSecret(pinVal);
-          } else if (lockConfig.mode !== 'pin') {
-            setSettingsStatus('Masukkan 4 digit PIN baru saat beralih ke mode PIN.', false);
+        // If already configured, verify current secret first
+        if (lockConfig.isConfigured) {
+          const currentInput = (document.getElementById('setting-current-secret')?.value || '').trim();
+          if (!currentInput) {
+            setSettingsStatus('Masukkan sandi/PIN saat ini untuk mengubah konfigurasi.', false);
             return;
           }
-        } else {
-          if (settingsPatternBuffer.length >= 4) {
-            nextHash = hashSecret(normalizePattern(settingsPatternBuffer));
-          } else if (settingsPatternBuffer.length > 0 || lockConfig.mode !== 'pattern') {
-            setSettingsStatus('Rekam minimal 4 arah pola saat beralih ke mode Pola.', false);
+          if (!verifyLockSecret(currentInput, lockConfig)) {
+            setSettingsStatus('Sandi/PIN saat ini salah!', false);
             return;
           }
         }
 
+        let newSecret = '';
+        if (settingsSelectedMode === 'pin') {
+          const pinVal = (document.getElementById('setting-new-pin')?.value || '').trim();
+          const confirmPinVal = (document.getElementById('setting-confirm-pin')?.value || '').trim();
+          if (!/^\d{4}$/.test(pinVal)) {
+            setSettingsStatus('PIN baru harus tepat 4 digit angka.', false);
+            return;
+          }
+          if (pinVal !== confirmPinVal) {
+            setSettingsStatus('Konfirmasi PIN tidak cocok dengan PIN baru.', false);
+            return;
+          }
+          newSecret = pinVal;
+        } else {
+          if (settingsPatternBuffer.length < 4) {
+            setSettingsStatus('Pola arah minimal 4 langkah arah remote.', false);
+            return;
+          }
+          const p1 = normalizePattern(settingsPatternBuffer);
+          const p2 = normalizePattern(settingsPatternConfirmBuffer);
+          if (settingsPatternStep !== 2 || !p2) {
+            setSettingsStatus('Selesaikan langkah 2: Konfirmasi pola arah remote.', false);
+            return;
+          }
+          if (p1 !== p2) {
+            setSettingsStatus('Konfirmasi pola tidak cocok dengan pola awal.', false);
+            return;
+          }
+          newSecret = p1;
+        }
+
+        const nextHash = hashSecret(newSecret);
         lockConfig = saveLockConfig({
+          isConfigured: true,
           mode: settingsSelectedMode,
           hash: nextHash,
-          hideAdultTab,
+          hideAdultTab: true,
         });
-        renderTabs();
-        setSettingsStatus('Pengaturan sandi & privasi disimpan.', true);
+
+        // Reset inputs
+        const currentSecInput = document.getElementById('setting-current-secret');
+        const newPinInput = document.getElementById('setting-new-pin');
+        const confirmPinInput = document.getElementById('setting-confirm-pin');
+        if (currentSecInput) currentSecInput.value = '';
+        if (newPinInput) newPinInput.value = '';
+        if (confirmPinInput) confirmPinInput.value = '';
+        settingsPatternBuffer = [];
+        settingsPatternConfirmBuffer = [];
+        settingsPatternStep = 1;
+
+        openSettingsModal(); // Refresh modal state
+        setSettingsStatus('Sandi berhasil disimpan & diaktifkan!', true);
+        showToast('Sandi keamanan tersimpan.');
+      });
+    }
+
+    const unlockAdultBtn = document.getElementById('btn-unlock-adult-session');
+    if (unlockAdultBtn) {
+      unlockAdultBtn.addEventListener('click', () => {
+        if (!lockConfig.isConfigured) {
+          setSettingsStatus('Buat & simpan sandi terlebih dahulu di atas.', false);
+          return;
+        }
+        openLockModal(() => {
+          updateAdultSessionUI();
+          setSettingsStatus('Menu rahasia 18+ terbuka untuk sesi ini.', true);
+        });
+      });
+    }
+
+    const lockAdultBtn = document.getElementById('btn-lock-adult-session');
+    if (lockAdultBtn) {
+      lockAdultBtn.addEventListener('click', () => {
+        isAdultUnlocked = false;
+        updateAdultSessionUI();
+        setSettingsStatus('Menu rahasia telah dikunci kembali.', true);
+        showToast('Menu 18+ dikunci.');
       });
     }
 

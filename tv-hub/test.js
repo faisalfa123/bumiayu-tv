@@ -273,41 +273,48 @@ test('hashSecret is deterministic and distinct for different secrets', () => {
   assert.notEqual(h1, h3);
 });
 
-test('loadLockConfig defaults to PIN 1234 and saveLockConfig/verifyLockSecret work for PIN and pattern', () => {
+test('loadLockConfig returns isConfigured: false when empty, saveLockConfig sets isConfigured: true, and verifyLockSecret works', () => {
   const defaultCfg = loadLockConfig(createMockStorage());
+  assert.equal(defaultCfg.isConfigured, false);
   assert.equal(defaultCfg.mode, 'pin');
-  assert.equal(defaultCfg.hideAdultTab, false);
-  assert.equal(verifyLockSecret('1234', defaultCfg), true);
+  assert.equal(defaultCfg.hash, null);
+  assert.equal(defaultCfg.hideAdultTab, true);
+  assert.equal(verifyLockSecret('1234', defaultCfg), false);
   assert.equal(verifyLockSecret('0000', defaultCfg), false);
   assert.equal(verifyLockSecret('', defaultCfg), false);
   assert.equal(verifyLockSecret(null, defaultCfg), false);
 
-  // Corrupt JSON falls back safely to default PIN 1234
+  // Corrupt JSON falls back safely to unconfigured state
   const corruptCfg = loadLockConfig(createMockStorage({ bumiayu_lock_config: '{bad-json' }));
-  assert.equal(verifyLockSecret('1234', corruptCfg), true);
+  assert.equal(corruptCfg.isConfigured, false);
+  assert.equal(verifyLockSecret('1234', corruptCfg), false);
 
-  // Custom PIN + hideAdultTab persistence
+  // Custom PIN + isConfigured persistence
   const mockStorage = createMockStorage();
   const savedPin = saveLockConfig(
-    { mode: 'pin', hash: hashSecret('4321'), hideAdultTab: true },
+    { isConfigured: true, mode: 'pin', hash: hashSecret('4321'), hideAdultTab: true },
     mockStorage
   );
+  assert.equal(savedPin.isConfigured, true);
   assert.equal(savedPin.mode, 'pin');
   assert.equal(savedPin.hideAdultTab, true);
   const reloadedPin = loadLockConfig(mockStorage);
+  assert.equal(reloadedPin.isConfigured, true);
   assert.equal(reloadedPin.hideAdultTab, true);
   assert.equal(verifyLockSecret('4321', reloadedPin), true);
   assert.equal(verifyLockSecret('1234', reloadedPin), false);
 
   // Pattern mode (UP,UP,DOWN,RIGHT)
   const savedPattern = saveLockConfig(
-    { mode: 'pattern', hash: hashSecret('UP,UP,DOWN,RIGHT'), hideAdultTab: false },
+    { isConfigured: true, mode: 'pattern', hash: hashSecret('UP,UP,DOWN,RIGHT'), hideAdultTab: true },
     mockStorage
   );
+  assert.equal(savedPattern.isConfigured, true);
   assert.equal(savedPattern.mode, 'pattern');
   const reloadedPattern = loadLockConfig(mockStorage);
+  assert.equal(reloadedPattern.isConfigured, true);
   assert.equal(reloadedPattern.mode, 'pattern');
-  assert.equal(reloadedPattern.hideAdultTab, false);
+  assert.equal(reloadedPattern.hideAdultTab, true);
   assert.equal(verifyLockSecret('UP,UP,DOWN,RIGHT', reloadedPattern), true);
   assert.equal(verifyLockSecret(['UP', 'UP', 'DOWN', 'RIGHT'], reloadedPattern), true);
   assert.equal(verifyLockSecret(['UP', 'DOWN', 'DOWN', 'RIGHT'], reloadedPattern), false);
@@ -336,11 +343,21 @@ test('sortChannelsWithFavorites pins favorite channels first while preserving re
   );
 });
 
-// --- webtv.js: isAdultTabVisible & themes.js: getThemeMeta ---
-test('isAdultTabVisible hides 18+ tab when hideAdultTab is true until unlocked', () => {
-  assert.equal(isAdultTabVisible({ hideAdultTab: false }, false), true);
-  assert.equal(isAdultTabVisible({ hideAdultTab: true }, false), false);
-  assert.equal(isAdultTabVisible({ hideAdultTab: true }, true), true);
+// --- webtv.js: isAdultTabVisible & stealth checks ---
+test('18+ tab is never visible in default public category tabs and stealth session lock', () => {
+  // Default lock config has hideAdultTab: true and isConfigured: false
+  const def = loadLockConfig(createMockStorage());
+  assert.equal(isAdultTabVisible(def, false), false);
+  assert.equal(isAdultTabVisible(def, true), false);
+
+  // Even if configured, when hideAdultTab is true (stealth mode), public tab is never visible
+  const configuredStealth = { isConfigured: true, mode: 'pin', hash: hashSecret('4321'), hideAdultTab: true };
+  assert.equal(isAdultTabVisible(configuredStealth, false), false);
+  assert.equal(isAdultTabVisible(configuredStealth, true), false);
+
+  // Adult channels unlock only with valid secret in a session
+  assert.equal(verifyLockSecret('4321', configuredStealth), true);
+  assert.equal(verifyLockSecret('0000', configuredStealth), false);
 });
 
 test('getThemeMeta returns metadata for valid themes and falls back to pixel', () => {
