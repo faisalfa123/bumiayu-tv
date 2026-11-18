@@ -181,14 +181,32 @@ function trapModalFocus(focusableCount, currentIndex, direction) {
 }
 
 /**
- * Format time as HH:MM (24-hour).
+ * Format time as HH:MM with optional seconds pulse.
  * @param {Date} date
+ * @param {boolean} [includePulse=false]
  * @returns {string}
  */
-function formatClock(date) {
+function formatClock(date, includePulse = false) {
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${hours}:${minutes}`;
+  if (!includePulse) {
+    return `${hours}:${minutes}`;
+  }
+  const isTick = date.getSeconds() % 2 === 0;
+  return `${hours}<span class="clock-colon ${isTick ? 'tick' : 'tock'}">:</span>${minutes}`;
+}
+
+/**
+ * Toggle ambient lockscreen state.
+ * @param {boolean} currentState
+ * @param {boolean} [targetState]
+ * @returns {boolean}
+ */
+function toggleAmbientState(currentState, targetState) {
+  if (typeof targetState === 'boolean') {
+    return targetState;
+  }
+  return !currentState;
 }
 
 /**
@@ -346,6 +364,7 @@ function formatIndonesianDate(date) {
     isAmbientOpen = true;
     overlay.hidden = false;
     overlay.setAttribute('aria-hidden', 'false');
+    updateClock();
   }
 
   function closeAmbientMode() {
@@ -566,7 +585,8 @@ function formatIndonesianDate(date) {
 
   function updateClock() {
     const now = new Date();
-    const timeStr = formatClock(now);
+    const timePlain = formatClock(now, false);
+    const timePulsed = formatClock(now, true);
     const dateStr = formatIndonesianDate(now);
 
     const clockEl = document.getElementById('live-clock');
@@ -574,9 +594,9 @@ function formatIndonesianDate(date) {
     const ambientClock = document.getElementById('ambient-clock');
     const ambientDate = document.getElementById('ambient-date');
 
-    if (clockEl) clockEl.textContent = timeStr;
+    if (clockEl) clockEl.textContent = timePlain;
     if (dateEl) dateEl.textContent = dateStr;
-    if (ambientClock) ambientClock.textContent = timeStr;
+    if (ambientClock) ambientClock.innerHTML = timePulsed;
     if (ambientDate) ambientDate.textContent = dateStr;
   }
 
@@ -706,5 +726,6 @@ if (typeof module !== 'undefined' && module.exports) {
     trapModalFocus,
     formatClock,
     formatIndonesianDate,
+    toggleAmbientState,
   };
 }

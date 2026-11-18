@@ -12,6 +12,7 @@ const {
   trapModalFocus,
   formatClock,
   formatIndonesianDate,
+  toggleAmbientState,
 } = require('./app.js');
 const {
   THEME_STORAGE_KEY,
@@ -186,6 +187,27 @@ test('formatClock formats 24-hour HH:MM with zero-padding', () => {
   assert.equal(formatClock(new Date(2026, 10, 18, 0, 0)), '00:00');
   assert.equal(formatClock(new Date(2026, 10, 18, 8, 5)), '08:05');
   assert.equal(formatClock(new Date(2026, 10, 18, 21, 45)), '21:45');
+});
+
+test('formatClock supports optional seconds pulse colon', () => {
+  const tickDate = new Date(2026, 10, 18, 14, 30, 10); // even second -> tick
+  const tockDate = new Date(2026, 10, 18, 14, 30, 11); // odd second -> tock
+  assert.equal(
+    formatClock(tickDate, true),
+    '14<span class="clock-colon tick">:</span>30'
+  );
+  assert.equal(
+    formatClock(tockDate, true),
+    '14<span class="clock-colon tock">:</span>30'
+  );
+});
+
+test('toggleAmbientState toggles and sets lockscreen visibility accurately', () => {
+  assert.equal(toggleAmbientState(false), true);
+  assert.equal(toggleAmbientState(true), false);
+  assert.equal(toggleAmbientState(false, true), true);
+  assert.equal(toggleAmbientState(true, false), false);
+  assert.equal(toggleAmbientState(false, false), false);
 });
 
 test('formatIndonesianDate formats day name, date, Indonesian month, and year', () => {

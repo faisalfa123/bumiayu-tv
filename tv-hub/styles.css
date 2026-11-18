@@ -609,7 +609,7 @@ body {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
 }
 
-/* Ambient Screensaver Overlay */
+/* Ambient Screensaver / Ghibli Lockscreen Overlay */
 .ambient-overlay {
   position: fixed;
   inset: 0;
@@ -617,52 +617,230 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(6, 9, 18, 0.65);
+  background: #050811;
   cursor: pointer;
+  overflow: hidden;
+  animation: ambientFadeIn 280ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ambient-overlay[hidden] {
   display: none;
 }
 
+@keyframes ambientFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Darkened Ghibli scenic backdrop with gentle ambient glow */
+.ambient-backdrop {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(ellipse 90% 65% at 50% 25%, rgba(56, 189, 248, 0.12) 0%, transparent 70%),
+    radial-gradient(circle 500px at 85% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 60%),
+    radial-gradient(circle 450px at 15% 75%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(8, 14, 28, 0.82) 0%, rgba(4, 7, 15, 0.94) 100%);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+
+/* Subtle cinematic vignette for TV */
+.ambient-vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 160px 50px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
+}
+
 .ambient-content {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
   text-align: center;
-  padding: 36px 52px;
+  padding: 38px 48px;
+  max-width: 860px;
+  width: 90%;
   border-radius: var(--radius-modal);
-  background: rgba(11, 15, 26, 0.85);
-  border: 1px solid var(--surface-border);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  background: rgba(10, 16, 30, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.06);
 }
 
 .ambient-badge {
-  font-size: 0.96rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--accent-primary);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   letter-spacing: 0.04em;
 }
 
+.ambient-clock-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .ambient-clock {
-  font-size: 5.4rem;
-  font-weight: 700;
+  font-size: 6.2rem;
+  font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
+  color: #ffffff;
+  text-shadow: 0 4px 30px rgba(56, 189, 248, 0.35);
+}
+
+.clock-colon {
+  display: inline-block;
+  transition: opacity 160ms ease;
+}
+
+.clock-colon.tick {
+  opacity: 1;
+}
+
+.clock-colon.tock {
+  opacity: 0.28;
 }
 
 .ambient-date {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
+  font-weight: 500;
   color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+
+/* Widgets Grid: Weather & Music */
+.ambient-widgets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.ambient-widget-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.ambient-weather-icon,
+.ambient-music-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ambient-widget-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ambient-weather-temp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ambient-temp {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.ambient-weather-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.ambient-weather-status {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ambient-music-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ambient-music-status {
+  font-size: 0.84rem;
+  color: #38bdf8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Subtle audio wave animation on lockscreen */
+.ambient-audio-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.ambient-audio-wave .wave-bar {
+  width: 3px;
+  background: var(--accent-primary);
+  border-radius: 2px;
+  animation: ambientWave 1.2s ease-in-out infinite alternate;
+}
+
+.ambient-audio-wave .w-1 { height: 35%; animation-delay: 0.1s; }
+.ambient-audio-wave .w-2 { height: 85%; animation-delay: 0.35s; }
+.ambient-audio-wave .w-3 { height: 60%; animation-delay: 0.2s; }
+.ambient-audio-wave .w-4 { height: 100%; animation-delay: 0.5s; }
+
+@keyframes ambientWave {
+  0% { height: 25%; opacity: 0.45; }
+  100% { height: 100%; opacity: 1; }
 }
 
 .ambient-hint {
-  margin-top: 8px;
-  font-size: 0.85rem;
+  margin-top: 4px;
+  font-size: 0.88rem;
   color: var(--text-secondary);
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 /* Toast Notification */

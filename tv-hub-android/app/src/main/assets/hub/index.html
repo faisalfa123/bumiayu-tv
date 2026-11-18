@@ -319,13 +319,50 @@
     </div>
   </dialog>
 
-  <!-- Ambient Screensaver Overlay -->
+  <!-- Ambient Screensaver / Ghibli Lockscreen Overlay -->
   <div id="ambient-overlay" class="ambient-overlay" hidden aria-hidden="true">
+    <div class="ambient-backdrop" aria-hidden="true"></div>
+    <div class="ambient-vignette" aria-hidden="true"></div>
     <div class="ambient-content">
-      <div class="ambient-badge" id="ambient-theme-label">👾 Bumiayu 16-Bit Pixel Art</div>
-      <time id="ambient-clock" class="ambient-clock">--:--</time>
-      <div id="ambient-date" class="ambient-date">Memuat tanggal...</div>
-      <div class="ambient-hint">Tekan tombol apa saja atau klik untuk kembali</div>
+      <div class="ambient-badge" id="ambient-theme-label">🌾 Bumiayu TV • Layar Tenang</div>
+      
+      <!-- Digital Clock & Indonesian Date -->
+      <div class="ambient-clock-wrap">
+        <time id="ambient-clock" class="ambient-clock">--:--</time>
+        <div id="ambient-date" class="ambient-date">Memuat tanggal...</div>
+      </div>
+
+      <!-- Widgets Grid: Weather Card & Senandung Status Card -->
+      <div class="ambient-widgets">
+        <!-- Weather Card Widget for Bumiayu -->
+        <div class="ambient-widget-card ambient-weather-card">
+          <div class="ambient-weather-icon" aria-hidden="true">⛅</div>
+          <div class="ambient-widget-info">
+            <div class="ambient-weather-temp-row">
+              <span class="ambient-temp">24°C</span>
+              <span class="ambient-weather-badge">Bumiayu</span>
+            </div>
+            <div class="ambient-weather-status">Bumiayu • Sejuk &amp; Cerah Berawan</div>
+          </div>
+        </div>
+
+        <!-- Senandung Audio Player Widget -->
+        <div class="ambient-widget-card ambient-music-card">
+          <div class="ambient-music-icon" aria-hidden="true">🎵</div>
+          <div class="ambient-widget-info">
+            <div class="ambient-music-title">Senandung Audio Player</div>
+            <div class="ambient-music-status">Siap Memutar Musik</div>
+          </div>
+          <div class="ambient-audio-wave" aria-hidden="true">
+            <span class="wave-bar w-1"></span>
+            <span class="wave-bar w-2"></span>
+            <span class="wave-bar w-3"></span>
+            <span class="wave-bar w-4"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ambient-hint">Tekan tombol apa saja pada remote untuk melanjutkan</div>
     </div>
   </div>
 
