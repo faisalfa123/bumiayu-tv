@@ -803,11 +803,12 @@ async function checkChannelsHealthQueue(channelList, maxConcurrency = 3, onStatu
       clearTimeout(osdTimer);
       osdTimer = null;
     }
+    // 4-second auto-hide timer for OSD
     osdTimer = setTimeout(() => {
       osd.classList.remove('visible');
       isOsdVisible = false;
       osdTimer = null;
-    }, 3000);
+    }, 4000);
   }
 
   function hideOsd() {

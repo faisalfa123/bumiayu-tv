@@ -92,7 +92,8 @@
     .webtv-tab:focus,
     .webtv-tab:focus-visible {
       transform: scale(1.05);
-      box-shadow: var(--focus-glow);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 20px var(--accent-primary);
       color: var(--text-primary);
     }
 
@@ -124,8 +125,9 @@
     .channel-card:focus,
     .channel-card:focus-visible {
       transform: scale(1.05);
-      background: rgba(255, 255, 255, 0.13);
-      box-shadow: var(--focus-glow);
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 24px var(--accent-primary);
       z-index: 2;
     }
 
