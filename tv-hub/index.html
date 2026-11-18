@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faisal TV Hub</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient-bg" aria-hidden="true"></div>
+
+  <div class="tv-shell">
+    <header class="top-bar">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <h1 class="brand-title">Faisal TV</h1>
+      </div>
+
+      <div class="top-bar-right">
+        <div class="status-badge" id="status-badge" aria-label="Status koneksi">
+          <span class="status-indicator" aria-hidden="true"></span>
+          <span id="status-text">Hub Aktif</span>
+        </div>
+        <div class="clock-block" aria-live="off">
+          <time id="live-clock" class="clock-time">--:--</time>
+          <span id="live-date" class="clock-date">Memuat tanggal...</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="hub-grid" class="hub-main" role="grid" aria-label="Menu Utama Faisal TV">
+      <!-- Row 0: Faisal's Ecosystem -->
+      <section class="hub-row" aria-labelledby="row-title-0">
+        <h2 id="row-title-0" class="row-title">Faisal's Ecosystem</h2>
+        <div class="card-row" role="row">
+          <button
+            type="button"
+            class="card card-senandung focused"
+            role="gridcell"
+            tabindex="0"
+            data-row="0"
+            data-col="0"
+            data-app-id="senandung"
+            data-app-name="Senandung"
+          >
+            <div class="card-icon" aria-hidden="true">🎵</div>
+            <div class="card-body">
+              <span class="card-title">Senandung</span>
+              <span class="card-subtitle">Spotify-like PWA</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-immich"
+            role="gridcell"
+            tabindex="-1"
+            data-row="0"
+            data-col="1"
+            data-app-id="immich"
+            data-app-name="Immich"
+          >
+            <div class="card-icon" aria-hidden="true">🖼️</div>
+            <div class="card-body">
+              <span class="card-title">Immich</span>
+              <span class="card-subtitle">Odroid C2 Photo Cloud</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-dompet"
+            role="gridcell"
+            tabindex="-1"
+            data-row="0"
+            data-col="2"
+            data-app-id="dompetmungil"
+            data-app-name="DompetMungil"
+          >
+            <div class="card-icon" aria-hidden="true">🌸</div>
+            <div class="card-body">
+              <span class="card-title">DompetMungil</span>
+              <span class="card-subtitle">Finance PWA</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Row 1: Hiburan & Streaming -->
+      <section class="hub-row" aria-labelledby="row-title-1">
+        <h2 id="row-title-1" class="row-title">Hiburan &amp; Streaming</h2>
+        <div class="card-row" role="row">
+          <button
+            type="button"
+            class="card card-smarttube"
+            role="gridcell"
+            tabindex="-1"
+            data-row="1"
+            data-col="0"
+            data-pkg="com.teamsmart.videomanager.tv"
+            data-app-name="SmartTube"
+          >
+            <div class="card-icon" aria-hidden="true">📺</div>
+            <div class="card-body">
+              <span class="card-title">SmartTube</span>
+              <span class="card-subtitle">Ad-Free 60fps YouTube</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-netflix"
+            role="gridcell"
+            tabindex="-1"
+            data-row="1"
+            data-col="1"
+            data-pkg="com.netflix.ninja"
+            data-app-name="Netflix"
+          >
+            <div class="card-icon" aria-hidden="true">🍿</div>
+            <div class="card-body">
+              <span class="card-title">Netflix</span>
+              <span class="card-subtitle">Widevine L1 HD</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-prime"
+            role="gridcell"
+            tabindex="-1"
+            data-row="1"
+            data-col="2"
+            data-pkg="com.amazon.amazonvideo.livingroom"
+            data-app-name="Prime Video"
+          >
+            <div class="card-icon" aria-hidden="true">🎬</div>
+            <div class="card-body">
+              <span class="card-title">Prime Video</span>
+              <span class="card-subtitle">Film &amp; Serial</span>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Row 2: Input TV & Pengaturan -->
+      <section class="hub-row" aria-labelledby="row-title-2">
+        <h2 id="row-title-2" class="row-title">Input TV &amp; Pengaturan</h2>
+        <div class="card-row" role="row">
+          <button
+            type="button"
+            class="card card-inputs"
+            role="gridcell"
+            tabindex="-1"
+            data-row="2"
+            data-col="0"
+            data-action="inputs"
+            data-app-name="HDMI 1 / TV Inputs"
+          >
+            <div class="card-icon" aria-hidden="true">🔌</div>
+            <div class="card-body">
+              <span class="card-title">HDMI 1 / TV Inputs</span>
+              <span class="card-subtitle">Sumber Input Eksternal</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-settings"
+            role="gridcell"
+            tabindex="-1"
+            data-row="2"
+            data-col="1"
+            data-action="settings"
+            data-app-name="Pengaturan TV"
+          >
+            <div class="card-icon" aria-hidden="true">⚙️</div>
+            <div class="card-body">
+              <span class="card-title">Pengaturan TV</span>
+              <span class="card-subtitle">Sistem Android TV</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-reconfig"
+            role="gridcell"
+            tabindex="-1"
+            data-row="2"
+            data-col="2"
+            data-action="reconfig"
+            data-app-name="Konfigurasi Server"
+          >
+            <div class="card-icon" aria-hidden="true">🌐</div>
+            <div class="card-body">
+              <span class="card-title">Konfigurasi Server</span>
+              <span class="card-subtitle">Ubah Alamat IP &amp; Port</span>
+            </div>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Server Re-configuration Modal -->
+  <dialog id="reconfig-modal" class="modal-dialog" aria-labelledby="reconfig-title">
+    <form id="reconfig-form" class="modal-card" method="dialog" novalidate>
+      <div class="modal-header">
+        <h2 id="reconfig-title" class="modal-title">Konfigurasi Alamat Server</h2>
+        <p class="modal-desc">Sesuaikan alamat IP &amp; port server lokal Faisal's Ecosystem.</p>
+      </div>
+
+      <div class="modal-fields">
+        <label class="field-group" for="input-senandung">
+          <span class="field-label">Senandung URL</span>
+          <input
+            id="input-senandung"
+            name="senandung"
+            type="url"
+            class="field-input modal-focusable"
+            placeholder="http://192.168.1.100:8080"
+            autocomplete="off"
+            spellcheck="false"
+            autofocus
+          >
+        </label>
+
+        <label class="field-group" for="input-immich">
+          <span class="field-label">Immich URL</span>
+          <input
+            id="input-immich"
+            name="immich"
+            type="url"
+            class="field-input modal-focusable"
+            placeholder="http://192.168.1.100:2283"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </label>
+
+        <label class="field-group" for="input-dompetmungil">
+          <span class="field-label">DompetMungil URL</span>
+          <input
+            id="input-dompetmungil"
+            name="dompetmungil"
+            type="url"
+            class="field-input modal-focusable"
+            placeholder="http://192.168.1.100:3000"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="btn-cancel-reconfig" class="btn btn-secondary modal-focusable">
+          Batal
+        </button>
+        <button type="submit" id="btn-save-reconfig" class="btn btn-primary modal-focusable">
+          Simpan Konfigurasi
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
