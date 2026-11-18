@@ -79,6 +79,8 @@ class WebAppActivity : Activity() {
                 mediaPlaybackRequiresUserGesture = false
                 cacheMode = WebSettings.LOAD_DEFAULT
                 allowFileAccess = true
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                userAgentString = MainActivity.TV_USER_AGENT
                 builtInZoomControls = false
                 displayZoomControls = false
             }

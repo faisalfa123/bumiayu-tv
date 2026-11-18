@@ -22,6 +22,7 @@ class MainActivity : Activity() {
     companion object {
         const val PREFS_NAME = "faisal_tv_urls"
         private const val HUB_ASSET_URL = "file:///android_asset/hub/index.html"
+        const val TV_USER_AGENT = "Mozilla/5.0 (Linux; Android 9; MiTV-4A Build/PI; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/100.0.4896.127 Mobile Safari/537.36 BumiayuTV/1.0 IPTV/ExoPlayer"
     }
 
     private lateinit var webView: WebView
@@ -46,6 +47,8 @@ class MainActivity : Activity() {
                 mediaPlaybackRequiresUserGesture = false
                 cacheMode = WebSettings.LOAD_DEFAULT
                 allowFileAccess = true
+                mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                userAgentString = TV_USER_AGENT
             }
 
             webChromeClient = WebChromeClient()
