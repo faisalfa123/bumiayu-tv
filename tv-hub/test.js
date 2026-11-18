@@ -12,6 +12,22 @@ const {
   formatClock,
   formatIndonesianDate,
 } = require('./app.js');
+const {
+  THEME_STORAGE_KEY,
+  BUMIAYU_THEMES,
+  normalizeThemeId,
+  loadTheme,
+  saveTheme,
+} = require('./themes.js');
+const {
+  DEFAULT_CHANNELS,
+  parseM3U,
+  hashSecret,
+  loadLockConfig,
+  saveLockConfig,
+  verifyLockSecret,
+  sortChannelsWithFavorites,
+} = require('./webtv.js');
 
 function createMockStorage(initial = {}) {
   const store = new Map(Object.entries(initial));
@@ -152,6 +168,147 @@ test('formatIndonesianDate formats day name, date, Indonesian month, and year', 
   assert.equal(formatIndonesianDate(new Date(2026, 10, 18)), 'Rabu, 18 November 2026');
   // 4 January 2026 is a Sunday (Minggu)
   assert.equal(formatIndonesianDate(new Date(2026, 0, 4)), 'Minggu, 4 Januari 2026');
+});
+
+// --- themes.js: normalizeThemeId / loadTheme / saveTheme ---
+test('BUMIAYU_THEMES defines the 4 anime-retro themes and normalizeThemeId validates ids', () => {
+  assert.deepEqual(
+    BUMIAYU_THEMES.map((t) => t.id),
+    ['pixel', 'asri', 'samudra', 'rintik']
+  );
+  assert.equal(normalizeThemeId('pixel'), 'pixel');
+  assert.equal(normalizeThemeId('asri'), 'asri');
+  assert.equal(normalizeThemeId('samudra'), 'samudra');
+  assert.equal(normalizeThemeId('rintik'), 'rintik');
+  assert.equal(normalizeThemeId('  ASRI  '), 'asri');
+
+  // Invalid or empty values fall back to 'pixel'
+  assert.equal(normalizeThemeId(''), 'pixel');
+  assert.equal(normalizeThemeId('unknown-theme'), 'pixel');
+  assert.equal(normalizeThemeId(null), 'pixel');
+  assert.equal(normalizeThemeId(undefined), 'pixel');
+  assert.equal(normalizeThemeId(42), 'pixel');
+});
+
+test('loadTheme and saveTheme persist normalized theme id with mock localStorage', () => {
+  assert.equal(loadTheme(null), 'pixel');
+  assert.equal(loadTheme(createMockStorage()), 'pixel');
+  assert.equal(loadTheme(createMockStorage({ [THEME_STORAGE_KEY]: 'invalid' })), 'pixel');
+
+  const mockStorage = createMockStorage();
+  assert.equal(saveTheme('samudra', mockStorage), 'samudra');
+  assert.equal(mockStorage.getItem(THEME_STORAGE_KEY), 'samudra');
+  assert.equal(loadTheme(mockStorage), 'samudra');
+
+  assert.equal(saveTheme('unknown', mockStorage), 'pixel');
+  assert.equal(loadTheme(mockStorage), 'pixel');
+});
+
+// --- webtv.js: parseM3U ---
+test('parseM3U parses EXTINF channel names, URLs, and infers hls vs web stream types', () => {
+  const playlist = [
+    '#EXTM3U',
+    '#EXTINF:-1 tvg-id="tvri" group-title="Nasional",TVRI Nasional',
+    'https://ott-balancer.tvri.go.id/live/eds/Nasional/hls/Nasional.m3u8',
+    '#EXTINF:-1 tvg-logo="https://example.com/logo.png",Kompas TV Live',
+    'https://www.kompas.tv/live',
+    '#EXTINF:-1,Stream Tokenized',
+    'https://cdn.example.com/live/stream.m3u8?token=xyz',
+  ].join('\n');
+
+  const parsed = parseM3U(playlist, 'internasional');
+  assert.equal(parsed.length, 3);
+
+  assert.equal(parsed[0].name, 'TVRI Nasional');
+  assert.equal(parsed[0].url, 'https://ott-balancer.tvri.go.id/live/eds/Nasional/hls/Nasional.m3u8');
+  assert.equal(parsed[0].type, 'hls');
+  assert.equal(parsed[0].category, 'internasional');
+
+  assert.equal(parsed[1].name, 'Kompas TV Live');
+  assert.equal(parsed[1].url, 'https://www.kompas.tv/live');
+  assert.equal(parsed[1].type, 'web');
+  assert.equal(parsed[1].category, 'internasional');
+
+  assert.equal(parsed[2].name, 'Stream Tokenized');
+  assert.equal(parsed[2].type, 'hls');
+
+  assert.deepEqual(parseM3U(''), []);
+  assert.deepEqual(parseM3U(null), []);
+});
+
+// --- webtv.js: hashSecret / loadLockConfig / saveLockConfig / verifyLockSecret ---
+test('hashSecret is deterministic and distinct for different secrets', () => {
+  const h1 = hashSecret('1234');
+  const h2 = hashSecret('1234');
+  const h3 = hashSecret('9876');
+
+  assert.equal(typeof h1, 'string');
+  assert.ok(h1.length > 0);
+  assert.equal(h1, h2);
+  assert.notEqual(h1, h3);
+});
+
+test('loadLockConfig defaults to PIN 1234 and saveLockConfig/verifyLockSecret work for PIN and pattern', () => {
+  const defaultCfg = loadLockConfig(createMockStorage());
+  assert.equal(defaultCfg.mode, 'pin');
+  assert.equal(defaultCfg.hideAdultTab, false);
+  assert.equal(verifyLockSecret('1234', defaultCfg), true);
+  assert.equal(verifyLockSecret('0000', defaultCfg), false);
+  assert.equal(verifyLockSecret('', defaultCfg), false);
+  assert.equal(verifyLockSecret(null, defaultCfg), false);
+
+  // Corrupt JSON falls back safely to default PIN 1234
+  const corruptCfg = loadLockConfig(createMockStorage({ bumiayu_lock_config: '{bad-json' }));
+  assert.equal(verifyLockSecret('1234', corruptCfg), true);
+
+  // Custom PIN + hideAdultTab persistence
+  const mockStorage = createMockStorage();
+  const savedPin = saveLockConfig(
+    { mode: 'pin', hash: hashSecret('4321'), hideAdultTab: true },
+    mockStorage
+  );
+  assert.equal(savedPin.mode, 'pin');
+  assert.equal(savedPin.hideAdultTab, true);
+  const reloadedPin = loadLockConfig(mockStorage);
+  assert.equal(reloadedPin.hideAdultTab, true);
+  assert.equal(verifyLockSecret('4321', reloadedPin), true);
+  assert.equal(verifyLockSecret('1234', reloadedPin), false);
+
+  // Pattern mode (UP,UP,DOWN,RIGHT)
+  const savedPattern = saveLockConfig(
+    { mode: 'pattern', hash: hashSecret('UP,UP,DOWN,RIGHT'), hideAdultTab: false },
+    mockStorage
+  );
+  assert.equal(savedPattern.mode, 'pattern');
+  const reloadedPattern = loadLockConfig(mockStorage);
+  assert.equal(reloadedPattern.mode, 'pattern');
+  assert.equal(reloadedPattern.hideAdultTab, false);
+  assert.equal(verifyLockSecret('UP,UP,DOWN,RIGHT', reloadedPattern), true);
+  assert.equal(verifyLockSecret(['UP', 'UP', 'DOWN', 'RIGHT'], reloadedPattern), true);
+  assert.equal(verifyLockSecret(['UP', 'DOWN', 'DOWN', 'RIGHT'], reloadedPattern), false);
+});
+
+// --- webtv.js: sortChannelsWithFavorites ---
+test('sortChannelsWithFavorites pins favorite channels first while preserving relative order', () => {
+  const sample = DEFAULT_CHANNELS.nasional;
+  assert.ok(sample.length >= 4);
+
+  const favIds = [sample[3].id, sample[1].id];
+  const sorted = sortChannelsWithFavorites(sample, favIds);
+
+  assert.equal(sorted.length, sample.length);
+  // Favorites appear first in their original relative order: sample[1], sample[3]
+  assert.equal(sorted[0].id, sample[1].id);
+  assert.equal(sorted[1].id, sample[3].id);
+  // Remaining channels preserve their original relative order
+  assert.equal(sorted[2].id, sample[0].id);
+  assert.equal(sorted[3].id, sample[2].id);
+
+  // Empty favorites preserves original order
+  assert.deepEqual(
+    sortChannelsWithFavorites(sample, []).map((c) => c.id),
+    sample.map((c) => c.id)
+  );
 });
 
 console.log(`\nAll ${passed} tests passed.`);
