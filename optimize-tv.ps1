@@ -130,18 +130,73 @@ Set-Content -Path $BackupLog -Value $BackupContent -Encoding UTF8
 Write-Success "Snapshot status sistem awal tersimpan di: $BackupLog"
 
 # ------------------------------------------------------------------------------
-# 4. INSTALASI FLIX LAUNCHER & TV INPUTS SWITCHER (JIKA ADA DI FOLDER APK)
+# 4. INSTALASI SMARTTUBE STABLE, FAISAL TV HUB & LAUNCHER BEBAS IKLAN
 # ------------------------------------------------------------------------------
 Write-Header "PENYIAPAN LAUNCHER BEBAS IKLAN & SHORTCUT INPUT TV"
 
 $HasCustomLauncher = $false
-$InstalledPackages = & $AdbCmd shell pm list packages
+$InstalledPackages = (& $AdbCmd shell pm list packages 2>&1) | Out-String
 
 if (-not (Test-Path $ApkDir)) { New-Item -ItemType Directory -Path $ApkDir -Force | Out-Null }
-$ApkFiles = Get-ChildItem -Path $ApkDir -Filter "*.apk"
 
-if ($ApkFiles.Count -gt 0) {
-    foreach ($apk in $ApkFiles) {
+# 4a. Auto-Download & Instalasi SmartTube Stable (YouTube Bebas Iklan)
+$SmartTubePkg = "com.teamsmart.videomanager.tv"
+$SmartTubeApkPath = Join-Path $ApkDir "smarttube_stable.apk"
+$SmartTubeUrl = "https://github.com/yuliskov/SmartTube/releases/latest/download/smarttube_stable.apk"
+
+if ($InstalledPackages -match [regex]::Escape($SmartTubePkg)) {
+    Write-Success "SmartTube Stable ($SmartTubePkg) sudah terpasang di TV."
+} else {
+    if (-not (Test-Path $SmartTubeApkPath)) {
+        Write-Info "Mengunduh SmartTube Stable terbaru dari GitHub..."
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::Tls12
+            Invoke-WebRequest -Uri $SmartTubeUrl -OutFile $SmartTubeApkPath -UseBasicParsing -TimeoutSec 30
+            Write-Success "SmartTube Stable berhasil diunduh ke: $SmartTubeApkPath"
+        } catch {
+            Write-Warn "Gagal mengunduh SmartTube Stable ($($_.Exception.Message)). Melanjutkan langkah berikutnya..."
+        }
+    } else {
+        Write-Info "File smarttube_stable.apk sudah tersedia di folder 'apk/'."
+    }
+
+    if (Test-Path $SmartTubeApkPath) {
+        Write-Info "Memasang SmartTube Stable ke TV..."
+        $SmartTubeInstallOutput = & $AdbCmd install -r $SmartTubeApkPath 2>&1
+        Write-Host $SmartTubeInstallOutput -ForegroundColor Gray
+        if ($SmartTubeInstallOutput -match "Success") {
+            Write-Success "Berhasil memasang SmartTube Stable!"
+        } else {
+            Write-Warn "Instalasi SmartTube Stable tidak mengembalikan status Success."
+        }
+    }
+}
+
+# 4b. Cek & Instalasi FaisalTVHub atau Launcher Alternatif Lainnya
+if ($InstalledPackages -match "com\.faisal\.tvhub|flix|flauncher|projectivy|atvlauncher|emotn") {
+    Write-Success "Launcher alternatif / FaisalTVHub sudah terdeteksi di dalam TV."
+    $HasCustomLauncher = $true
+}
+
+$FaisalHubApks = Get-ChildItem -Path $ApkDir -Filter "FaisalTVHub*.apk" -ErrorAction SilentlyContinue
+if ($FaisalHubApks -and $FaisalHubApks.Count -gt 0) {
+    foreach ($hubApk in $FaisalHubApks) {
+        Write-Info "Memasang FaisalTVHub: $($hubApk.Name)..."
+        $HubInstallOutput = & $AdbCmd install -r $hubApk.FullName 2>&1
+        Write-Host $HubInstallOutput -ForegroundColor Gray
+        if ($HubInstallOutput -match "Success") {
+            Write-Success "Berhasil memasang $($hubApk.Name) (com.faisal.tvhub)"
+            $HasCustomLauncher = $true
+        }
+    }
+}
+
+$OtherLauncherApks = Get-ChildItem -Path $ApkDir -Filter "*.apk" -ErrorAction SilentlyContinue | Where-Object {
+    $_.Name -ne "smarttube_stable.apk" -and $_.Name -notlike "FaisalTVHub*.apk"
+}
+
+if ($OtherLauncherApks -and $OtherLauncherApks.Count -gt 0) {
+    foreach ($apk in $OtherLauncherApks) {
         Write-Info "Memasang aplikasi: $($apk.Name)..."
         $InstallOutput = & $AdbCmd install -r $apk.FullName 2>&1
         Write-Host $InstallOutput -ForegroundColor Gray
@@ -150,34 +205,46 @@ if ($ApkFiles.Count -gt 0) {
             $HasCustomLauncher = $true
         }
     }
-} else {
-    Write-Info "Mencari ketersediaan launcher alternatif di TV..."
-    # Cek apakah Flix Launcher atau FLauncher sudah ada
-    if ($InstalledPackages -match "flix|flauncher|projectivy|atvlauncher|emotn") {
-        Write-Success "Launcher alternatif sudah terdeteksi di dalam TV."
-        $HasCustomLauncher = $true
-    } else {
-        Write-Warn "Belum ada file APK di folder 'apk/'."
-        Write-Info "Mengunduh Flix Launcher resmi (Open-Source, super ringan <1MB)..."
-        try {
-            $FlixUrl = "https://github.com/HatriGt/flix-launcher/releases/latest/download/app-release.apk"
-            $FlixApkPath = Join-Path $ApkDir "flix-launcher.apk"
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Invoke-WebRequest -Uri $FlixUrl -OutFile $FlixApkPath -UseBasicParsing -TimeoutSec 15
-            Write-Success "Flix Launcher berhasil diunduh!"
-            Write-Info "Memasang Flix Launcher ke TV..."
-            $InstallRes = & $AdbCmd install -r $FlixApkPath 2>&1
-            Write-Host $InstallRes -ForegroundColor Gray
-            if ($InstallRes -match "Success") {
-                $HasCustomLauncher = $true
-                Write-Success "Flix Launcher aktif di TV!"
-            }
-        } catch {
-            Write-Warn "Gagal auto-download APK secara online ($($_.Exception.Message))."
-            Write-Warn "Anda dapat menaruh file APK launcher pilihan Anda ke folder 'apk/'."
+} elseif (-not $HasCustomLauncher) {
+    Write-Warn "Belum ada file APK launcher di folder 'apk/'."
+    Write-Info "Mengunduh Flix Launcher resmi (Open-Source, super ringan <1MB)..."
+    try {
+        $FlixUrl = "https://github.com/HatriGt/flix-launcher/releases/latest/download/app-release.apk"
+        $FlixApkPath = Join-Path $ApkDir "flix-launcher.apk"
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::Tls12
+        Invoke-WebRequest -Uri $FlixUrl -OutFile $FlixApkPath -UseBasicParsing -TimeoutSec 15
+        Write-Success "Flix Launcher berhasil diunduh!"
+        Write-Info "Memasang Flix Launcher ke TV..."
+        $InstallRes = & $AdbCmd install -r $FlixApkPath 2>&1
+        Write-Host $InstallRes -ForegroundColor Gray
+        if ($InstallRes -match "Success") {
+            $HasCustomLauncher = $true
+            Write-Success "Flix Launcher aktif di TV!"
         }
+    } catch {
+        Write-Warn "Gagal auto-download APK secara online ($($_.Exception.Message))."
+        Write-Warn "Anda dapat menaruh file APK FaisalTVHub atau launcher pilihan Anda ke folder 'apk/'."
     }
 }
+
+# 4c. Konfigurasi Opsional IP Server Lokal SBC / Odroid C2 (apps-config.json)
+Write-Info "Konfigurasi opsional alamat server lokal SBC/Odroid C2 untuk FaisalTVHub:"
+$DefaultSbcIP = "192.168.1.100"
+$SbcIP = Read-Host "Masukkan Alamat IP Server SBC/Odroid C2 Anda (Tekan ENTER untuk '$DefaultSbcIP')"
+if ([string]::IsNullOrWhiteSpace($SbcIP)) {
+    $SbcIP = $DefaultSbcIP
+}
+$SbcIP = $SbcIP.Trim()
+
+$AppsConfig = [ordered]@{
+    senandung    = "http://$($SbcIP):8080"
+    immich       = "http://$($SbcIP):2283"
+    dompetmungil = "http://$($SbcIP):3000"
+}
+$AppsConfigPath = Join-Path $ScriptDir "apps-config.json"
+$AppsConfig | ConvertTo-Json -Depth 2 | Set-Content -Path $AppsConfigPath -Encoding UTF8
+Write-Success "Referensi URL aplikasi lokal tersimpan di: $AppsConfigPath"
+
 
 # ------------------------------------------------------------------------------
 # 5. EKSEKUSI DEBLOAT PAKET XIAOMI & IKLAN
