@@ -365,6 +365,11 @@ function saveFavorites(favIds, storage) {
   return clean;
 }
 
+function isAdultTabVisible(lockConfig, isUnlocked) {
+  if (!lockConfig || !lockConfig.hideAdultTab) return true;
+  return Boolean(isUnlocked);
+}
+
 // --- Browser / WebView Controller ---
 (function initWebTvBrowser() {
   if (typeof document === 'undefined' || typeof window === 'undefined') {
@@ -377,6 +382,8 @@ function saveFavorites(favIds, storage) {
   let activeCategory = 'nasional';
   let isAdultUnlocked = false;
   let pendingUnlockAction = null;
+  let playbackToken = 0;
+  let lastFocusElement = null;
 
   let pinBuffer = '';
   let patternBuffer = [];
@@ -449,8 +456,7 @@ function saveFavorites(favIds, storage) {
   function renderTabs() {
     const adultTab = document.getElementById('tab-adult');
     if (adultTab) {
-      const shouldHide = lockConfig.hideAdultTab && !isAdultUnlocked;
-      adultTab.hidden = shouldHide;
+      adultTab.hidden = !isAdultTabVisible(lockConfig, isAdultUnlocked);
       adultTab.textContent = isAdultUnlocked ? '🔓 18+ / Dewasa' : '🔒 18+ / Dewasa';
     }
 
@@ -510,6 +516,9 @@ function saveFavorites(favIds, storage) {
       });
 
       card.addEventListener('keydown', (e) => {
+        if (e.target && e.target.closest('.fav-btn')) {
+          return;
+        }
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           launchChannel(ch, sorted);
@@ -532,6 +541,7 @@ function saveFavorites(favIds, storage) {
   }
 
   function toggleFavorite(channelId) {
+    const hadFavFocus = document.activeElement && document.activeElement.classList.contains('fav-btn');
     const idx = favoriteIds.indexOf(channelId);
     if (idx === -1) {
       favoriteIds = [channelId].concat(favoriteIds);
@@ -542,6 +552,11 @@ function saveFavorites(favIds, storage) {
     }
     saveFavorites(favoriteIds);
     renderChannelGrid();
+    const targetCard = document.querySelector(`.channel-card[data-channel-id="${channelId}"]`);
+    if (targetCard) {
+      const targetEl = hadFavFocus ? targetCard.querySelector('.fav-btn') : targetCard;
+      if (targetEl) targetEl.focus();
+    }
   }
 
   function ensureHlsJs() {
@@ -552,7 +567,10 @@ function saveFavorites(favIds, storage) {
       script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js';
       script.async = true;
       script.onload = () => resolve(window.Hls || null);
-      script.onerror = () => resolve(null);
+      script.onerror = () => {
+        hlsLoadPromise = null;
+        resolve(null);
+      };
       document.head.appendChild(script);
     });
     return hlsLoadPromise;
@@ -590,6 +608,10 @@ function saveFavorites(favIds, storage) {
     const metaEl = document.getElementById('player-channel-meta');
     if (!overlay || !video) return;
 
+    if (overlay.hidden) {
+      lastFocusElement = document.activeElement;
+    }
+    const token = ++playbackToken;
     overlay.hidden = false;
     if (titleEl) titleEl.textContent = channel.name;
     if (metaEl) {
@@ -613,23 +635,29 @@ function saveFavorites(favIds, storage) {
       video.play().catch(() => {});
     } else {
       ensureHlsJs().then((Hls) => {
-        if (overlay.hidden) return;
+        if (overlay.hidden || token !== playbackToken) return;
+        if (hlsInstance) {
+          hlsInstance.destroy();
+          hlsInstance = null;
+        }
         if (Hls && Hls.isSupported()) {
           hlsInstance = new Hls({ enableWorker: true });
           hlsInstance.loadSource(channel.url);
           hlsInstance.attachMedia(video);
           hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(() => {});
+            if (token === playbackToken) video.play().catch(() => {});
           });
           hlsInstance.on(Hls.Events.ERROR, (_ev, data) => {
-            if (data && data.fatal) {
+            if (data && data.fatal && token === playbackToken) {
               showToast(`Stream ${channel.name} tidak merespons.`);
             }
           });
         } else {
           video.src = channel.url;
           video.play().catch(() => {
-            showToast(`Format stream ${channel.name} tidak didukung di browser ini.`);
+            if (token === playbackToken) {
+              showToast(`Format stream ${channel.name} tidak didukung di browser ini.`);
+            }
           });
         }
       });
@@ -637,6 +665,7 @@ function saveFavorites(favIds, storage) {
   }
 
   function closePlayerOverlay() {
+    playbackToken++;
     const overlay = document.getElementById('player-overlay');
     const video = document.getElementById('tv-player');
     if (hlsInstance) {
@@ -649,6 +678,9 @@ function saveFavorites(favIds, storage) {
       video.load();
     }
     if (overlay) overlay.hidden = true;
+    if (lastFocusElement && lastFocusElement.isConnected) {
+      lastFocusElement.focus();
+    }
   }
 
   function zapChannel(delta) {
@@ -748,12 +780,21 @@ function saveFavorites(favIds, storage) {
     }
   }
 
+  function setSettingsStatus(msg, isSuccess) {
+    const el = document.getElementById('settings-status');
+    if (!el) return;
+    el.textContent = msg || '';
+    el.style.color = isSuccess ? '#34d399' : '#f87171';
+  }
+
   // --- Settings & M3U Modal ---
   function openSettingsModal() {
     const modal = document.getElementById('webtv-settings-modal');
     if (!modal) return;
+    lastFocusElement = document.activeElement;
     settingsSelectedMode = lockConfig.mode;
     settingsPatternBuffer = [];
+    setSettingsStatus('', false);
 
     const hideToggle = document.getElementById('setting-hide-adult');
     if (hideToggle) hideToggle.checked = lockConfig.hideAdultTab;
@@ -769,6 +810,8 @@ function saveFavorites(favIds, storage) {
     } else {
       modal.setAttribute('open', '');
     }
+    const firstBtn = document.getElementById('mode-btn-pin');
+    if (firstBtn) firstBtn.focus();
   }
 
   function closeSettingsModal() {
@@ -778,6 +821,9 @@ function saveFavorites(favIds, storage) {
       modal.close();
     } else {
       modal.removeAttribute('open');
+    }
+    if (lastFocusElement && lastFocusElement.isConnected) {
+      lastFocusElement.focus();
     }
   }
 
@@ -807,7 +853,14 @@ function saveFavorites(favIds, storage) {
 
   function selectCategory(cat) {
     if (cat === 'settings') {
-      openSettingsModal();
+      if (!isAdultUnlocked) {
+        openLockModal(() => {
+          renderTabs();
+          openSettingsModal();
+        });
+      } else {
+        openSettingsModal();
+      }
       return;
     }
     if (cat === 'adult' && !isAdultUnlocked) {
@@ -911,19 +964,19 @@ function saveFavorites(favIds, storage) {
           const pinVal = (document.getElementById('setting-new-pin')?.value || '').trim();
           if (pinVal) {
             if (!/^\d{4}$/.test(pinVal)) {
-              showToast('PIN baru harus tepat 4 digit angka.');
+              setSettingsStatus('PIN baru harus tepat 4 digit angka.', false);
               return;
             }
             nextHash = hashSecret(pinVal);
           } else if (lockConfig.mode !== 'pin') {
-            showToast('Masukkan 4 digit PIN baru saat beralih ke mode PIN.');
+            setSettingsStatus('Masukkan 4 digit PIN baru saat beralih ke mode PIN.', false);
             return;
           }
         } else {
           if (settingsPatternBuffer.length >= 4) {
             nextHash = hashSecret(normalizePattern(settingsPatternBuffer));
           } else if (settingsPatternBuffer.length > 0 || lockConfig.mode !== 'pattern') {
-            showToast('Rekam minimal 4 arah pola saat beralih ke mode Pola.');
+            setSettingsStatus('Rekam minimal 4 arah pola saat beralih ke mode Pola.', false);
             return;
           }
         }
@@ -934,7 +987,7 @@ function saveFavorites(favIds, storage) {
           hideAdultTab,
         });
         renderTabs();
-        showToast('Pengaturan sandi & privasi disimpan.');
+        setSettingsStatus('Pengaturan sandi & privasi disimpan.', true);
       });
     }
 
@@ -945,7 +998,7 @@ function saveFavorites(favIds, storage) {
         const url = (document.getElementById('custom-ch-url')?.value || '').trim();
         const cat = document.getElementById('custom-ch-cat')?.value || 'nasional';
         if (!name || !url) {
-          showToast('Nama channel dan URL wajib diisi.');
+          setSettingsStatus('Nama channel dan URL wajib diisi.', false);
           return;
         }
         const list = (channelsByCat[cat] || []).filter((c) => !c.isPlaceholder);
@@ -961,7 +1014,7 @@ function saveFavorites(favIds, storage) {
         document.getElementById('custom-ch-name').value = '';
         document.getElementById('custom-ch-url').value = '';
         if (activeCategory === cat) renderChannelGrid();
-        showToast(`Channel "${name}" ditambahkan ke ${cat}.`);
+        setSettingsStatus(`Channel "${name}" ditambahkan ke ${cat}.`, true);
       });
     }
 
@@ -971,7 +1024,7 @@ function saveFavorites(favIds, storage) {
         const rawText = (document.getElementById('m3u-input')?.value || '').trim();
         const cat = document.getElementById('m3u-cat')?.value || 'nasional';
         if (!rawText) {
-          showToast('Tempel teks M3U atau masukkan URL playlist .m3u.');
+          setSettingsStatus('Tempel teks M3U atau masukkan URL playlist .m3u.', false);
           return;
         }
         let content = rawText;
@@ -980,13 +1033,13 @@ function saveFavorites(favIds, storage) {
             const resp = await fetch(rawText);
             content = await resp.text();
           } catch (_err) {
-            showToast('Gagal mengunduh URL M3U. Coba tempel isi teksnya.');
+            setSettingsStatus('Gagal mengunduh URL M3U. Coba tempel isi teksnya.', false);
             return;
           }
         }
         const parsed = parseM3U(content, cat);
         if (parsed.length === 0) {
-          showToast('Tidak ada channel valid ditemukan dalam M3U.');
+          setSettingsStatus('Tidak ada channel valid ditemukan dalam M3U.', false);
           return;
         }
         const existing = (channelsByCat[cat] || []).filter((c) => !c.isPlaceholder);
@@ -994,7 +1047,7 @@ function saveFavorites(favIds, storage) {
         saveChannels(channelsByCat);
         document.getElementById('m3u-input').value = '';
         if (activeCategory === cat) renderChannelGrid();
-        showToast(`${parsed.length} channel diimpor ke ${cat}.`);
+        setSettingsStatus(`${parsed.length} channel diimpor ke ${cat}.`, true);
       });
     }
 
@@ -1053,6 +1106,38 @@ function saveFavorites(favIds, storage) {
     window.addEventListener('pagehide', () => {
       isAdultUnlocked = false;
     });
+
+    const lockModalEl = document.getElementById('lock-modal');
+    if (lockModalEl) {
+      lockModalEl.addEventListener('cancel', (e) => {
+        e.preventDefault();
+        closeLockModal();
+      });
+    }
+    const settingsModalEl = document.getElementById('webtv-settings-modal');
+    if (settingsModalEl) {
+      settingsModalEl.addEventListener('cancel', (e) => {
+        e.preventDefault();
+        closeSettingsModal();
+      });
+    }
+
+    window.onAndroidBack = function () {
+      const playerOverlay = document.getElementById('player-overlay');
+      if (playerOverlay && !playerOverlay.hidden) {
+        closePlayerOverlay();
+        return true;
+      }
+      if (lockModalEl && lockModalEl.hasAttribute('open')) {
+        closeLockModal();
+        return true;
+      }
+      if (settingsModalEl && settingsModalEl.hasAttribute('open')) {
+        closeSettingsModal();
+        return true;
+      }
+      return false;
+    };
   }
 
   applyThemeAndParticles();
@@ -1061,6 +1146,8 @@ function saveFavorites(favIds, storage) {
   renderTabs();
   renderChannelGrid();
   bindEvents();
+  const initialTab = document.querySelector('.webtv-tab.active');
+  if (initialTab) initialTab.focus();
 })();
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -1073,6 +1160,7 @@ if (typeof module !== 'undefined' && module.exports) {
     hashSecret,
     normalizePattern,
     inferStreamType,
+    isAdultTabVisible,
     loadLockConfig,
     saveLockConfig,
     verifyLockSecret,

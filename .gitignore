@@ -1,0 +1,7 @@
+bin/
+apk/
+apps-config.json
+disabled-packages-backup.txt
+tv-hub-android/.gradle/
+tv-hub-android/build/
+tv-hub-android/app/build/

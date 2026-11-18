@@ -92,9 +92,11 @@ class MainActivity : Activity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (::webView.isInitialized && webView.canGoBack()) {
-                webView.goBack()
+        if (keyCode == KeyEvent.KEYCODE_BACK && ::webView.isInitialized) {
+            webView.evaluateJavascript("(function(){ return typeof window.onAndroidBack === 'function' && window.onAndroidBack(); })()") { result ->
+                if (result != "true" && webView.canGoBack()) {
+                    webView.goBack()
+                }
             }
             return true
         }

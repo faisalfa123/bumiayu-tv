@@ -16,6 +16,7 @@ const {
   THEME_STORAGE_KEY,
   BUMIAYU_THEMES,
   normalizeThemeId,
+  getThemeMeta,
   loadTheme,
   saveTheme,
 } = require('./themes.js');
@@ -23,6 +24,7 @@ const {
   DEFAULT_CHANNELS,
   parseM3U,
   hashSecret,
+  isAdultTabVisible,
   loadLockConfig,
   saveLockConfig,
   verifyLockSecret,
@@ -309,6 +311,20 @@ test('sortChannelsWithFavorites pins favorite channels first while preserving re
     sortChannelsWithFavorites(sample, []).map((c) => c.id),
     sample.map((c) => c.id)
   );
+});
+
+// --- webtv.js: isAdultTabVisible & themes.js: getThemeMeta ---
+test('isAdultTabVisible hides 18+ tab when hideAdultTab is true until unlocked', () => {
+  assert.equal(isAdultTabVisible({ hideAdultTab: false }, false), true);
+  assert.equal(isAdultTabVisible({ hideAdultTab: true }, false), false);
+  assert.equal(isAdultTabVisible({ hideAdultTab: true }, true), true);
+});
+
+test('getThemeMeta returns metadata for valid themes and falls back to pixel', () => {
+  assert.equal(getThemeMeta('asri').id, 'asri');
+  assert.equal(getThemeMeta('samudra').id, 'samudra');
+  assert.equal(getThemeMeta('rintik').id, 'rintik');
+  assert.equal(getThemeMeta('unknown-theme').id, 'pixel');
 });
 
 console.log(`\nAll ${passed} tests passed.`);

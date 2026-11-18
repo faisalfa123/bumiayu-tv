@@ -637,6 +637,19 @@ function formatIndonesianDate(date) {
     setupDialogCloseListeners('reconfig-modal');
     setupDialogCloseListeners('theme-modal');
 
+    window.onAndroidBack = function () {
+      const ambient = document.getElementById('ambient-overlay');
+      if (ambient && !ambient.hidden) {
+        closeAmbientMode();
+        return true;
+      }
+      if (activeModalId) {
+        closeActiveModal();
+        return true;
+      }
+      return false;
+    };
+
     const cancelBtn = document.getElementById('btn-cancel-reconfig');
     if (cancelBtn) {
       cancelBtn.addEventListener('click', () => closeActiveModal());

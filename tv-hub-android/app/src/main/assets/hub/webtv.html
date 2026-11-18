@@ -74,9 +74,9 @@
     }
 
     .webtv-tab.active {
-      background: var(--accent-blue);
+      background: var(--accent-primary);
       border-color: rgba(255, 255, 255, 0.28);
-      color: #ffffff;
+      color: #0b0e14;
     }
 
     .webtv-tab:hover {
@@ -85,7 +85,8 @@
     }
 
     .webtv-tab.active:hover {
-      background: var(--accent-blue);
+      background: var(--accent-primary);
+      color: #0b0e14;
     }
 
     .webtv-tab:focus,
@@ -285,7 +286,8 @@
     .pin-key:focus,
     .pattern-key:focus,
     .setting-pattern-key:focus {
-      background: var(--accent-blue);
+      background: var(--accent-primary);
+      color: #0b0e14;
       box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
     }
 
@@ -309,8 +311,8 @@
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: var(--accent-blue);
-      color: #ffffff;
+      background: var(--accent-primary);
+      color: #0b0e14;
       font-size: 1.15rem;
       font-weight: 700;
     }
@@ -372,7 +374,7 @@
     .checkbox-row input {
       width: 20px;
       height: 20px;
-      accent-color: var(--accent-blue);
+      accent-color: var(--accent-primary);
     }
 
     .inline-fields {
@@ -582,6 +584,8 @@
           <button type="button" id="btn-import-m3u" class="btn btn-secondary">Impor M3U</button>
         </div>
       </div>
+
+      <p id="settings-status" class="lock-error" aria-live="polite" style="margin:0"></p>
 
       <div class="modal-actions">
         <button type="button" id="btn-settings-close" class="btn btn-primary">Tutup</button>
