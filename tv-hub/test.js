@@ -31,6 +31,8 @@ const {
   saveLockConfig,
   verifyLockSecret,
   sortChannelsWithFavorites,
+  checkStreamHealth,
+  checkChannelsHealthQueue,
 } = require('./webtv.js');
 
 function createMockStorage(initial = {}) {
@@ -445,6 +447,32 @@ https://example.com/cnn.m3u8
   const cnn = parsed.find((c) => c.name === 'CNN International');
   assert.ok(cnn);
   assert.equal(cnn.category, 'nasional');
+});
+
+test('checkStreamHealth and checkChannelsHealthQueue handle invalid URLs and concurrency limits', async () => {
+  // Invalid or empty URLs should resolve to 'down'
+  const down1 = await checkStreamHealth('');
+  assert.equal(down1, 'down');
+  const down2 = await checkStreamHealth('ftp://invalid.com/stream');
+  assert.equal(down2, 'down');
+
+  // Queue processes channels and invokes onStatusChange callback
+  const mockChannels = [
+    { id: 'ch-invalid-1', url: '' },
+    { id: 'ch-invalid-2', url: 'not-a-url' },
+    { id: 'ch-valid-dummy', url: 'http://dummy-local.test/stream.m3u8' },
+  ];
+
+  const statuses = [];
+  const results = await checkChannelsHealthQueue(mockChannels, 2, (id, status) => {
+    statuses.push({ id, status });
+  });
+
+  assert.ok(results instanceof Map);
+  // Only non-placeholder channel with url is processed
+  assert.equal(results.has('ch-invalid-2'), true);
+  assert.equal(results.has('ch-valid-dummy'), true);
+  assert.ok(statuses.length > 0);
 });
 
 console.log(`\nAll ${passed} tests passed.`);

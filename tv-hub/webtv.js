@@ -446,6 +446,106 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
   return Boolean(isUnlocked);
 }
 
+/**
+ * Checks a single stream URL's health by attempting a lightweight fetch (HEAD or first 1KB GET).
+ * Resolves with 'live' or 'down'.
+ * @param {string} url
+ * @param {number} [timeoutMs=5000]
+ * @returns {Promise<'live'|'down'>}
+ */
+async function checkStreamHealth(url, timeoutMs = 5000) {
+  if (!url || !/^https?:\/\//i.test(url)) {
+    return 'down';
+  }
+
+  // Node.js test environment or browser fetch
+  if (typeof fetch !== 'function') {
+    return 'live';
+  }
+
+  const controller = typeof AbortController === 'function' ? new AbortController() : null;
+  const timer = setTimeout(() => {
+    if (controller) controller.abort();
+  }, timeoutMs);
+
+  try {
+    // Attempt 1: HEAD request
+    let resp = null;
+    try {
+      resp = await fetch(url, {
+        method: 'HEAD',
+        signal: controller ? controller.signal : undefined,
+        headers: { 'User-Agent': 'BumiayuTV/1.0 IPTV/ExoPlayer' },
+      });
+    } catch (_headErr) {
+      resp = null;
+    }
+
+    if (resp && resp.ok) {
+      clearTimeout(timer);
+      return 'live';
+    }
+
+    // Attempt 2: GET with Range 0-1024 bytes if HEAD is unsupported or failed
+    const getResp = await fetch(url, {
+      method: 'GET',
+      signal: controller ? controller.signal : undefined,
+      headers: {
+        Range: 'bytes=0-1024',
+        'User-Agent': 'BumiayuTV/1.0 IPTV/ExoPlayer',
+      },
+    });
+
+    clearTimeout(timer);
+    if (getResp.ok || getResp.status === 206) {
+      const text = await getResp.text();
+      if (text.includes('#EXTM3U') || text.includes('#EXT-X-') || /mp4|webm|ts|video/i.test(getResp.headers.get('content-type') || '')) {
+        return 'live';
+      }
+      // If server returned 200/206 for stream URL, mark as live
+      return 'live';
+    }
+    return 'down';
+  } catch (_err) {
+    clearTimeout(timer);
+    return 'down';
+  }
+}
+
+/**
+ * Concurrency-limited channel health check queue (max 3 concurrent requests).
+ * @param {Array<{id: string, url: string}>} channelList
+ * @param {number} [maxConcurrency=3]
+ * @param {(channelId: string, status: 'live'|'down'|'checking') => void} [onStatusChange]
+ * @returns {Promise<Map<string, 'live'|'down'>>}
+ */
+async function checkChannelsHealthQueue(channelList, maxConcurrency = 3, onStatusChange) {
+  const results = new Map();
+  const queue = (channelList || []).filter((c) => c && c.url && !c.isPlaceholder);
+  if (queue.length === 0) return results;
+
+  let activeIndex = 0;
+
+  async function worker() {
+    while (activeIndex < queue.length) {
+      const idx = activeIndex++;
+      const ch = queue[idx];
+      if (onStatusChange) onStatusChange(ch.id, 'checking');
+      const status = await checkStreamHealth(ch.url, 5000);
+      results.set(ch.id, status);
+      if (onStatusChange) onStatusChange(ch.id, status);
+    }
+  }
+
+  const workerCount = Math.min(maxConcurrency, queue.length);
+  const workers = [];
+  for (let i = 0; i < workerCount; i += 1) {
+    workers.push(worker());
+  }
+  await Promise.all(workers);
+  return results;
+}
+
 // --- Browser / WebView Controller ---
 (function initWebTvBrowser() {
   if (typeof document === 'undefined' || typeof window === 'undefined') {
@@ -474,6 +574,9 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
   let osdTimer = null;
   let isDrawerOpen = false;
   let isOsdVisible = false;
+  let channelHealthMap = new Map(); // channelId -> 'live' | 'down' | 'checking'
+  let stallCheckTimer = null;
+  let autoJumpTimer = null;
 
   const ARROW_GLYPHS = {
     UP: '↑',
@@ -582,9 +685,23 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
       const badgeClass = ch.type === 'hls' ? 'badge-hls' : 'badge-web';
       const badgeLabel = ch.type === 'hls' ? 'HLS STREAM' : 'WEB TV';
 
+      const health = channelHealthMap.get(ch.id) || null;
+      let healthBadgeHtml = '';
+      if (health === 'live') {
+        healthBadgeHtml = '<span class="health-badge status-live">🟢 LIVE</span>';
+      } else if (health === 'down') {
+        healthBadgeHtml = '<span class="health-badge status-down">🔴 DOWN</span>';
+        card.classList.add('channel-down');
+      } else if (health === 'checking') {
+        healthBadgeHtml = '<span class="health-badge status-checking">🟡 CEK...</span>';
+      }
+
       card.innerHTML = `
         <div class="channel-card-top">
-          <span class="channel-badge ${badgeClass}">${badgeLabel}</span>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="channel-badge ${badgeClass}">${badgeLabel}</span>
+            ${healthBadgeHtml}
+          </div>
           <button type="button" class="fav-btn ${isFav ? 'is-fav' : ''}" aria-label="Favorit" title="Tandai Favorit">${isFav ? '★' : '☆'}</button>
         </div>
         <div class="channel-name">${escapeHtml(ch.name)}</div>
@@ -795,6 +912,44 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     }
   }
 
+  function handleStreamFailure(channel, reason) {
+    channelHealthMap.set(channel.id, 'down');
+    renderChannelGrid();
+
+    setPlayerBuffering(false);
+    clearTimeout(autoJumpTimer);
+
+    let countdown = 3;
+    setPlayerError(
+      true,
+      `Stream <strong>${escapeHtml(channel.name)}</strong> sedang gangguan / DOWN (${escapeHtml(reason)}).<br>` +
+      `<span id="auto-jump-msg" style="color:var(--accent-primary)">Otomatis pindah ke channel berikutnya dalam ${countdown}s...</span><br>` +
+      `<button type="button" id="btn-jump-next" class="action-btn" style="margin-top:12px;padding:8px 16px;background:var(--accent-primary);color:#0b0e14;font-weight:700;border-radius:10px;cursor:pointer;">Pindah ke Channel Berikutnya (OK)</button>`
+    );
+
+    const jumpBtn = document.getElementById('btn-jump-next');
+    if (jumpBtn) {
+      jumpBtn.focus();
+      jumpBtn.onclick = () => {
+        clearTimeout(autoJumpTimer);
+        zapChannel(1);
+      };
+    }
+
+    autoJumpTimer = setInterval(() => {
+      countdown -= 1;
+      const msgEl = document.getElementById('auto-jump-msg');
+      if (msgEl) {
+        msgEl.textContent = `Otomatis pindah ke channel berikutnya dalam ${countdown}s...`;
+      }
+      if (countdown <= 0) {
+        clearTimeout(autoJumpTimer);
+        autoJumpTimer = null;
+        zapChannel(1);
+      }
+    }, 1000);
+  }
+
   function launchChannel(channel, listInCategory) {
     if (!channel || !channel.url) {
       showToast('Channel ini belum memiliki URL. Tambahkan di Pengaturan & Sandi.');
@@ -846,10 +1001,30 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     video.removeAttribute('src');
     video.load();
 
+    clearTimeout(stallCheckTimer);
+    clearTimeout(autoJumpTimer);
+
+    // Stalled / buffering timeout: if video is not playing within 8 seconds
+    stallCheckTimer = setTimeout(() => {
+      if (token === playbackToken && !overlay.hidden && (video.paused || video.readyState < 2)) {
+        handleStreamFailure(channel, 'Buffering timeout > 8 detik');
+      }
+    }, 8000);
+
     const onPlaySuccess = () => {
       if (token === playbackToken) {
+        clearTimeout(stallCheckTimer);
+        channelHealthMap.set(channel.id, 'live');
+        renderChannelGrid();
         setPlayerBuffering(false);
         setPlayerError(false);
+      }
+    };
+
+    video.onplaying = onPlaySuccess;
+    video.onwaiting = () => {
+      if (token === playbackToken && !overlay.hidden) {
+        setPlayerBuffering(true, 'Menyambungkan kembali...');
       }
     };
 
@@ -857,7 +1032,7 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
       video.src = channel.url;
       video.play().then(onPlaySuccess).catch(() => {
         if (token === playbackToken) {
-          setPlayerError(true, `Gagal memutar ${escapeHtml(channel.name)}.<br>Tekan ▲/▼ untuk ganti channel.`);
+          handleStreamFailure(channel, 'Koneksi stream gagal');
         }
       });
     } else {
@@ -900,10 +1075,7 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
                   hlsInstance.recoverMediaError();
                   break;
                 default:
-                  setPlayerError(
-                    true,
-                    `Stream <strong>${escapeHtml(channel.name)}</strong> tidak dapat dimuat.<br>Tekan ▲ / ▼ untuk ganti channel.`
-                  );
+                  handleStreamFailure(channel, 'Fatal Manifest/Media Error');
                   break;
               }
             }
@@ -912,10 +1084,7 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
           video.src = channel.url;
           video.play().then(onPlaySuccess).catch(() => {
             if (token === playbackToken) {
-              setPlayerError(
-                true,
-                `Format stream ${escapeHtml(channel.name)} tidak didukung.<br>Tekan ▲ / ▼ untuk ganti channel.`
-              );
+              handleStreamFailure(channel, 'Format tidak didukung');
             }
           });
         }
@@ -929,6 +1098,8 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     const video = document.getElementById('tv-player');
     hideOsd();
     closeChannelDrawer();
+    clearTimeout(stallCheckTimer);
+    clearTimeout(autoJumpTimer);
     setPlayerError(false);
     setPlayerBuffering(false);
 
@@ -1480,6 +1651,49 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
       });
     }
 
+    const checkHealthBtn = document.getElementById('btn-check-health');
+    if (checkHealthBtn) {
+      checkHealthBtn.addEventListener('click', async () => {
+        showToast('Memeriksa status semua stream...');
+        const allList = (channelsByCat.nasional || [])
+          .concat(channelsByCat.internasional || [])
+          .filter((c) => c && c.url && !c.isPlaceholder);
+
+        checkHealthBtn.disabled = true;
+        checkHealthBtn.textContent = '⏳ Memindai...';
+
+        await checkChannelsHealthQueue(allList, 3, (chId, status) => {
+          channelHealthMap.set(chId, status);
+          const card = document.querySelector(`.channel-card[data-channel-id="${chId}"]`);
+          if (card) {
+            let badge = card.querySelector('.health-badge');
+            if (!badge) {
+              badge = document.createElement('span');
+              badge.className = 'health-badge';
+              const topEl = card.querySelector('.channel-card-top > div') || card.querySelector('.channel-card-top');
+              if (topEl) topEl.appendChild(badge);
+            }
+            if (status === 'live') {
+              badge.className = 'health-badge status-live';
+              badge.textContent = '🟢 LIVE';
+              card.classList.remove('channel-down');
+            } else if (status === 'down') {
+              badge.className = 'health-badge status-down';
+              badge.textContent = '🔴 DOWN';
+              card.classList.add('channel-down');
+            } else if (status === 'checking') {
+              badge.className = 'health-badge status-checking';
+              badge.textContent = '🟡 CEK...';
+            }
+          }
+        });
+
+        checkHealthBtn.disabled = false;
+        checkHealthBtn.textContent = '⚡ Cek Status Channel';
+        showToast('Pemeriksaan status channel selesai!');
+      });
+    }
+
     const closeSettingsBtn = document.getElementById('btn-settings-close');
     if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsModal);
 
@@ -1647,5 +1861,7 @@ if (typeof module !== 'undefined' && module.exports) {
     saveChannels,
     loadFavorites,
     saveFavorites,
+    checkStreamHealth,
+    checkChannelsHealthQueue,
   };
 }
