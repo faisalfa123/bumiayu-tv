@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Koneksi Terputus - Faisal TV Hub</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, #0b0e14 0%, #141923 100%);
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .error-card {
+      width: min(680px, 90vw);
+      background: rgba(24, 30, 42, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 40px 44px;
+      box-shadow: 0 28px 64px rgba(0, 0, 0, 0.65);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .url-box {
+      background: rgba(11, 14, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 15px;
+      color: #38bdf8;
+      word-break: break-all;
+      margin-bottom: 28px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .btn {
+      appearance: none;
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.08);
+      color: #f8fafc;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 22px;
+      border-radius: 14px;
+      cursor: pointer;
+      outline: none;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    .btn-primary {
+      background: #0ea5e9;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+
+    .btn:focus,
+    .btn.focused {
+      transform: scale(1.05);
+      border-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+    }
+
+    .reconfig-panel {
+      display: none;
+      margin-top: 26px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .reconfig-panel.open {
+      display: block;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 14px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .url-input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      background: #0b0e14;
+      color: #ffffff;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .url-input:focus,
+    .url-input.focused {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <main class="error-card" role="main">
+    <span class="badge">Server Tidak Terjangkau</span>
+    <h1 id="error-title">Tidak dapat terhubung ke Aplikasi</h1>
+    <p class="subtitle">
+      Pastikan server lokal SBC menyala dan terhubung ke jaringan Wi-Fi yang sama dengan TV, atau perbarui alamat IP/Port di bawah ini.
+    </p>
+    <div id="failed-url" class="url-box">-</div>
+
+    <div id="main-actions" class="actions">
+      <button id="btn-retry" class="btn btn-primary nav-item" type="button">Coba Lagi</button>
+      <button id="btn-reconfig" class="btn nav-item" type="button">Re-konfigurasi Alamat Server</button>
+      <button id="btn-back" class="btn nav-item" type="button">Kembali ke Hub</button>
+    </div>
+
+    <section id="reconfig-panel" class="reconfig-panel" aria-hidden="true">
+      <label class="field-label" for="input-server-url">Alamat Server Baru (IP &amp; Port):</label>
+      <input
+        id="input-server-url"
+        class="url-input nav-item"
+        type="text"
+        placeholder="http://192.168.1.100:8080"
+        autocomplete="off"
+      />
+      <div class="actions">
+        <button id="btn-save-url" class="btn btn-primary nav-item" type="button">Simpan &amp; Muat Ulang</button>
+        <button id="btn-cancel-reconfig" class="btn nav-item" type="button">Batal</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var params = new URLSearchParams(window.location.search || '');
+      var appName = params.get('name') || 'Aplikasi';
+      var targetUrl = params.get('url') || '';
+      var appId = params.get('appId') || '';
+
+      var titleEl = document.getElementById('error-title');
+      var urlEl = document.getElementById('failed-url');
+      var btnRetry = document.getElementById('btn-retry');
+      var btnReconfig = document.getElementById('btn-reconfig');
+      var btnBack = document.getElementById('btn-back');
+      var reconfigPanel = document.getElementById('reconfig-panel');
+      var inputUrl = document.getElementById('input-server-url');
+      var btnSave = document.getElementById('btn-save-url');
+      var btnCancel = document.getElementById('btn-cancel-reconfig');
+
+      titleEl.textContent = 'Tidak dapat terhubung ke ' + appName;
+      urlEl.textContent = targetUrl || '(Alamat server kosong)';
+      inputUrl.value = targetUrl;
+
+      function normalizeUrl(raw) {
+        if (typeof raw !== 'string') return '';
+        var trimmed = raw.trim().replace(/\/+$/, '');
+        if (!trimmed) return '';
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+        return 'http://' + trimmed;
+      }
+
+      function navigateTo(url) {
+        if (!url) return;
+        if (window.TvBridge && typeof window.TvBridge.loadUrl === 'function') {
+          window.TvBridge.loadUrl(url);
+        } else {
+          window.location.href = url;
+        }
+      }
+
+      function getVisibleFocusables() {
+        var list = [btnRetry, btnReconfig, btnBack];
+        if (reconfigPanel.classList.contains('open')) {
+          list = [inputUrl, btnSave, btnCancel];
+        }
+        return list;
+      }
+
+      var focusIndex = 0;
+
+      function setFocus(idx) {
+        var items = getVisibleFocusables();
+        if (items.length === 0) return;
+        document.querySelectorAll('.nav-item').forEach(function (el) {
+          el.classList.remove('focused');
+        });
+        focusIndex = (idx + items.length) % items.length;
+        var target = items[focusIndex];
+        target.classList.add('focused');
+        target.focus();
+      }
+
+      function openReconfig() {
+        reconfigPanel.classList.add('open');
+        reconfigPanel.setAttribute('aria-hidden', 'false');
+        inputUrl.value = targetUrl;
+        setFocus(0);
+      }
+
+      function closeReconfig() {
+        reconfigPanel.classList.remove('open');
+        reconfigPanel.setAttribute('aria-hidden', 'true');
+        setFocus(1);
+      }
+
+      btnRetry.addEventListener('click', function () {
+        navigateTo(targetUrl);
+      });
+
+      btnReconfig.addEventListener('click', function () {
+        openReconfig();
+      });
+
+      btnBack.addEventListener('click', function () {
+        if (window.TvBridge && typeof window.TvBridge.closeWebApp === 'function') {
+          window.TvBridge.closeWebApp();
+        } else {
+          window.history.back();
+        }
+      });
+
+      btnCancel.addEventListener('click', function () {
+        closeReconfig();
+      });
+
+      btnSave.addEventListener('click', function () {
+        var nextUrl = normalizeUrl(inputUrl.value);
+        if (!nextUrl) return;
+        targetUrl = nextUrl;
+        urlEl.textContent = nextUrl;
+        if (appId && window.TvBridge && typeof window.TvBridge.saveAppUrl === 'function') {
+          window.TvBridge.saveAppUrl(appId, nextUrl);
+        }
+        navigateTo(nextUrl);
+      });
+
+      document.addEventListener('keydown', function (e) {
+        var items = getVisibleFocusables();
+        var activeIdx = items.indexOf(document.activeElement);
+        if (activeIdx !== -1) focusIndex = activeIdx;
+        var isInput = document.activeElement && document.activeElement.tagName === 'INPUT';
+
+        if (e.key === 'Escape' && reconfigPanel.classList.contains('open')) {
+          e.preventDefault();
+          closeReconfig();
+          return;
+        }
+
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+          if (isInput && e.key === 'ArrowRight') return;
+          e.preventDefault();
+          setFocus(focusIndex + 1);
+          return;
+        }
+
+        if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+          if (isInput && e.key === 'ArrowLeft') return;
+          e.preventDefault();
+          setFocus(focusIndex - 1);
+          return;
+        }
+
+        if (e.key === 'Enter' && isInput) {
+          e.preventDefault();
+          setFocus(1);
+        }
+      });
+
+      setFocus(0);
+    })();
+  </script>
+</body>
+</html>
