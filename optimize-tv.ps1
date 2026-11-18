@@ -4,7 +4,7 @@
 # ==============================================================================
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $BinDir = Join-Path $ScriptDir "bin"
@@ -73,7 +73,7 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
 # 2. KONEKSI WI-FI ADB KE TV
 # ------------------------------------------------------------------------------
 Write-Header "KONEKSI KE XIAOMI SMART TV 4A"
-$DefaultIP = "192.168.0.107"
+$DefaultIP = "192.168.1.5"
 $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP')"
 if ([string]::IsNullOrWhiteSpace($TvIP)) {
     $TvIP = $DefaultIP
@@ -206,7 +206,8 @@ foreach ($pkg in $BloatList) {
     }
 
     Write-Info "Menonaktifkan: $pkg ..."
-    $Res = & $AdbCmd shell pm disable-user --user 0 $pkg 2>&1
+    $rawRes = & $AdbCmd shell "pm disable-user --user 0 $pkg" 2>&1
+    $Res = ($rawRes | Out-String).Trim()
     
     if ($Res -match "new state: disabled-user" -or $Res -match "disabled") {
         Write-Success "$pkg [NONAKTIF]"
@@ -215,7 +216,16 @@ foreach ($pkg in $BloatList) {
     } elseif ($Res -match "not installed") {
         Write-Host "[-] $pkg [TIDAK TERPASANG PADA MODEL INI]" -ForegroundColor Gray
     } else {
-        Write-Host "[!] $pkg ($Res)" -ForegroundColor Gray
+        # Coba fallback ke pm disable biasa jika disable-user tidak didukung
+        $fallbackRaw = & $AdbCmd shell "pm disable $pkg" 2>&1
+        $fallbackRes = ($fallbackRaw | Out-String).Trim()
+        if ($fallbackRes -match "new state: disabled" -or $fallbackRes -match "disabled") {
+            Write-Success "$pkg [NONAKTIF (via pm disable)]"
+            Add-Content -Path $BackupLog -Value $pkg
+            $DisabledCount++
+        } else {
+            Write-Host "[!] $pkg ($Res)" -ForegroundColor Gray
+        }
     }
 }
 

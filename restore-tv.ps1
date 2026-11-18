@@ -4,7 +4,7 @@
 # ==============================================================================
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $BinDir = Join-Path $ScriptDir "bin"
@@ -41,7 +41,7 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
 }
 
 # 2. KONEKSI KE TV
-$DefaultIP = "192.168.0.107"
+$DefaultIP = "192.168.1.5"
 $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP')"
 if ([string]::IsNullOrWhiteSpace($TvIP)) {
     $TvIP = $DefaultIP
@@ -90,7 +90,8 @@ $RestoredCount = 0
 foreach ($pkg in $RestoreList) {
     $pkg = $pkg.Trim()
     Write-Info "Mengaktifkan: $pkg ..."
-    $Res = & $AdbCmd shell pm enable $pkg 2>&1
+    $rawRes = & $AdbCmd shell "pm enable $pkg" 2>&1
+    $Res = ($rawRes | Out-String).Trim()
     if ($Res -match "new state: enabled" -or $Res -match "enabled") {
         Write-Success "$pkg [AKTIF KEMBALI]"
         $RestoredCount++
