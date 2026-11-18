@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web TV — Bumiayu TV Launcher</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-primary);
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .back-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    .back-btn:focus,
+    .back-btn:focus-visible {
+      transform: scale(1.05);
+      box-shadow: var(--focus-glow);
+    }
+
+    /* Category Tabs */
+    .webtv-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .webtv-tab {
+      padding: 12px 20px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-secondary);
+      font: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .webtv-tab[hidden] {
+      display: none;
+    }
+
+    .webtv-tab.active {
+      background: var(--accent-blue);
+      border-color: rgba(255, 255, 255, 0.28);
+      color: #ffffff;
+    }
+
+    .webtv-tab:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .webtv-tab.active:hover {
+      background: var(--accent-blue);
+    }
+
+    .webtv-tab:focus,
+    .webtv-tab:focus-visible {
+      transform: scale(1.05);
+      box-shadow: var(--focus-glow);
+      color: var(--text-primary);
+    }
+
+    /* Channel Grid */
+    .channel-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .channel-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 18px 20px;
+      border-radius: var(--radius-card);
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      color: var(--text-primary);
+      cursor: pointer;
+      outline: none;
+      transition: transform 170ms cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 170ms ease, background-color 170ms ease;
+    }
+
+    .channel-card:hover {
+      background: var(--surface-hover);
+    }
+
+    .channel-card:focus,
+    .channel-card:focus-visible {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.13);
+      box-shadow: var(--focus-glow);
+      z-index: 2;
+    }
+
+    .channel-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .channel-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-hls {
+      background: rgba(34, 197, 94, 0.2);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .badge-web {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+    }
+
+    .fav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      line-height: 1;
+      padding: 4px 8px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .fav-btn.is-fav {
+      color: #facc15;
+    }
+
+    .fav-btn:focus,
+    .fav-btn:focus-visible {
+      border-color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .channel-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .channel-meta {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .channel-empty {
+      padding: 48px 24px;
+      text-align: center;
+      border-radius: var(--radius-card);
+      background: var(--surface);
+      border: 1px dashed var(--surface-border);
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* Fullscreen Player Overlay */
+    .player-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: #000000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .player-overlay[hidden] {
+      display: none;
+    }
+
+    .tv-video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000000;
+    }
+
+    .player-hud {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 24px 36px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.88), transparent);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .player-channel-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .player-channel-meta {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.72);
+      margin-top: 4px;
+    }
+
+    /* Lock Modal */
+    .pin-dots {
+      text-align: center;
+      font-size: 2rem;
+      letter-spacing: 0.5rem;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pin-key,
+    .pattern-key,
+    .setting-pattern-key {
+      padding: 14px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text-primary);
+      font: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .pin-key:focus,
+    .pattern-key:focus,
+    .setting-pattern-key:focus {
+      background: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.85);
+    }
+
+    .pattern-badges {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .pattern-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-blue);
+      color: #ffffff;
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .pattern-placeholder {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+
+    .pattern-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .lock-error {
+      min-height: 20px;
+      color: #f87171;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* Settings Modal */
+    .settings-modal {
+      width: min(680px, 94vw);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .settings-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .settings-section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .mode-switch {
+      display: flex;
+      gap: 10px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+
+    .checkbox-row input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent-blue);
+    }
+
+    .inline-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    textarea.field-input {
+      min-height: 84px;
+      resize: vertical;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      .channel-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      .channel-grid,
+      .inline-fields {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="ambient-bg" aria-hidden="true"></div>
+
+  <div class="tv-shell">
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button type="button" id="btn-back-home" class="back-btn" aria-label="Kembali ke Beranda">
+          ← Beranda
+        </button>
+        <div class="brand">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <h1 class="brand-title">Web TV</h1>
+        </div>
+      </div>
+
+      <div class="top-bar-right">
+        <div class="status-badge">
+          <span class="status-indicator" aria-hidden="true"></span>
+          <span>Live &amp; M3U</span>
+        </div>
+        <div class="clock-block" aria-live="off">
+          <time id="live-clock" class="clock-time">--:--</time>
+          <span id="live-date" class="clock-date">Memuat tanggal...</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="webtv-tabs" role="tablist" aria-label="Kategori Web TV">
+      <button type="button" class="webtv-tab active" role="tab" aria-selected="true" data-category="nasional">
+        📺 Channel Nasional
+      </button>
+      <button type="button" class="webtv-tab" role="tab" aria-selected="false" data-category="internasional">
+        🌍 Channel Internasional
+      </button>
+      <button type="button" id="tab-adult" class="webtv-tab" role="tab" aria-selected="false" data-category="adult">
+        🔒 18+ / Dewasa
+      </button>
+      <button type="button" class="webtv-tab" role="tab" aria-selected="false" data-category="settings">
+        ⚙️ Pengaturan &amp; Sandi
+      </button>
+    </nav>
+
+    <main class="hub-main">
+      <div id="channel-grid" class="channel-grid" aria-live="polite"></div>
+      <div id="channel-empty" class="channel-empty" hidden>
+        Belum ada channel di kategori ini. Tambahkan atau impor playlist M3U melalui ⚙️ Pengaturan &amp; Sandi.
+      </div>
+    </main>
+  </div>
+
+  <!-- Fullscreen HLS Video Player Overlay -->
+  <div id="player-overlay" class="player-overlay" hidden>
+    <video id="tv-player" class="tv-video" autoplay playsinline controls></video>
+    <div class="player-hud">
+      <div>
+        <div id="player-channel-name" class="player-channel-name">Channel</div>
+        <div id="player-channel-meta" class="player-channel-meta">▲/▼ Ganti Channel • ESC/Back Tutup</div>
+      </div>
+      <button type="button" id="btn-player-close" class="btn btn-secondary">Tutup Player</button>
+    </div>
+  </div>
+
+  <!-- Lock Modal (PIN 4-Digit or D-Pad Pattern) -->
+  <dialog id="lock-modal" class="modal-dialog" aria-labelledby="lock-modal-title">
+    <div class="modal-card">
+      <div>
+        <h2 id="lock-modal-title" class="modal-title">🔒 Akses 18+ / Dewasa</h2>
+        <p class="modal-desc">Masukkan PIN atau Pola Arah Remote untuk membuka sesi ini.</p>
+      </div>
+
+      <div id="lock-pin-pane">
+        <div id="pin-dots" class="pin-dots" aria-live="polite">○○○○</div>
+        <div class="pin-keypad">
+          <button type="button" class="pin-key" data-pin="1">1</button>
+          <button type="button" class="pin-key" data-pin="2">2</button>
+          <button type="button" class="pin-key" data-pin="3">3</button>
+          <button type="button" class="pin-key" data-pin="4">4</button>
+          <button type="button" class="pin-key" data-pin="5">5</button>
+          <button type="button" class="pin-key" data-pin="6">6</button>
+          <button type="button" class="pin-key" data-pin="7">7</button>
+          <button type="button" class="pin-key" data-pin="8">8</button>
+          <button type="button" class="pin-key" data-pin="9">9</button>
+          <button type="button" class="pin-key" data-pin="clear">Hapus</button>
+          <button type="button" class="pin-key" data-pin="0">0</button>
+          <button type="button" class="pin-key" data-pin="ok">OK</button>
+        </div>
+      </div>
+
+      <div id="lock-pattern-pane" hidden>
+        <div id="pattern-badges" class="pattern-badges" aria-live="polite"></div>
+        <div class="pattern-pad">
+          <button type="button" class="pattern-key" data-dir="clear">Reset</button>
+          <button type="button" class="pattern-key" data-dir="UP">↑ Atas</button>
+          <button type="button" class="pattern-key" data-dir="ok">OK</button>
+          <button type="button" class="pattern-key" data-dir="LEFT">← Kiri</button>
+          <button type="button" class="pattern-key" data-dir="DOWN">↓ Bawah</button>
+          <button type="button" class="pattern-key" data-dir="RIGHT">→ Kanan</button>
+        </div>
+      </div>
+
+      <div id="lock-error" class="lock-error" role="alert"></div>
+
+      <div class="modal-actions">
+        <button type="button" id="btn-lock-cancel" class="btn btn-secondary">Batal</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Settings, Lock Config & M3U Import Modal -->
+  <dialog id="webtv-settings-modal" class="modal-dialog settings-modal" aria-labelledby="settings-modal-title">
+    <div class="modal-card">
+      <div>
+        <h2 id="settings-modal-title" class="modal-title">⚙️ Pengaturan Web TV &amp; Sandi</h2>
+        <p class="modal-desc">Atur kunci 18+ (PIN atau Pola Remote), impor M3U, atau tambah channel.</p>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Keamanan Kategori 18+</div>
+        <div class="mode-switch">
+          <button type="button" id="mode-btn-pin" class="btn btn-secondary">PIN 4-Digit</button>
+          <button type="button" id="mode-btn-pattern" class="btn btn-secondary">Pola Arah Remote</button>
+        </div>
+
+        <div id="setting-pin-group" class="field-group">
+          <label class="field-label" for="setting-new-pin">PIN 4-Digit Baru (kosongkan jika tetap)</label>
+          <input id="setting-new-pin" class="field-input" type="password" maxlength="4" inputmode="numeric" placeholder="Default: 1234">
+        </div>
+
+        <div id="setting-pattern-group" class="field-group" hidden>
+          <span class="field-label">Rekam Pola Arah Remote (4–6 arah)</span>
+          <div id="setting-pattern-preview" class="pattern-badges"></div>
+          <div class="pattern-pad">
+            <button type="button" class="setting-pattern-key" data-dir="clear">Reset</button>
+            <button type="button" class="setting-pattern-key" data-dir="UP">↑</button>
+            <span></span>
+            <button type="button" class="setting-pattern-key" data-dir="LEFT">←</button>
+            <button type="button" class="setting-pattern-key" data-dir="DOWN">↓</button>
+            <button type="button" class="setting-pattern-key" data-dir="RIGHT">→</button>
+          </div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" id="setting-hide-adult">
+          <span>Sembunyikan Tab 18+ dari Layar Utama</span>
+        </label>
+
+        <div>
+          <button type="button" id="btn-save-lock" class="btn btn-primary">Simpan Sandi &amp; Privasi</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Tambah Channel Satuan</div>
+        <div class="inline-fields">
+          <input id="custom-ch-name" class="field-input" type="text" placeholder="Nama Channel">
+          <select id="custom-ch-cat" class="field-input">
+            <option value="nasional">Channel Nasional</option>
+            <option value="internasional">Channel Internasional</option>
+            <option value="adult">18+ / Dewasa</option>
+          </select>
+        </div>
+        <input id="custom-ch-url" class="field-input" type="url" placeholder="https://.../stream.m3u8 atau URL Web">
+        <div>
+          <button type="button" id="btn-add-custom-channel" class="btn btn-secondary">Tambah Channel</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Impor Playlist M3U</div>
+        <select id="m3u-cat" class="field-input">
+          <option value="nasional">Impor ke: Channel Nasional</option>
+          <option value="internasional">Impor ke: Channel Internasional</option>
+          <option value="adult">Impor ke: 18+ / Dewasa</option>
+        </select>
+        <textarea id="m3u-input" class="field-input" placeholder="#EXTM3U&#10;#EXTINF:-1,Nama Channel&#10;https://contoh.com/live.m3u8&#10;(atau tempel URL file .m3u)"></textarea>
+        <div>
+          <button type="button" id="btn-import-m3u" class="btn btn-secondary">Impor M3U</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="btn-settings-close" class="btn btn-primary">Tutup</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="themes.js"></script>
+  <script src="webtv.js"></script>
+</body>
+</html>

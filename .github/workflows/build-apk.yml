@@ -1,4 +1,4 @@
-name: Build FaisalTVHub APK
+name: Build Bumiayu TV Launcher APK
 
 on:
   push:
@@ -34,9 +34,9 @@ jobs:
       - name: Build Debug APK
         run: gradle -p tv-hub-android assembleDebug --no-daemon
 
-      - name: Upload FaisalTVHub APK
+      - name: Upload Bumiayu TV Launcher APK
         uses: actions/upload-artifact@v4
         with:
-          name: FaisalTVHub-APK
+          name: BumiayuTVLauncher-APK
           path: tv-hub-android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

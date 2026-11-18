@@ -130,7 +130,7 @@ Set-Content -Path $BackupLog -Value $BackupContent -Encoding UTF8
 Write-Success "Snapshot status sistem awal tersimpan di: $BackupLog"
 
 # ------------------------------------------------------------------------------
-# 4. INSTALASI SMARTTUBE STABLE, FAISAL TV HUB & LAUNCHER BEBAS IKLAN
+# 4. INSTALASI SMARTTUBE STABLE, BUMIAYU TV LAUNCHER & LAUNCHER BEBAS IKLAN
 # ------------------------------------------------------------------------------
 Write-Header "PENYIAPAN LAUNCHER BEBAS IKLAN & SHORTCUT INPUT TV"
 
@@ -175,16 +175,18 @@ if ($InstalledPackages -match [regex]::Escape($SmartTubePkg)) {
     }
 }
 
-# 4b. Cek & Instalasi FaisalTVHub atau Launcher Alternatif Lainnya
+# 4b. Cek & Instalasi Bumiayu TV Launcher atau Launcher Alternatif Lainnya
 if ($InstalledPackages -match "com\.faisal\.tvhub|flix|flauncher|projectivy|atvlauncher|emotn") {
-    Write-Success "Launcher alternatif / FaisalTVHub sudah terdeteksi di dalam TV."
+    Write-Success "Launcher alternatif / Bumiayu TV Launcher sudah terdeteksi di dalam TV."
     $HasCustomLauncher = $true
 }
 
-$FaisalHubApks = Get-ChildItem -Path $ApkDir -Filter "FaisalTVHub*.apk" -ErrorAction SilentlyContinue
-if ($FaisalHubApks -and $FaisalHubApks.Count -gt 0) {
-    foreach ($hubApk in $FaisalHubApks) {
-        Write-Info "Memasang FaisalTVHub: $($hubApk.Name)..."
+$CustomLauncherApks = Get-ChildItem -Path $ApkDir -Filter "*.apk" -ErrorAction SilentlyContinue | Where-Object {
+    $_.Name -like "BumiayuTVLauncher*.apk" -or $_.Name -like "FaisalTVHub*.apk" -or $_.Name -eq "app-debug.apk"
+}
+if ($CustomLauncherApks -and $CustomLauncherApks.Count -gt 0) {
+    foreach ($hubApk in $CustomLauncherApks) {
+        Write-Info "Memasang Bumiayu TV Launcher: $($hubApk.Name)..."
         $HubInstallOutput = & $AdbCmd install -r $hubApk.FullName 2>&1
         Write-Host $HubInstallOutput -ForegroundColor Gray
         if ($HubInstallOutput -match "Success") {
@@ -195,7 +197,10 @@ if ($FaisalHubApks -and $FaisalHubApks.Count -gt 0) {
 }
 
 $OtherLauncherApks = Get-ChildItem -Path $ApkDir -Filter "*.apk" -ErrorAction SilentlyContinue | Where-Object {
-    $_.Name -ne "smarttube_stable.apk" -and $_.Name -notlike "FaisalTVHub*.apk"
+    $_.Name -ne "smarttube_stable.apk" -and
+    $_.Name -notlike "BumiayuTVLauncher*.apk" -and
+    $_.Name -notlike "FaisalTVHub*.apk" -and
+    $_.Name -ne "app-debug.apk"
 }
 
 if ($OtherLauncherApks -and $OtherLauncherApks.Count -gt 0) {
@@ -229,12 +234,12 @@ if ($OtherLauncherApks -and $OtherLauncherApks.Count -gt 0) {
     } catch {
         Remove-Item -Path $FlixTmp -Force -ErrorAction SilentlyContinue
         Write-Warn "Gagal auto-download APK secara online ($($_.Exception.Message))."
-        Write-Warn "Anda dapat menaruh file APK FaisalTVHub atau launcher pilihan Anda ke folder 'apk/'."
+        Write-Warn "Anda dapat menaruh file APK Bumiayu TV Launcher atau launcher pilihan Anda ke folder 'apk/'."
     }
 }
 
 # 4c. Konfigurasi Opsional IP Server Lokal SBC / Odroid C2 (apps-config.json)
-Write-Info "Konfigurasi opsional alamat server lokal SBC/Odroid C2 untuk FaisalTVHub:"
+Write-Info "Konfigurasi opsional alamat server lokal SBC/Odroid C2 untuk Bumiayu TV Launcher:"
 $DefaultSbcIP = "192.168.1.100"
 $SbcIP = Read-Host "Masukkan Alamat IP Server SBC/Odroid C2 Anda (Tekan ENTER untuk '$DefaultSbcIP')"
 if ([string]::IsNullOrWhiteSpace($SbcIP)) {
@@ -250,7 +255,7 @@ $AppsConfig = [ordered]@{
 $AppsConfigPath = Join-Path $ScriptDir "apps-config.json"
 $AppsConfig | ConvertTo-Json -Depth 2 | Set-Content -Path $AppsConfigPath -Encoding UTF8
 Write-Success "Referensi URL lokal tersimpan di: $AppsConfigPath"
-Write-Info "Catatan: Di TV nanti, Anda dapat mengubah/memeriksa URL ini langsung lewat menu 'Konfigurasi Server' di FaisalTVHub."
+Write-Info "Catatan: Di TV nanti, Anda dapat mengubah/memeriksa URL ini langsung lewat menu 'Konfigurasi Server' di Bumiayu TV Launcher."
 
 
 # ------------------------------------------------------------------------------
