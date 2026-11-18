@@ -47,15 +47,15 @@ function normalizeUrl(url, fallback) {
   return `http://${trimmed}`;
 }
 
+function getDefaultStorage() {
+  return typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
+}
+
 /**
  * Load app server configuration from storage, merged with DEFAULT_CONFIG.
  * @param {Storage} [storage]
  * @returns {{ senandung: string, immich: string, dompetmungil: string }}
  */
-function getDefaultStorage() {
-  return typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
-}
-
 function loadConfig(storage) {
   let base = { ...DEFAULT_CONFIG };
   const store = storage !== undefined ? storage : getDefaultStorage();
@@ -200,7 +200,7 @@ function formatClock(date) {
 }
 
 /**
- * Format date in Indonesian (e.g. "Senin, 18 November 2026").
+ * Format date in Indonesian (e.g. "Rabu, 18 November 2026").
  * @param {Date} date
  * @returns {string}
  */
@@ -218,11 +218,14 @@ function formatIndonesianDate(date) {
     return;
   }
 
+  const themes = window.BumiayuThemes || null;
+  let particleEngine = null;
   let audioCtx = null;
   let toastTimer = null;
   let currentPos = { row: 0, col: 0 };
-  let isModalOpen = false;
+  let activeModalId = null;
   let modalFocusIndex = 0;
+  let isAmbientOpen = false;
 
   function playFocusSound() {
     try {
@@ -263,6 +266,31 @@ function formatIndonesianDate(date) {
       toast.classList.remove('visible');
       toast.setAttribute('aria-hidden', 'true');
     }, 3000);
+  }
+
+  function updateThemeUI(themeId) {
+    if (!themes) return;
+    const validId = themes.applyTheme(themeId);
+    const meta = themes.getThemeMeta(validId);
+
+    const pillIcon = document.getElementById('theme-pill-icon');
+    const pillName = document.getElementById('theme-pill-name');
+    const ambientLabel = document.getElementById('ambient-theme-label');
+
+    if (pillIcon) pillIcon.textContent = meta.icon;
+    if (pillName) pillName.textContent = meta.name;
+    if (ambientLabel) ambientLabel.textContent = `${meta.icon} ${meta.name}`;
+
+    const options = document.querySelectorAll('.theme-option');
+    options.forEach((btn) => {
+      const isSelected = btn.dataset.themeId === validId;
+      btn.classList.toggle('active', isSelected);
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    });
+
+    if (particleEngine) {
+      particleEngine.setTheme(validId);
+    }
   }
 
   function getGridRows() {
@@ -320,7 +348,37 @@ function formatIndonesianDate(date) {
     }
   }
 
+  function openAmbientMode() {
+    const overlay = document.getElementById('ambient-overlay');
+    if (!overlay) return;
+    isAmbientOpen = true;
+    overlay.hidden = false;
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeAmbientMode() {
+    const overlay = document.getElementById('ambient-overlay');
+    isAmbientOpen = false;
+    if (overlay) {
+      overlay.hidden = true;
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    applyGridFocus(currentPos, false);
+  }
+
   function handleAction(action) {
+    if (action === 'webtv') {
+      window.location.href = 'webtv.html';
+      return;
+    }
+    if (action === 'theme') {
+      openThemeModal();
+      return;
+    }
+    if (action === 'ambient') {
+      openAmbientMode();
+      return;
+    }
     if (action === 'inputs') {
       if (window.TvBridge && typeof window.TvBridge.openTvInputs === 'function') {
         window.TvBridge.openTvInputs();
@@ -360,7 +418,8 @@ function formatIndonesianDate(date) {
   }
 
   function getModalFocusables() {
-    const modal = document.getElementById('reconfig-modal');
+    if (!activeModalId) return [];
+    const modal = document.getElementById(activeModalId);
     if (!modal) return [];
     return Array.from(modal.querySelectorAll('.modal-focusable'));
   }
@@ -375,11 +434,36 @@ function formatIndonesianDate(date) {
     target.focus();
   }
 
-  function openReconfigModal() {
-    const modal = document.getElementById('reconfig-modal');
+  function openDialog(modalId, initialIndex) {
+    const modal = document.getElementById(modalId);
     if (!modal) return;
-    const config = loadConfig();
+    activeModalId = modalId;
+    if (typeof modal.showModal === 'function') {
+      if (!modal.open) modal.showModal();
+    } else {
+      modal.setAttribute('open', '');
+    }
+    setModalFocus(initialIndex || 0);
+  }
 
+  function closeActiveModal() {
+    const modalId = activeModalId;
+    activeModalId = null;
+    if (modalId) {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        if (typeof modal.close === 'function' && modal.open) {
+          modal.close();
+        } else {
+          modal.removeAttribute('open');
+        }
+      }
+    }
+    applyGridFocus(currentPos, false);
+  }
+
+  function openReconfigModal() {
+    const config = loadConfig();
     const inputSenandung = document.getElementById('input-senandung');
     const inputImmich = document.getElementById('input-immich');
     const inputDompet = document.getElementById('input-dompetmungil');
@@ -388,26 +472,20 @@ function formatIndonesianDate(date) {
     if (inputImmich) inputImmich.value = config.immich;
     if (inputDompet) inputDompet.value = config.dompetmungil;
 
-    isModalOpen = true;
-    if (typeof modal.showModal === 'function') {
-      if (!modal.open) modal.showModal();
-    } else {
-      modal.setAttribute('open', '');
-    }
-    setModalFocus(0);
+    openDialog('reconfig-modal', 0);
   }
 
-  function closeReconfigModal() {
-    const modal = document.getElementById('reconfig-modal');
-    isModalOpen = false;
+  function openThemeModal() {
+    const currentId = themes ? themes.loadTheme() : 'pixel';
+    updateThemeUI(currentId);
+    const modal = document.getElementById('theme-modal');
+    let initialIdx = 0;
     if (modal) {
-      if (typeof modal.close === 'function' && modal.open) {
-        modal.close();
-      } else {
-        modal.removeAttribute('open');
-      }
+      const items = Array.from(modal.querySelectorAll('.modal-focusable'));
+      const foundIdx = items.findIndex((el) => el.dataset.themeId === currentId);
+      if (foundIdx !== -1) initialIdx = foundIdx;
     }
-    applyGridFocus(currentPos, false);
+    openDialog('theme-modal', initialIdx);
   }
 
   function handleModalKeydown(e) {
@@ -424,7 +502,7 @@ function formatIndonesianDate(date) {
 
     if (e.key === 'Escape' || (e.key === 'Backspace' && !isInput)) {
       e.preventDefault();
-      closeReconfigModal();
+      closeActiveModal();
       return;
     }
 
@@ -460,9 +538,16 @@ function formatIndonesianDate(date) {
   }
 
   function handleHubKeydown(e) {
+    if (isAmbientOpen) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeAmbientMode();
+      return;
+    }
+
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey) return;
 
-    if (isModalOpen) {
+    if (activeModalId) {
       handleModalKeydown(e);
       return;
     }
@@ -492,14 +577,45 @@ function formatIndonesianDate(date) {
   }
 
   function updateClock() {
+    const now = new Date();
+    const timeStr = formatClock(now);
+    const dateStr = formatIndonesianDate(now);
+
     const clockEl = document.getElementById('live-clock');
     const dateEl = document.getElementById('live-date');
-    const now = new Date();
-    if (clockEl) clockEl.textContent = formatClock(now);
-    if (dateEl) dateEl.textContent = formatIndonesianDate(now);
+    const ambientClock = document.getElementById('ambient-clock');
+    const ambientDate = document.getElementById('ambient-date');
+
+    if (clockEl) clockEl.textContent = timeStr;
+    if (dateEl) dateEl.textContent = dateStr;
+    if (ambientClock) ambientClock.textContent = timeStr;
+    if (ambientDate) ambientDate.textContent = dateStr;
+  }
+
+  function setupDialogCloseListeners(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.addEventListener('cancel', (e) => {
+      e.preventDefault();
+      closeActiveModal();
+    });
+    modal.addEventListener('close', () => {
+      if (activeModalId === modalId) {
+        activeModalId = null;
+        applyGridFocus(currentPos, false);
+      }
+    });
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const initialTheme = themes ? themes.loadTheme() : 'pixel';
+    const canvas = document.getElementById('bg-canvas');
+    if (themes && canvas) {
+      particleEngine = new themes.BumiayuParticleEngine(canvas, initialTheme);
+      particleEngine.start();
+    }
+    updateThemeUI(initialTheme);
+
     updateClock();
     setInterval(updateClock, 1000);
 
@@ -511,31 +627,42 @@ function formatIndonesianDate(date) {
           activateCard(card);
         });
         card.addEventListener('mouseenter', () => {
-          if (!isModalOpen) {
+          if (!activeModalId && !isAmbientOpen) {
             applyGridFocus({ row: rIdx, col: cIdx }, false);
           }
         });
       });
     });
 
-    const modal = document.getElementById('reconfig-modal');
-    if (modal) {
-      modal.addEventListener('cancel', (e) => {
-        e.preventDefault();
-        closeReconfigModal();
-      });
-      modal.addEventListener('close', () => {
-        if (isModalOpen) {
-          isModalOpen = false;
-          applyGridFocus(currentPos, false);
-        }
-      });
-    }
+    setupDialogCloseListeners('reconfig-modal');
+    setupDialogCloseListeners('theme-modal');
 
     const cancelBtn = document.getElementById('btn-cancel-reconfig');
     if (cancelBtn) {
-      cancelBtn.addEventListener('click', () => {
-        closeReconfigModal();
+      cancelBtn.addEventListener('click', () => closeActiveModal());
+    }
+
+    const closeThemeBtn = document.getElementById('btn-close-theme-modal');
+    if (closeThemeBtn) {
+      closeThemeBtn.addEventListener('click', () => closeActiveModal());
+    }
+
+    const themeOptions = document.querySelectorAll('.theme-option');
+    themeOptions.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!themes) return;
+        const selectedId = themes.saveTheme(btn.dataset.themeId);
+        updateThemeUI(selectedId);
+        closeActiveModal();
+        const meta = themes.getThemeMeta(selectedId);
+        showToast(`Tema aktif: ${meta.name}`);
+      });
+    });
+
+    const ambientOverlay = document.getElementById('ambient-overlay');
+    if (ambientOverlay) {
+      ambientOverlay.addEventListener('click', () => {
+        if (isAmbientOpen) closeAmbientMode();
       });
     }
 
@@ -553,7 +680,7 @@ function formatIndonesianDate(date) {
           dompetmungil: inputDompet ? inputDompet.value : '',
         });
 
-        closeReconfigModal();
+        closeActiveModal();
         showToast('Konfigurasi server berhasil disimpan.');
       });
     }

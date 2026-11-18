@@ -1,22 +1,27 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="pixel">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Faisal TV Hub</title>
+  <title>Bumiayu TV Launcher</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="ambient-bg" aria-hidden="true"></div>
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
   <div class="tv-shell">
     <header class="top-bar">
       <div class="brand">
         <span class="brand-dot" aria-hidden="true"></span>
-        <h1 class="brand-title">Faisal TV</h1>
+        <h1 class="brand-title">Bumiayu TV Launcher</h1>
       </div>
 
       <div class="top-bar-right">
+        <div class="theme-pill" id="theme-pill" aria-label="Tema aktif">
+          <span class="theme-pill-icon" id="theme-pill-icon" aria-hidden="true">👾</span>
+          <span id="theme-pill-name">Bumiayu 16-Bit Pixel Art</span>
+        </div>
         <div class="status-badge" id="status-badge" aria-label="Status koneksi">
           <span class="status-indicator" aria-hidden="true"></span>
           <span id="status-text">Hub Aktif</span>
@@ -28,11 +33,11 @@
       </div>
     </header>
 
-    <main id="hub-grid" class="hub-main" role="grid" aria-label="Menu Utama Faisal TV">
+    <main id="hub-grid" class="hub-main" role="grid" aria-label="Menu Utama Bumiayu TV Launcher">
       <!-- Row 0: Faisal's Ecosystem -->
       <section class="hub-row" aria-labelledby="row-title-0">
         <h2 id="row-title-0" class="row-title">Faisal's Ecosystem</h2>
-        <div class="card-row" role="row">
+        <div class="card-row card-row-3" role="row">
           <button
             type="button"
             class="card card-senandung focused"
@@ -89,7 +94,7 @@
       <!-- Row 1: Hiburan & Streaming -->
       <section class="hub-row" aria-labelledby="row-title-1">
         <h2 id="row-title-1" class="row-title">Hiburan &amp; Streaming</h2>
-        <div class="card-row" role="row">
+        <div class="card-row card-row-4" role="row">
           <button
             type="button"
             class="card card-smarttube"
@@ -109,11 +114,28 @@
 
           <button
             type="button"
-            class="card card-netflix"
+            class="card card-webtv"
             role="gridcell"
             tabindex="-1"
             data-row="1"
             data-col="1"
+            data-action="webtv"
+            data-app-name="Web TV"
+          >
+            <div class="card-icon" aria-hidden="true">📡</div>
+            <div class="card-body">
+              <span class="card-title">Web TV</span>
+              <span class="card-subtitle">Nasional, Global &amp; 18+</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-netflix"
+            role="gridcell"
+            tabindex="-1"
+            data-row="1"
+            data-col="2"
             data-pkg="com.netflix.ninja"
             data-app-name="Netflix"
           >
@@ -130,7 +152,7 @@
             role="gridcell"
             tabindex="-1"
             data-row="1"
-            data-col="2"
+            data-col="3"
             data-pkg="com.amazon.amazonvideo.livingroom"
             data-app-name="Prime Video"
           >
@@ -143,41 +165,58 @@
         </div>
       </section>
 
-      <!-- Row 2: Input TV & Pengaturan -->
+      <!-- Row 2: Tema & Sistem -->
       <section class="hub-row" aria-labelledby="row-title-2">
-        <h2 id="row-title-2" class="row-title">Input TV &amp; Pengaturan</h2>
-        <div class="card-row" role="row">
+        <h2 id="row-title-2" class="row-title">Tema &amp; Sistem</h2>
+        <div class="card-row card-row-4" role="row">
+          <button
+            type="button"
+            class="card card-theme"
+            role="gridcell"
+            tabindex="-1"
+            data-row="2"
+            data-col="0"
+            data-action="theme"
+            data-app-name="Tema Bumiayu"
+          >
+            <div class="card-icon" aria-hidden="true">🎨</div>
+            <div class="card-body">
+              <span class="card-title">Tema Bumiayu</span>
+              <span class="card-subtitle">4 Tema Anime &amp; Retro</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="card card-ambient"
+            role="gridcell"
+            tabindex="-1"
+            data-row="2"
+            data-col="1"
+            data-action="ambient"
+            data-app-name="Layar Santai"
+          >
+            <div class="card-icon" aria-hidden="true">🌙</div>
+            <div class="card-body">
+              <span class="card-title">Layar Santai</span>
+              <span class="card-subtitle">Jam &amp; Partikel Ambient</span>
+            </div>
+          </button>
+
           <button
             type="button"
             class="card card-inputs"
             role="gridcell"
             tabindex="-1"
             data-row="2"
-            data-col="0"
+            data-col="2"
             data-action="inputs"
-            data-app-name="HDMI 1 / TV Inputs"
+            data-app-name="HDMI / TV Inputs"
           >
             <div class="card-icon" aria-hidden="true">🔌</div>
             <div class="card-body">
-              <span class="card-title">HDMI 1 / TV Inputs</span>
+              <span class="card-title">HDMI / TV Inputs</span>
               <span class="card-subtitle">Sumber Input Eksternal</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            class="card card-settings"
-            role="gridcell"
-            tabindex="-1"
-            data-row="2"
-            data-col="1"
-            data-action="settings"
-            data-app-name="Pengaturan TV"
-          >
-            <div class="card-icon" aria-hidden="true">⚙️</div>
-            <div class="card-body">
-              <span class="card-title">Pengaturan TV</span>
-              <span class="card-subtitle">Sistem Android TV</span>
             </div>
           </button>
 
@@ -187,7 +226,7 @@
             role="gridcell"
             tabindex="-1"
             data-row="2"
-            data-col="2"
+            data-col="3"
             data-action="reconfig"
             data-app-name="Konfigurasi Server"
           >
@@ -263,8 +302,86 @@
     </form>
   </dialog>
 
+  <!-- Bumiayu Theme Picker Modal -->
+  <dialog id="theme-modal" class="modal-dialog modal-dialog-wide" aria-labelledby="theme-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="theme-modal-title" class="modal-title">Pilih Tema Bumiayu</h2>
+        <p class="modal-desc">Ganti suasana visual &amp; efek partikel ringan 60fps untuk TV.</p>
+      </div>
+
+      <div class="theme-grid" id="theme-options-grid">
+        <button
+          type="button"
+          class="theme-option modal-focusable"
+          data-theme-id="pixel"
+          autofocus
+        >
+          <span class="theme-option-icon" aria-hidden="true">👾</span>
+          <span class="theme-option-body">
+            <span class="theme-option-title">Bumiayu 16-Bit Pixel Art</span>
+            <span class="theme-option-desc">Estetik anime retro arcade, bingkai piksel &amp; bintang</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="theme-option modal-focusable"
+          data-theme-id="asri"
+        >
+          <span class="theme-option-icon" aria-hidden="true">🍁</span>
+          <span class="theme-option-body">
+            <span class="theme-option-title">Bumiayu Asri</span>
+            <span class="theme-option-desc">Musim gugur hangat, emas terakota &amp; daun berguguran</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="theme-option modal-focusable"
+          data-theme-id="samudra"
+        >
+          <span class="theme-option-icon" aria-hidden="true">🌊</span>
+          <span class="theme-option-body">
+            <span class="theme-option-title">Bumiayu Samudra</span>
+            <span class="theme-option-desc">Nuansa laut dalam biru-teal &amp; gelembung mengapung</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="theme-option modal-focusable"
+          data-theme-id="rintik"
+        >
+          <span class="theme-option-icon" aria-hidden="true">🌧️</span>
+          <span class="theme-option-body">
+            <span class="theme-option-title">Bumiayu Rintik</span>
+            <span class="theme-option-desc">Senja musim penghujan, biru berkabut &amp; rintik hujan</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="btn-close-theme-modal" class="btn btn-secondary modal-focusable">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Ambient Screensaver Overlay -->
+  <div id="ambient-overlay" class="ambient-overlay" hidden aria-hidden="true">
+    <div class="ambient-content">
+      <div class="ambient-badge" id="ambient-theme-label">👾 Bumiayu 16-Bit Pixel Art</div>
+      <time id="ambient-clock" class="ambient-clock">--:--</time>
+      <div id="ambient-date" class="ambient-date">Memuat tanggal...</div>
+      <div class="ambient-hint">Tekan tombol apa saja atau klik untuk kembali</div>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="status" aria-live="polite" aria-hidden="true"></div>
 
+  <script src="themes.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
