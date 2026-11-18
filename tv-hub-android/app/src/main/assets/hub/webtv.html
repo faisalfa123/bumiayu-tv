@@ -455,16 +455,48 @@
     </main>
   </div>
 
-  <!-- Fullscreen HLS Video Player Overlay -->
+  <!-- Fullscreen Direct HLS Video Player Overlay -->
   <div id="player-overlay" class="player-overlay" hidden>
-    <video id="tv-player" class="tv-video" autoplay playsinline controls></video>
-    <div class="player-hud">
-      <div>
-        <div id="player-channel-name" class="player-channel-name">Channel</div>
-        <div id="player-channel-meta" class="player-channel-meta">▲/▼ Ganti Channel • ESC/Back Tutup</div>
+    <video id="tv-player" class="tv-video" playsinline autoplay></video>
+
+    <!-- OSD Channel Badge (Auto-hiding on switch/OK) -->
+    <div id="player-osd" class="player-osd">
+      <div id="osd-channel-num" class="osd-number">01</div>
+      <div class="osd-info">
+        <div id="osd-channel-name" class="osd-title">TVRI Nasional</div>
+        <div id="osd-channel-meta" class="osd-meta">HLS Direct • 1080p Live • ▲/▼ Ganti Channel</div>
       </div>
-      <button type="button" id="btn-player-close" class="btn btn-secondary">Tutup Player</button>
     </div>
+
+    <!-- Buffering Spinner Overlay -->
+    <div id="player-state-overlay" class="player-state-overlay" hidden>
+      <div class="player-spinner"></div>
+      <div id="player-state-msg" class="player-state-msg">Memuat siaran...</div>
+    </div>
+
+    <!-- Error & Stream Recovery Overlay -->
+    <div id="player-error-card" class="player-error-card" hidden>
+      <div class="player-error-title">⚠️ Gangguan Siaran</div>
+      <div id="player-error-desc" class="player-error-desc">
+        Stream tidak merespons atau sedang offline.<br>
+        Tekan ▲ / ▼ untuk ganti channel lain.
+      </div>
+      <div class="player-error-actions">
+        <button type="button" id="btn-player-retry" class="btn btn-primary">Coba Lagi</button>
+        <button type="button" id="btn-player-exit" class="btn btn-secondary">Tutup Player</button>
+      </div>
+    </div>
+
+    <!-- Sliding Channel Drawer (D-Pad LEFT) -->
+    <aside id="channel-drawer" class="channel-drawer" aria-label="Daftar Saluran">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>📺 Saluran TV</span>
+        </div>
+        <span class="drawer-hint">► / Back Tutup</span>
+      </div>
+      <div id="drawer-channel-list" class="drawer-list" role="listbox"></div>
+    </aside>
   </div>
 
   <!-- Lock Modal (PIN 4-Digit or D-Pad Pattern) -->
@@ -624,6 +656,7 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script src="hls.min.js"></script>
   <script src="themes.js"></script>
   <script src="webtv.js"></script>
 </body>

@@ -367,4 +367,29 @@ test('getThemeMeta returns metadata for valid themes and falls back to pixel', (
   assert.equal(getThemeMeta('unknown-theme').id, 'pixel');
 });
 
+test('DEFAULT_CHANNELS provides direct HLS .m3u8 streams with no web embeds', () => {
+  assert.ok(DEFAULT_CHANNELS.nasional.length >= 6);
+  assert.ok(DEFAULT_CHANNELS.internasional.length >= 4);
+
+  // Verify all channels in nasional and internasional are direct HLS (.m3u8) streams
+  const allMain = DEFAULT_CHANNELS.nasional.concat(DEFAULT_CHANNELS.internasional);
+  for (const ch of allMain) {
+    assert.equal(ch.type, 'hls', `Channel ${ch.name} should have type: hls`);
+    assert.ok(ch.url.includes('.m3u8'), `Channel ${ch.name} URL should contain .m3u8: ${ch.url}`);
+  }
+
+  // Key required channels exist
+  const names = allMain.map((c) => c.name.toLowerCase());
+  assert.ok(names.some((n) => n.includes('tvri nasional')));
+  assert.ok(names.some((n) => n.includes('kompas')));
+  assert.ok(names.some((n) => n.includes('metro')));
+  assert.ok(names.some((n) => n.includes('tvone')));
+  assert.ok(names.some((n) => n.includes('rtv')));
+  assert.ok(names.some((n) => n.includes('trans7')));
+  assert.ok(names.some((n) => n.includes('nhk world')));
+  assert.ok(names.some((n) => n.includes('al jazeera')));
+  assert.ok(names.some((n) => n.includes('dw english')));
+  assert.ok(names.some((n) => n.includes('france 24')));
+});
+
 console.log(`\nAll ${passed} tests passed.`);

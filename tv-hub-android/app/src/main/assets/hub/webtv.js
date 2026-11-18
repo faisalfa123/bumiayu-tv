@@ -16,37 +16,58 @@ const DEFAULT_CHANNELS = {
     {
       id: 'kompas-tv',
       name: 'Kompas TV',
-      url: 'https://www.kompas.tv/live',
+      url: 'https://op-group1-swiftservehd-1.dens.tv/s/s104/index.m3u8',
       category: 'nasional',
-      type: 'web',
-    },
-    {
-      id: 'cnn-indonesia',
-      name: 'CNN Indonesia',
-      url: 'https://www.cnnindonesia.com/tv',
-      category: 'nasional',
-      type: 'web',
+      type: 'hls',
     },
     {
       id: 'metro-tv',
       name: 'Metro TV',
-      url: 'https://www.metrotvnews.com/live',
+      url: 'https://edge.medcom.id/live-edge/smil:metro.smil/playlist.m3u8',
       category: 'nasional',
-      type: 'web',
+      type: 'hls',
+    },
+    {
+      id: 'tvone',
+      name: 'tvOne',
+      url: 'https://op-group1-swiftservehd-1.dens.tv/h/h40/index.m3u8',
+      category: 'nasional',
+      type: 'hls',
+    },
+    {
+      id: 'rtv',
+      name: 'RTV (Rajawali TV)',
+      url: 'https://rtvstream.rtv.co.id:4555/hls/rtv.m3u8',
+      category: 'nasional',
+      type: 'hls',
+    },
+    {
+      id: 'trans7',
+      name: 'Trans7',
+      url: 'https://video.detik.com/trans7/smil:trans7.smil/playlist.m3u8',
+      category: 'nasional',
+      type: 'hls',
     },
     {
       id: 'trans-tv',
       name: 'Trans TV',
-      url: 'https://www.transtv.co.id/live',
+      url: 'https://video.detik.com/transtv/smil:transtv.smil/chunklist.m3u8',
       category: 'nasional',
-      type: 'web',
+      type: 'hls',
     },
     {
-      id: 'net-tv',
-      name: 'NET TV',
-      url: 'https://www.netmedia.co.id/live-streaming',
+      id: 'cnn-indonesia',
+      name: 'CNN Indonesia',
+      url: 'https://video.detik.com/livecnn/smil:cnntv/chunklist_w268557525_b384000_sleng.m3u8',
       category: 'nasional',
-      type: 'web',
+      type: 'hls',
+    },
+    {
+      id: 'cnbc-indonesia',
+      name: 'CNBC Indonesia',
+      url: 'https://video.detik.com/livecnbc/smil:cnbctv/chunklist_w1279679883_b384000_sleng.m3u8',
+      category: 'nasional',
+      type: 'hls',
     },
   ],
   internasional: [
@@ -74,16 +95,16 @@ const DEFAULT_CHANNELS = {
     {
       id: 'france-24-en',
       name: 'France 24 English',
-      url: 'https://www.france24.com/en/live',
+      url: 'https://static.france24.com/live/F24_EN_LO_HLS/live_tv.m3u8',
       category: 'internasional',
-      type: 'web',
+      type: 'hls',
     },
     {
       id: 'nasa-tv',
       name: 'NASA TV',
-      url: 'https://plus.nasa.gov/scheduled-video/nasa-tv-public/',
+      url: 'https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8',
       category: 'internasional',
-      type: 'web',
+      type: 'hls',
     },
   ],
   adult: [
@@ -400,6 +421,9 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
   let hlsInstance = null;
   let hlsLoadPromise = null;
   let toastTimer = null;
+  let osdTimer = null;
+  let isDrawerOpen = false;
+  let isOsdVisible = false;
 
   const ARROW_GLYPHS = {
     UP: '↑',
@@ -588,6 +612,139 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     return hlsLoadPromise;
   }
 
+  function showOsd(channel, index, total) {
+    const osd = document.getElementById('player-osd');
+    const numEl = document.getElementById('osd-channel-num');
+    const nameEl = document.getElementById('osd-channel-name');
+    const metaEl = document.getElementById('osd-channel-meta');
+    if (!osd) return;
+
+    if (numEl) {
+      numEl.textContent = String(index + 1).padStart(2, '0');
+    }
+    if (nameEl) {
+      nameEl.textContent = channel.name;
+    }
+    if (metaEl) {
+      metaEl.textContent = `HLS Direct • Channel ${index + 1}/${total} • ◄ Daftar • ▲/▼ Ganti`;
+    }
+
+    osd.classList.add('visible');
+    isOsdVisible = true;
+
+    if (osdTimer) {
+      clearTimeout(osdTimer);
+      osdTimer = null;
+    }
+    osdTimer = setTimeout(() => {
+      osd.classList.remove('visible');
+      isOsdVisible = false;
+      osdTimer = null;
+    }, 3000);
+  }
+
+  function hideOsd() {
+    const osd = document.getElementById('player-osd');
+    if (osd) osd.classList.remove('visible');
+    isOsdVisible = false;
+    if (osdTimer) {
+      clearTimeout(osdTimer);
+      osdTimer = null;
+    }
+  }
+
+  function toggleOsd() {
+    if (isOsdVisible) {
+      hideOsd();
+    } else {
+      const ch = activePlayerChannels[activePlayerIndex];
+      if (ch) {
+        showOsd(ch, activePlayerIndex, activePlayerChannels.length);
+      }
+    }
+  }
+
+  function setPlayerBuffering(isBuffering, msg) {
+    const spinnerOverlay = document.getElementById('player-state-overlay');
+    const msgEl = document.getElementById('player-state-msg');
+    if (!spinnerOverlay) return;
+    if (isBuffering) {
+      if (msgEl) msgEl.textContent = msg || 'Memuat siaran...';
+      spinnerOverlay.hidden = false;
+    } else {
+      spinnerOverlay.hidden = true;
+    }
+  }
+
+  function setPlayerError(hasError, desc) {
+    const errCard = document.getElementById('player-error-card');
+    const descEl = document.getElementById('player-error-desc');
+    if (!errCard) return;
+    if (hasError) {
+      setPlayerBuffering(false);
+      if (descEl && desc) descEl.innerHTML = desc;
+      errCard.hidden = false;
+      const retryBtn = document.getElementById('btn-player-retry');
+      if (retryBtn) retryBtn.focus();
+    } else {
+      errCard.hidden = true;
+    }
+  }
+
+  function openChannelDrawer() {
+    const drawer = document.getElementById('channel-drawer');
+    const listEl = document.getElementById('drawer-channel-list');
+    if (!drawer || !listEl) return;
+
+    listEl.innerHTML = '';
+    activePlayerChannels.forEach((ch, idx) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'drawer-item';
+      if (idx === activePlayerIndex) {
+        item.classList.add('active-stream');
+      }
+      item.dataset.index = String(idx);
+      item.innerHTML = `
+        <span class="drawer-item-num">${String(idx + 1).padStart(2, '0')}</span>
+        <span class="drawer-item-name">${escapeHtml(ch.name)}</span>
+        <span class="drawer-item-badge">HLS</span>
+      `;
+
+      item.addEventListener('click', () => {
+        closeChannelDrawer();
+        zapToChannel(idx);
+      });
+
+      listEl.appendChild(item);
+    });
+
+    drawer.classList.add('open');
+    isDrawerOpen = true;
+
+    // Focus current playing channel or first item
+    const target = listEl.querySelector(`.drawer-item[data-index="${activePlayerIndex}"]`) || listEl.querySelector('.drawer-item');
+    if (target) {
+      setTimeout(() => target.focus(), 60);
+    }
+  }
+
+  function closeChannelDrawer() {
+    const drawer = document.getElementById('channel-drawer');
+    if (drawer) drawer.classList.remove('open');
+    isDrawerOpen = false;
+    const video = document.getElementById('tv-player');
+    if (video) video.focus();
+  }
+
+  function toggleChannelDrawer() {
+    if (isDrawerOpen) {
+      closeChannelDrawer();
+    } else {
+      openChannelDrawer();
+    }
+  }
+
   function launchChannel(channel, listInCategory) {
     if (!channel || !channel.url) {
       showToast('Channel ini belum memiliki URL. Tambahkan di Pengaturan & Sandi.');
@@ -604,7 +761,7 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
       return;
     }
 
-    // HLS / Direct video playback
+    // Direct HLS video playback
     activePlayerChannels = (listInCategory || []).filter((c) => c.type === 'hls' && c.url);
     activePlayerIndex = Math.max(
       0,
@@ -616,8 +773,6 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
   function openPlayerOverlay(channel) {
     const overlay = document.getElementById('player-overlay');
     const video = document.getElementById('tv-player');
-    const titleEl = document.getElementById('player-channel-name');
-    const metaEl = document.getElementById('player-channel-meta');
     if (!overlay || !video) return;
 
     if (overlay.hidden) {
@@ -625,13 +780,12 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     }
     const token = ++playbackToken;
     overlay.hidden = false;
-    if (titleEl) titleEl.textContent = channel.name;
-    if (metaEl) {
-      const posText = activePlayerChannels.length > 0
-        ? `Channel ${activePlayerIndex + 1}/${activePlayerChannels.length}`
-        : 'Live Stream';
-      metaEl.textContent = `${posText} • ▲/▼ Ganti Channel • ESC/Back Tutup`;
-    }
+    isDrawerOpen = false;
+    closeChannelDrawer();
+    setPlayerError(false);
+    setPlayerBuffering(true, 'Menghubungkan ke stream...');
+
+    showOsd(channel, activePlayerIndex, activePlayerChannels.length);
 
     if (hlsInstance) {
       hlsInstance.destroy();
@@ -642,9 +796,20 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     video.removeAttribute('src');
     video.load();
 
+    const onPlaySuccess = () => {
+      if (token === playbackToken) {
+        setPlayerBuffering(false);
+        setPlayerError(false);
+      }
+    };
+
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = channel.url;
-      video.play().catch(() => {});
+      video.play().then(onPlaySuccess).catch(() => {
+        if (token === playbackToken) {
+          setPlayerError(true, `Gagal memutar ${escapeHtml(channel.name)}.<br>Tekan ▲/▼ untuk ganti channel.`);
+        }
+      });
     } else {
       ensureHlsJs().then((Hls) => {
         if (overlay.hidden || token !== playbackToken) return;
@@ -653,22 +818,47 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
           hlsInstance = null;
         }
         if (Hls && Hls.isSupported()) {
-          hlsInstance = new Hls({ enableWorker: true });
+          hlsInstance = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 30,
+          });
           hlsInstance.loadSource(channel.url);
           hlsInstance.attachMedia(video);
           hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-            if (token === playbackToken) video.play().catch(() => {});
+            if (token === playbackToken) {
+              video.play().then(onPlaySuccess).catch(() => {});
+            }
           });
           hlsInstance.on(Hls.Events.ERROR, (_ev, data) => {
-            if (data && data.fatal && token === playbackToken) {
-              showToast(`Stream ${channel.name} tidak merespons.`);
+            if (token !== playbackToken) return;
+            if (data && data.fatal) {
+              switch (data.type) {
+                case Hls.ErrorTypes.NETWORK_ERROR:
+                  setPlayerBuffering(true, 'Koneksi jaringan terputus, mencoba ulang...');
+                  hlsInstance.startLoad();
+                  break;
+                case Hls.ErrorTypes.MEDIA_ERROR:
+                  setPlayerBuffering(true, 'Memulihkan media buffer...');
+                  hlsInstance.recoverMediaError();
+                  break;
+                default:
+                  setPlayerError(
+                    true,
+                    `Stream <strong>${escapeHtml(channel.name)}</strong> tidak dapat dimuat.<br>Tekan ▲ / ▼ untuk ganti channel.`
+                  );
+                  break;
+              }
             }
           });
         } else {
           video.src = channel.url;
-          video.play().catch(() => {
+          video.play().then(onPlaySuccess).catch(() => {
             if (token === playbackToken) {
-              showToast(`Format stream ${channel.name} tidak didukung di browser ini.`);
+              setPlayerError(
+                true,
+                `Format stream ${escapeHtml(channel.name)} tidak didukung.<br>Tekan ▲ / ▼ untuk ganti channel.`
+              );
             }
           });
         }
@@ -680,6 +870,11 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     playbackToken++;
     const overlay = document.getElementById('player-overlay');
     const video = document.getElementById('tv-player');
+    hideOsd();
+    closeChannelDrawer();
+    setPlayerError(false);
+    setPlayerBuffering(false);
+
     if (hlsInstance) {
       hlsInstance.destroy();
       hlsInstance = null;
@@ -699,6 +894,12 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     if (activePlayerChannels.length <= 1) return;
     activePlayerIndex =
       (activePlayerIndex + delta + activePlayerChannels.length) % activePlayerChannels.length;
+    openPlayerOverlay(activePlayerChannels[activePlayerIndex]);
+  }
+
+  function zapToChannel(index) {
+    if (index < 0 || index >= activePlayerChannels.length) return;
+    activePlayerIndex = index;
     openPlayerOverlay(activePlayerChannels[activePlayerIndex]);
   }
 
@@ -1225,8 +1426,18 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     const closeSettingsBtn = document.getElementById('btn-settings-close');
     if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', closeSettingsModal);
 
-    const playerCloseBtn = document.getElementById('btn-player-close');
-    if (playerCloseBtn) playerCloseBtn.addEventListener('click', closePlayerOverlay);
+    const playerRetryBtn = document.getElementById('btn-player-retry');
+    if (playerRetryBtn) {
+      playerRetryBtn.addEventListener('click', () => {
+        const ch = activePlayerChannels[activePlayerIndex];
+        if (ch) openPlayerOverlay(ch);
+      });
+    }
+
+    const playerExitBtn = document.getElementById('btn-player-exit');
+    if (playerExitBtn) {
+      playerExitBtn.addEventListener('click', closePlayerOverlay);
+    }
 
     // Global keyboard & D-Pad handler
     document.addEventListener('keydown', (e) => {
@@ -1235,15 +1446,50 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
       const settingsModal = document.getElementById('webtv-settings-modal');
 
       if (playerOverlay && !playerOverlay.hidden) {
+        // If drawer is open: navigate drawer list
+        if (isDrawerOpen) {
+          if (e.key === 'ArrowRight' || e.key === 'Escape' || e.key === 'Backspace') {
+            e.preventDefault();
+            closeChannelDrawer();
+            return;
+          }
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            // Let normal TV focus move across items in the drawer
+            return;
+          }
+          if (e.key === 'Enter') {
+            // If an item in drawer has focus, its click handler handles it
+            return;
+          }
+        }
+
+        // Drawer is closed: Native TV Remote controls
         if (e.key === 'ArrowUp') {
           e.preventDefault();
           zapChannel(-1);
         } else if (e.key === 'ArrowDown') {
           e.preventDefault();
           zapChannel(1);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          openChannelDrawer();
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          closeChannelDrawer();
+        } else if (e.key === 'Enter') {
+          // If error card is showing and button is active, let it click
+          if (e.target && (e.target.id === 'btn-player-retry' || e.target.id === 'btn-player-exit')) {
+            return;
+          }
+          e.preventDefault();
+          toggleOsd();
         } else if (e.key === 'Escape' || e.key === 'Backspace') {
           e.preventDefault();
-          closePlayerOverlay();
+          if (isDrawerOpen) {
+            closeChannelDrawer();
+          } else {
+            closePlayerOverlay();
+          }
         }
         return;
       }
@@ -1296,7 +1542,11 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
     window.onAndroidBack = function () {
       const playerOverlay = document.getElementById('player-overlay');
       if (playerOverlay && !playerOverlay.hidden) {
-        closePlayerOverlay();
+        if (isDrawerOpen) {
+          closeChannelDrawer();
+        } else {
+          closePlayerOverlay();
+        }
         return true;
       }
       if (lockModalEl && lockModalEl.hasAttribute('open')) {
