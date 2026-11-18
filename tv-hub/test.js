@@ -3,6 +3,7 @@
 const assert = require('assert/strict');
 const {
   STORAGE_KEY,
+  ROW_COL_COUNTS,
   DEFAULT_CONFIG,
   normalizeUrl,
   loadConfig,
@@ -56,14 +57,14 @@ test('normalizeUrl prepends http:// when protocol is missing and trims spaces', 
 });
 
 test('normalizeUrl preserves https:// and trims trailing slashes cleanly', () => {
-  assert.equal(normalizeUrl('https://immich.home.arpa///', DEFAULT_CONFIG.immich), 'https://immich.home.arpa');
-  assert.equal(normalizeUrl('  HTTP://nas.local:3000/  ', DEFAULT_CONFIG.dompetmungil), 'HTTP://nas.local:3000');
+  assert.equal(normalizeUrl('https://senandung.home.arpa///', DEFAULT_CONFIG.senandung), 'https://senandung.home.arpa');
+  assert.equal(normalizeUrl('  HTTP://nas.local:8080/  ', DEFAULT_CONFIG.senandung), 'HTTP://nas.local:8080');
 });
 
 test('normalizeUrl falls back when input is empty, whitespace, or non-string', () => {
   assert.equal(normalizeUrl('', DEFAULT_CONFIG.senandung), DEFAULT_CONFIG.senandung);
-  assert.equal(normalizeUrl('   ', DEFAULT_CONFIG.immich), DEFAULT_CONFIG.immich);
-  assert.equal(normalizeUrl(null, DEFAULT_CONFIG.dompetmungil), DEFAULT_CONFIG.dompetmungil);
+  assert.equal(normalizeUrl('   ', DEFAULT_CONFIG.senandung), DEFAULT_CONFIG.senandung);
+  assert.equal(normalizeUrl(null, DEFAULT_CONFIG.senandung), DEFAULT_CONFIG.senandung);
   assert.equal(normalizeUrl(undefined, DEFAULT_CONFIG.senandung), DEFAULT_CONFIG.senandung);
 });
 
@@ -80,16 +81,12 @@ test('saveConfig persists normalized URLs and loadConfig reloads them from mock 
   const saved = saveConfig(
     {
       senandung: '10.0.0.10:8080/',
-      immich: 'https://photos.local///',
-      dompetmungil: '  10.0.0.10:3000  ',
     },
     mockStorage
   );
 
   const expected = {
     senandung: 'http://10.0.0.10:8080',
-    immich: 'https://photos.local',
-    dompetmungil: 'http://10.0.0.10:3000',
   };
 
   assert.deepEqual(saved, expected);
@@ -98,15 +95,41 @@ test('saveConfig persists normalized URLs and loadConfig reloads them from mock 
 
 test('loadConfig and saveConfig fall back to DEFAULT_CONFIG for omitted fields', () => {
   const mockStorage = createMockStorage();
-  saveConfig({ senandung: '192.168.10.2:9000' }, mockStorage);
+  saveConfig({}, mockStorage);
   assert.deepEqual(loadConfig(mockStorage), {
-    senandung: 'http://192.168.10.2:9000',
-    immich: DEFAULT_CONFIG.immich,
-    dompetmungil: DEFAULT_CONFIG.dompetmungil,
+    senandung: DEFAULT_CONFIG.senandung,
   });
 });
 
 // --- navigateGrid ---
+test('navigateGrid moves across ROW_COL_COUNTS [1, 4, 4] and clamps at all boundaries', () => {
+  const grid = ROW_COL_COUNTS; // [1, 4, 4]
+
+  // Row 0 has only 1 item (col 0): Left/Right clamp to 0
+  assert.deepEqual(navigateGrid(grid, { row: 0, col: 0 }, 'ArrowLeft'), { row: 0, col: 0 });
+  assert.deepEqual(navigateGrid(grid, { row: 0, col: 0 }, 'ArrowRight'), { row: 0, col: 0 });
+  assert.deepEqual(navigateGrid(grid, { row: 0, col: 0 }, 'ArrowUp'), { row: 0, col: 0 });
+
+  // Move down to Row 1
+  assert.deepEqual(navigateGrid(grid, { row: 0, col: 0 }, 'ArrowDown'), { row: 1, col: 0 });
+
+  // Moving horizontally across Row 1 (4 items)
+  assert.deepEqual(navigateGrid(grid, { row: 1, col: 0 }, 'ArrowRight'), { row: 1, col: 1 });
+  assert.deepEqual(navigateGrid(grid, { row: 1, col: 1 }, 'ArrowRight'), { row: 1, col: 2 });
+  assert.deepEqual(navigateGrid(grid, { row: 1, col: 2 }, 'ArrowRight'), { row: 1, col: 3 });
+  assert.deepEqual(navigateGrid(grid, { row: 1, col: 3 }, 'ArrowRight'), { row: 1, col: 3 }); // clamps at 3
+
+  // Moving up from (1, 3) to Row 0 clamps col to 0 (since Row 0 length is 1)
+  assert.deepEqual(navigateGrid(grid, { row: 1, col: 3 }, 'ArrowUp'), { row: 0, col: 0 });
+
+  // Moving down from (1, 2) to Row 2 preserves col 2
+  assert.deepEqual(navigateGrid(grid, { row: 1, col: 2 }, 'ArrowDown'), { row: 2, col: 2 });
+
+  // Row 2 boundary clamping
+  assert.deepEqual(navigateGrid(grid, { row: 2, col: 3 }, 'ArrowRight'), { row: 2, col: 3 });
+  assert.deepEqual(navigateGrid(grid, { row: 2, col: 3 }, 'ArrowDown'), { row: 2, col: 3 });
+});
+
 test('navigateGrid moves across a 3x3 grid and clamps at all boundaries', () => {
   const grid = [3, 3, 3];
 

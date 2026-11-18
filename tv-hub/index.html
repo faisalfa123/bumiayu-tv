@@ -37,10 +37,10 @@
       <!-- Row 0: Faisal's Ecosystem -->
       <section class="hub-row" aria-labelledby="row-title-0">
         <h2 id="row-title-0" class="row-title">Faisal's Ecosystem</h2>
-        <div class="card-row card-row-3" role="row">
+        <div class="card-row card-row-1" role="row">
           <button
             type="button"
-            class="card card-senandung focused"
+            class="card card-senandung card-senandung-hero focused"
             role="gridcell"
             tabindex="0"
             data-row="0"
@@ -48,44 +48,20 @@
             data-app-id="senandung"
             data-app-name="Senandung"
           >
-            <div class="card-icon" aria-hidden="true">🎵</div>
-            <div class="card-body">
-              <span class="card-title">Senandung</span>
-              <span class="card-subtitle">Spotify-like PWA</span>
+            <div class="card-icon card-icon-hero" aria-hidden="true">🎵</div>
+            <div class="card-body card-body-hero">
+              <div class="card-title-row">
+                <span class="card-title card-title-hero">Senandung</span>
+                <span class="hero-badge">Pusat Musik Pribadi</span>
+              </div>
+              <span class="card-subtitle card-subtitle-hero">Audio Streaming PWA &amp; Koleksi Musik Lokal</span>
             </div>
-          </button>
-
-          <button
-            type="button"
-            class="card card-immich"
-            role="gridcell"
-            tabindex="-1"
-            data-row="0"
-            data-col="1"
-            data-app-id="immich"
-            data-app-name="Immich"
-          >
-            <div class="card-icon" aria-hidden="true">🖼️</div>
-            <div class="card-body">
-              <span class="card-title">Immich</span>
-              <span class="card-subtitle">Odroid C2 Photo Cloud</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            class="card card-dompet"
-            role="gridcell"
-            tabindex="-1"
-            data-row="0"
-            data-col="2"
-            data-app-id="dompetmungil"
-            data-app-name="DompetMungil"
-          >
-            <div class="card-icon" aria-hidden="true">🌸</div>
-            <div class="card-body">
-              <span class="card-title">DompetMungil</span>
-              <span class="card-subtitle">Finance PWA</span>
+            <div class="music-wave-indicator" aria-hidden="true">
+              <span class="bar bar-1"></span>
+              <span class="bar bar-2"></span>
+              <span class="bar bar-3"></span>
+              <span class="bar bar-4"></span>
+              <span class="bar bar-5"></span>
             </div>
           </button>
         </div>
@@ -228,12 +204,12 @@
             data-row="2"
             data-col="3"
             data-action="reconfig"
-            data-app-name="Konfigurasi Server"
+            data-app-name="Pengaturan Server"
           >
-            <div class="card-icon" aria-hidden="true">🌐</div>
+            <div class="card-icon" aria-hidden="true">⚙️</div>
             <div class="card-body">
-              <span class="card-title">Konfigurasi Server</span>
-              <span class="card-subtitle">Ubah Alamat IP &amp; Port</span>
+              <span class="card-title">Pengaturan Server</span>
+              <span class="card-subtitle">Senandung &amp; Keamanan</span>
             </div>
           </button>
         </div>
@@ -245,8 +221,8 @@
   <dialog id="reconfig-modal" class="modal-dialog" aria-labelledby="reconfig-title">
     <form id="reconfig-form" class="modal-card" method="dialog" novalidate>
       <div class="modal-header">
-        <h2 id="reconfig-title" class="modal-title">Konfigurasi Alamat Server</h2>
-        <p class="modal-desc">Sesuaikan alamat IP &amp; port server lokal Faisal's Ecosystem.</p>
+        <h2 id="reconfig-title" class="modal-title">Pengaturan Server Senandung</h2>
+        <p class="modal-desc">Sesuaikan alamat IP &amp; port server musik lokal Senandung.</p>
       </div>
 
       <div class="modal-fields">
@@ -261,32 +237,6 @@
             autocomplete="off"
             spellcheck="false"
             autofocus
-          >
-        </label>
-
-        <label class="field-group" for="input-immich">
-          <span class="field-label">Immich URL</span>
-          <input
-            id="input-immich"
-            name="immich"
-            type="url"
-            class="field-input modal-focusable"
-            placeholder="http://192.168.1.100:2283"
-            autocomplete="off"
-            spellcheck="false"
-          >
-        </label>
-
-        <label class="field-group" for="input-dompetmungil">
-          <span class="field-label">DompetMungil URL</span>
-          <input
-            id="input-dompetmungil"
-            name="dompetmungil"
-            type="url"
-            class="field-input modal-focusable"
-            placeholder="http://192.168.1.100:3000"
-            autocomplete="off"
-            spellcheck="false"
           >
         </label>
       </div>

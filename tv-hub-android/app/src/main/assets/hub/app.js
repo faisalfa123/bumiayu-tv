@@ -2,10 +2,10 @@
 
 const STORAGE_KEY = 'faisal_tv_apps_config';
 
+const ROW_COL_COUNTS = [1, 4, 4];
+
 const DEFAULT_CONFIG = {
   senandung: 'http://192.168.1.100:8080',
-  immich: 'http://192.168.1.100:2283',
-  dompetmungil: 'http://192.168.1.100:3000',
 };
 
 const INDONESIAN_DAYS = [
@@ -54,7 +54,7 @@ function getDefaultStorage() {
 /**
  * Load app server configuration from storage, merged with DEFAULT_CONFIG.
  * @param {Storage} [storage]
- * @returns {{ senandung: string, immich: string, dompetmungil: string }}
+ * @returns {{ senandung: string }}
  */
 function loadConfig(storage) {
   let base = { ...DEFAULT_CONFIG };
@@ -67,8 +67,6 @@ function loadConfig(storage) {
         if (parsed && typeof parsed === 'object') {
           base = {
             senandung: normalizeUrl(parsed.senandung, DEFAULT_CONFIG.senandung),
-            immich: normalizeUrl(parsed.immich, DEFAULT_CONFIG.immich),
-            dompetmungil: normalizeUrl(parsed.dompetmungil, DEFAULT_CONFIG.dompetmungil),
           };
         }
       }
@@ -83,8 +81,6 @@ function loadConfig(storage) {
         const nativeParsed = JSON.parse(nativeRaw);
         if (nativeParsed && typeof nativeParsed === 'object') {
           if (nativeParsed.senandung) base.senandung = normalizeUrl(nativeParsed.senandung, base.senandung);
-          if (nativeParsed.immich) base.immich = normalizeUrl(nativeParsed.immich, base.immich);
-          if (nativeParsed.dompetmungil) base.dompetmungil = normalizeUrl(nativeParsed.dompetmungil, base.dompetmungil);
         }
       }
     } catch (_err) {
@@ -98,14 +94,12 @@ function loadConfig(storage) {
  * Save app server configuration to storage.
  * @param {Partial<typeof DEFAULT_CONFIG>} config
  * @param {Storage} [storage]
- * @returns {{ senandung: string, immich: string, dompetmungil: string }}
+ * @returns {{ senandung: string }}
  */
 function saveConfig(config, storage) {
   const store = storage !== undefined ? storage : getDefaultStorage();
   const next = {
     senandung: normalizeUrl(config && config.senandung, DEFAULT_CONFIG.senandung),
-    immich: normalizeUrl(config && config.immich, DEFAULT_CONFIG.immich),
-    dompetmungil: normalizeUrl(config && config.dompetmungil, DEFAULT_CONFIG.dompetmungil),
   };
   if (store) {
     try {
@@ -117,8 +111,6 @@ function saveConfig(config, storage) {
   if (!storage && typeof window !== 'undefined' && window.TvBridge && typeof window.TvBridge.saveAppUrl === 'function') {
     try {
       window.TvBridge.saveAppUrl('senandung', next.senandung);
-      window.TvBridge.saveAppUrl('immich', next.immich);
-      window.TvBridge.saveAppUrl('dompetmungil', next.dompetmungil);
     } catch (_err) {
       // Ignore bridge errors
     }
@@ -465,12 +457,8 @@ function formatIndonesianDate(date) {
   function openReconfigModal() {
     const config = loadConfig();
     const inputSenandung = document.getElementById('input-senandung');
-    const inputImmich = document.getElementById('input-immich');
-    const inputDompet = document.getElementById('input-dompetmungil');
 
     if (inputSenandung) inputSenandung.value = config.senandung;
-    if (inputImmich) inputImmich.value = config.immich;
-    if (inputDompet) inputDompet.value = config.dompetmungil;
 
     openDialog('reconfig-modal', 0);
   }
@@ -559,7 +547,7 @@ function formatIndonesianDate(date) {
       e.key === 'ArrowDown'
     ) {
       const gridRows = getGridRows();
-      const rowLengths = gridRows.map((r) => r.length);
+      const rowLengths = gridRows.length > 0 ? gridRows.map((r) => r.length) : ROW_COL_COUNTS;
       const nextPos = navigateGrid(rowLengths, currentPos, e.key);
       if (nextPos.row !== currentPos.row || nextPos.col !== currentPos.col) {
         e.preventDefault();
@@ -684,13 +672,9 @@ function formatIndonesianDate(date) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
         const inputSenandung = document.getElementById('input-senandung');
-        const inputImmich = document.getElementById('input-immich');
-        const inputDompet = document.getElementById('input-dompetmungil');
 
         saveConfig({
           senandung: inputSenandung ? inputSenandung.value : '',
-          immich: inputImmich ? inputImmich.value : '',
-          dompetmungil: inputDompet ? inputDompet.value : '',
         });
 
         closeActiveModal();
@@ -713,6 +697,7 @@ function formatIndonesianDate(date) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     STORAGE_KEY,
+    ROW_COL_COUNTS,
     DEFAULT_CONFIG,
     normalizeUrl,
     loadConfig,
