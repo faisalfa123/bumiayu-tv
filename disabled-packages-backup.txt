@@ -1,6 +1,6 @@
 ﻿# ==============================================================================
 # LOG BACKUP PAKET DINONAKTIFKAN
-# Tanggal: 2026-11-18 10:12:25
+# Tanggal: 2026-11-18 12:05:44
 # IP TV  : 192.168.1.5
 # ==============================================================================
 package:com.xiaomi.floatingframe package:com.mitv.tvhome.atv package:com.google.android.tvrecommendations package:com.xiaomi.mimusic2 package:com.google.android.tvlauncher package:com.mitv.tvhome.mitvplus package:com.mitv.gallery package:com.xiaomi.statistic package:com.xiaomi.mitv.handbook
