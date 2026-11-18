@@ -7,15 +7,21 @@
 # Layanan rekomendasi konten, poster PatchWall, dan push notifikasi iklan
 com.duokan.videodaily
 com.mitv.tvhome
+com.mitv.tvhome.atv
+com.mitv.tvhome.mitvplus
 com.xiaomi.mitv.tvpush.tvpushservice
 com.xiaomi.mitv.upgrade
 com.mitv.screensaver
 com.xiaomi.screenrecorder
 com.mitv.gallery
+com.xiaomi.mimusic2
+com.xiaomi.mitv.handbook
+com.xiaomi.floatingframe
 
 # --- Xiaomi Telemetry, Tracker & Analytics ---
 # Layanan analitik dan pengumpulan data Xiaomi yang berjalan terus di RAM 1GB
 com.xiaomi.stat
+com.xiaomi.statistic
 com.miui.analytics
 com.xiaomi.mitv.tracker
 

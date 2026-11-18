@@ -3,6 +3,11 @@
 # Script Otomasi Windows PowerShell (Wi-Fi ADB)
 # ==============================================================================
 
+param(
+    [string]$TargetIP = "",
+    [string]$SbcServerIP = ""
+)
+
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $ErrorActionPreference = "Continue"
 
@@ -53,7 +58,7 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
     $ZipPath = Join-Path $BinDir "platform-tools.zip"
     $Url = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip"
     
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12, Tls13'
     Invoke-WebRequest -Uri $Url -OutFile $ZipPath -UseBasicParsing
     
     Write-Info "Mengekstrak Android Platform-Tools..."
@@ -74,9 +79,14 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
 # ------------------------------------------------------------------------------
 Write-Header "KONEKSI KE XIAOMI SMART TV 4A"
 $DefaultIP = "192.168.1.5"
-$TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP')"
-if ([string]::IsNullOrWhiteSpace($TvIP)) {
-    $TvIP = $DefaultIP
+if (-not [string]::IsNullOrWhiteSpace($TargetIP)) {
+    $TvIP = $TargetIP
+    Write-Info "Menggunakan IP target dari parameter: $TvIP"
+} else {
+    $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP')"
+    if ([string]::IsNullOrWhiteSpace($TvIP)) {
+        $TvIP = $DefaultIP
+    }
 }
 
 Write-Info "Menghubungkan ke $TvIP`:5555 via Wi-Fi ADB..."
@@ -140,7 +150,7 @@ $InstalledPackages = (& $AdbCmd shell pm list packages 2>&1) | Out-String
 if (-not (Test-Path $ApkDir)) { New-Item -ItemType Directory -Path $ApkDir -Force | Out-Null }
 
 # 4a. Auto-Download & Instalasi SmartTube Stable (YouTube Bebas Iklan)
-$SmartTubePkg = "com.teamsmart.videomanager.tv"
+$SmartTubePkg = "org.smarttube.stable"
 $SmartTubeApkPath = Join-Path $ApkDir "smarttube_stable.apk"
 $SmartTubeUrl = "https://github.com/yuliskov/SmartTube/releases/latest/download/smarttube_stable.apk"
 
@@ -150,7 +160,7 @@ if ($InstalledPackages -match [regex]::Escape($SmartTubePkg)) {
     if (-not (Test-Path $SmartTubeApkPath)) {
         Write-Info "Mengunduh SmartTube Stable terbaru dari GitHub..."
         try {
-            [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::Tls12
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12, Tls13'
             $SmartTubeTmp = "$SmartTubeApkPath.tmp"
             Invoke-WebRequest -Uri $SmartTubeUrl -OutFile $SmartTubeTmp -UseBasicParsing -TimeoutSec 120 -ErrorAction Stop
             Move-Item -Path $SmartTubeTmp -Destination $SmartTubeApkPath -Force -ErrorAction Stop
@@ -220,7 +230,7 @@ if ($OtherLauncherApks -and $OtherLauncherApks.Count -gt 0) {
     $FlixTmp = "$FlixApkPath.tmp"
     try {
         $FlixUrl = "https://github.com/HatriGt/flix-launcher/releases/latest/download/app-release.apk"
-        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::Tls12
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]'Tls12, Tls13'
         Invoke-WebRequest -Uri $FlixUrl -OutFile $FlixTmp -UseBasicParsing -TimeoutSec 60 -ErrorAction Stop
         Move-Item -Path $FlixTmp -Destination $FlixApkPath -Force -ErrorAction Stop
         Write-Success "Flix Launcher berhasil diunduh!"
@@ -241,9 +251,14 @@ if ($OtherLauncherApks -and $OtherLauncherApks.Count -gt 0) {
 # 4c. Konfigurasi Opsional IP Server Lokal SBC / Odroid C2 (apps-config.json)
 Write-Info "Konfigurasi opsional alamat server lokal SBC/Odroid C2 untuk Bumiayu TV Launcher:"
 $DefaultSbcIP = "192.168.1.100"
-$SbcIP = Read-Host "Masukkan Alamat IP Server SBC/Odroid C2 Anda (Tekan ENTER untuk '$DefaultSbcIP')"
-if ([string]::IsNullOrWhiteSpace($SbcIP)) {
-    $SbcIP = $DefaultSbcIP
+if (-not [string]::IsNullOrWhiteSpace($SbcServerIP)) {
+    $SbcIP = $SbcServerIP
+    Write-Info "Menggunakan IP server SBC dari parameter: $SbcIP"
+} else {
+    $SbcIP = Read-Host "Masukkan Alamat IP Server SBC/Odroid C2 Anda (Tekan ENTER untuk '$DefaultSbcIP')"
+    if ([string]::IsNullOrWhiteSpace($SbcIP)) {
+        $SbcIP = $DefaultSbcIP
+    }
 }
 $SbcIP = $SbcIP.Trim()
 
