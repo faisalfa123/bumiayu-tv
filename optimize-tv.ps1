@@ -151,9 +151,12 @@ if ($InstalledPackages -match [regex]::Escape($SmartTubePkg)) {
         Write-Info "Mengunduh SmartTube Stable terbaru dari GitHub..."
         try {
             [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::Tls12
-            Invoke-WebRequest -Uri $SmartTubeUrl -OutFile $SmartTubeApkPath -UseBasicParsing -TimeoutSec 30
+            $SmartTubeTmp = "$SmartTubeApkPath.tmp"
+            Invoke-WebRequest -Uri $SmartTubeUrl -OutFile $SmartTubeTmp -UseBasicParsing -TimeoutSec 120 -ErrorAction Stop
+            Move-Item -Path $SmartTubeTmp -Destination $SmartTubeApkPath -Force -ErrorAction Stop
             Write-Success "SmartTube Stable berhasil diunduh ke: $SmartTubeApkPath"
         } catch {
+            Remove-Item -Path "$SmartTubeApkPath.tmp" -Force -ErrorAction SilentlyContinue
             Write-Warn "Gagal mengunduh SmartTube Stable ($($_.Exception.Message)). Melanjutkan langkah berikutnya..."
         }
     } else {
@@ -208,11 +211,13 @@ if ($OtherLauncherApks -and $OtherLauncherApks.Count -gt 0) {
 } elseif (-not $HasCustomLauncher) {
     Write-Warn "Belum ada file APK launcher di folder 'apk/'."
     Write-Info "Mengunduh Flix Launcher resmi (Open-Source, super ringan <1MB)..."
+    $FlixApkPath = Join-Path $ApkDir "flix-launcher.apk"
+    $FlixTmp = "$FlixApkPath.tmp"
     try {
         $FlixUrl = "https://github.com/HatriGt/flix-launcher/releases/latest/download/app-release.apk"
-        $FlixApkPath = Join-Path $ApkDir "flix-launcher.apk"
         [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::Tls12
-        Invoke-WebRequest -Uri $FlixUrl -OutFile $FlixApkPath -UseBasicParsing -TimeoutSec 15
+        Invoke-WebRequest -Uri $FlixUrl -OutFile $FlixTmp -UseBasicParsing -TimeoutSec 60 -ErrorAction Stop
+        Move-Item -Path $FlixTmp -Destination $FlixApkPath -Force -ErrorAction Stop
         Write-Success "Flix Launcher berhasil diunduh!"
         Write-Info "Memasang Flix Launcher ke TV..."
         $InstallRes = & $AdbCmd install -r $FlixApkPath 2>&1
@@ -222,6 +227,7 @@ if ($OtherLauncherApks -and $OtherLauncherApks.Count -gt 0) {
             Write-Success "Flix Launcher aktif di TV!"
         }
     } catch {
+        Remove-Item -Path $FlixTmp -Force -ErrorAction SilentlyContinue
         Write-Warn "Gagal auto-download APK secara online ($($_.Exception.Message))."
         Write-Warn "Anda dapat menaruh file APK FaisalTVHub atau launcher pilihan Anda ke folder 'apk/'."
     }
@@ -243,7 +249,8 @@ $AppsConfig = [ordered]@{
 }
 $AppsConfigPath = Join-Path $ScriptDir "apps-config.json"
 $AppsConfig | ConvertTo-Json -Depth 2 | Set-Content -Path $AppsConfigPath -Encoding UTF8
-Write-Success "Referensi URL aplikasi lokal tersimpan di: $AppsConfigPath"
+Write-Success "Referensi URL lokal tersimpan di: $AppsConfigPath"
+Write-Info "Catatan: Di TV nanti, Anda dapat mengubah/memeriksa URL ini langsung lewat menu 'Konfigurasi Server' di FaisalTVHub."
 
 
 # ------------------------------------------------------------------------------

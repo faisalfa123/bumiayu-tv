@@ -49,6 +49,7 @@ class WebAppActivity : Activity() {
 
     private var pointerMode = true
     private var isErrorPage = false
+    private var clearHistoryOnFinish = false
     private var activeTouchDownTime: Long = 0L
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -93,6 +94,10 @@ class WebAppActivity : Activity() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     isErrorPage = url?.startsWith(ERROR_ASSET_PREFIX) == true
+                    if (!isErrorPage && clearHistoryOnFinish) {
+                        clearHistoryOnFinish = false
+                        view?.clearHistory()
+                    }
                     updatePointerVisibility()
                 }
 
@@ -334,6 +339,7 @@ class WebAppActivity : Activity() {
             if (cleanUrl.isEmpty()) return
             targetUrl = cleanUrl
             runOnUiThread {
+                clearHistoryOnFinish = true
                 isErrorPage = false
                 updatePointerVisibility()
                 webView.loadUrl(cleanUrl)

@@ -235,7 +235,15 @@
         target.focus();
       }
 
+      function setMainActionsDisabled(disabled) {
+        [btnRetry, btnReconfig, btnBack].forEach(function (btn) {
+          btn.disabled = disabled;
+          btn.tabIndex = disabled ? -1 : 0;
+        });
+      }
+
       function openReconfig() {
+        setMainActionsDisabled(true);
         reconfigPanel.classList.add('open');
         reconfigPanel.setAttribute('aria-hidden', 'false');
         inputUrl.value = targetUrl;
@@ -245,6 +253,7 @@
       function closeReconfig() {
         reconfigPanel.classList.remove('open');
         reconfigPanel.setAttribute('aria-hidden', 'true');
+        setMainActionsDisabled(false);
         setFocus(1);
       }
 
@@ -284,6 +293,12 @@
         var activeIdx = items.indexOf(document.activeElement);
         if (activeIdx !== -1) focusIndex = activeIdx;
         var isInput = document.activeElement && document.activeElement.tagName === 'INPUT';
+
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          setFocus(e.shiftKey ? focusIndex - 1 : focusIndex + 1);
+          return;
+        }
 
         if (e.key === 'Escape' && reconfigPanel.classList.contains('open')) {
           e.preventDefault();

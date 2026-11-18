@@ -52,22 +52,46 @@ function normalizeUrl(url, fallback) {
  * @param {Storage} [storage]
  * @returns {{ senandung: string, immich: string, dompetmungil: string }}
  */
+function getDefaultStorage() {
+  return typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
+}
+
 function loadConfig(storage) {
-  const store = storage || (typeof localStorage !== 'undefined' ? localStorage : null);
-  if (!store) return { ...DEFAULT_CONFIG };
-  try {
-    const raw = store.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_CONFIG };
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_CONFIG };
-    return {
-      senandung: normalizeUrl(parsed.senandung, DEFAULT_CONFIG.senandung),
-      immich: normalizeUrl(parsed.immich, DEFAULT_CONFIG.immich),
-      dompetmungil: normalizeUrl(parsed.dompetmungil, DEFAULT_CONFIG.dompetmungil),
-    };
-  } catch (_err) {
-    return { ...DEFAULT_CONFIG };
+  let base = { ...DEFAULT_CONFIG };
+  const store = storage !== undefined ? storage : getDefaultStorage();
+  if (store) {
+    try {
+      const raw = store.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          base = {
+            senandung: normalizeUrl(parsed.senandung, DEFAULT_CONFIG.senandung),
+            immich: normalizeUrl(parsed.immich, DEFAULT_CONFIG.immich),
+            dompetmungil: normalizeUrl(parsed.dompetmungil, DEFAULT_CONFIG.dompetmungil),
+          };
+        }
+      }
+    } catch (_err) {
+      // Ignore malformed JSON
+    }
   }
+  if (!storage && typeof window !== 'undefined' && window.TvBridge && typeof window.TvBridge.getAppUrlsJson === 'function') {
+    try {
+      const nativeRaw = window.TvBridge.getAppUrlsJson();
+      if (nativeRaw) {
+        const nativeParsed = JSON.parse(nativeRaw);
+        if (nativeParsed && typeof nativeParsed === 'object') {
+          if (nativeParsed.senandung) base.senandung = normalizeUrl(nativeParsed.senandung, base.senandung);
+          if (nativeParsed.immich) base.immich = normalizeUrl(nativeParsed.immich, base.immich);
+          if (nativeParsed.dompetmungil) base.dompetmungil = normalizeUrl(nativeParsed.dompetmungil, base.dompetmungil);
+        }
+      }
+    } catch (_err) {
+      // Ignore bridge parse errors
+    }
+  }
+  return base;
 }
 
 /**
@@ -77,7 +101,7 @@ function loadConfig(storage) {
  * @returns {{ senandung: string, immich: string, dompetmungil: string }}
  */
 function saveConfig(config, storage) {
-  const store = storage || (typeof localStorage !== 'undefined' ? localStorage : null);
+  const store = storage !== undefined ? storage : getDefaultStorage();
   const next = {
     senandung: normalizeUrl(config && config.senandung, DEFAULT_CONFIG.senandung),
     immich: normalizeUrl(config && config.immich, DEFAULT_CONFIG.immich),
@@ -88,6 +112,15 @@ function saveConfig(config, storage) {
       store.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch (_err) {
       // Ignore storage quota or private mode errors
+    }
+  }
+  if (!storage && typeof window !== 'undefined' && window.TvBridge && typeof window.TvBridge.saveAppUrl === 'function') {
+    try {
+      window.TvBridge.saveAppUrl('senandung', next.senandung);
+      window.TvBridge.saveAppUrl('immich', next.immich);
+      window.TvBridge.saveAppUrl('dompetmungil', next.dompetmungil);
+    } catch (_err) {
+      // Ignore bridge errors
     }
   }
   return next;
