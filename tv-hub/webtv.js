@@ -69,6 +69,20 @@ const DEFAULT_CHANNELS = {
       category: 'nasional',
       type: 'hls',
     },
+    {
+      id: 'net-tv',
+      name: 'NET TV',
+      url: 'https://op-group1-swiftservehd-1.dens.tv/s/s101/index.m3u8',
+      category: 'nasional',
+      type: 'hls',
+    },
+    {
+      id: 'btv',
+      name: 'BTV (BeritaSatu)',
+      url: 'https://op-group1-swiftservehd-1.dens.tv/s/s102/index.m3u8',
+      category: 'nasional',
+      type: 'hls',
+    },
   ],
   internasional: [
     {
@@ -103,6 +117,20 @@ const DEFAULT_CHANNELS = {
       id: 'nasa-tv',
       name: 'NASA TV',
       url: 'https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8',
+      category: 'internasional',
+      type: 'hls',
+    },
+    {
+      id: 'cna-singapore',
+      name: 'CNA (Channel NewsAsia)',
+      url: 'https://cna-mediacorp-live.akamaized.net/hls/live/2004246/cna_hls/master.m3u8',
+      category: 'internasional',
+      type: 'hls',
+    },
+    {
+      id: 'bloomberg-tv',
+      name: 'Bloomberg TV',
+      url: 'https://bloomberg.com/media-manifest/streams/us.m3u8',
       category: 'internasional',
       type: 'hls',
     },
@@ -170,7 +198,22 @@ function inferStreamType(url) {
 }
 
 /**
+ * Detect whether an M3U EXTINF line or channel name indicates adult / 18+ content.
+ * @param {string} extinfLine
+ * @param {string} channelName
+ * @returns {boolean}
+ */
+function isAdultM3uEntry(extinfLine, channelName) {
+  const combined = `${extinfLine || ''} ${channelName || ''}`.toLowerCase();
+  return (
+    /group-title=["']?[^"']*(adult|18\+|xxx|dewasa|porn|nsfw|erotic)/i.test(extinfLine || '') ||
+    /\b(xxx|18\+|adult|dewasa|playboy|penthouse|brazzers)\b/i.test(combined)
+  );
+}
+
+/**
  * Parse M3U playlist text into normalized channel objects.
+ * Automatically classifies adult/18+/XXX entries into the 'adult' locked category.
  * @param {string} text
  * @param {'nasional'|'internasional'|'adult'} [defaultCategory='nasional']
  * @returns {Array<{id: string, name: string, url: string, category: string, type: 'hls'|'web'}>}
@@ -184,12 +227,14 @@ function parseM3U(text, defaultCategory = 'nasional') {
   const lines = text.split(/\r?\n/);
   const channels = [];
   let pendingName = '';
+  let pendingExtinf = '';
 
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i].trim();
     if (!line) continue;
 
     if (line.startsWith('#EXTINF:')) {
+      pendingExtinf = line;
       const commaIdx = line.lastIndexOf(',');
       pendingName = commaIdx !== -1 ? line.slice(commaIdx + 1).trim() : '';
       continue;
@@ -205,16 +250,21 @@ function parseM3U(text, defaultCategory = 'nasional') {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '') || 'ch';
+
+      const targetCategory = isAdultM3uEntry(pendingExtinf, name) ? 'adult' : validCat;
+
       channels.push({
         id: `m3u-${slug}-${channels.length + 1}`,
         name,
         url: line,
-        category: validCat,
+        category: targetCategory,
         type: inferStreamType(line),
       });
       pendingName = '';
+      pendingExtinf = '';
     } else {
       pendingName = '';
+      pendingExtinf = '';
     }
   }
 
@@ -820,8 +870,15 @@ function isAdultTabVisible(lockConfig, isUnlocked) {
         if (Hls && Hls.isSupported()) {
           hlsInstance = new Hls({
             enableWorker: true,
-            lowLatencyMode: true,
-            backBufferLength: 30,
+            lowLatencyMode: false,
+            maxBufferLength: 15,
+            maxMaxBufferLength: 30,
+            maxBufferSize: 30 * 1000 * 1000,
+            backBufferLength: 15,
+            manifestLoadingTimeOut: 8000,
+            manifestLoadingMaxRetry: 2,
+            levelLoadingTimeOut: 8000,
+            levelLoadingMaxRetry: 2,
           });
           hlsInstance.loadSource(channel.url);
           hlsInstance.attachMedia(video);

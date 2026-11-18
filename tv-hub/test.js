@@ -414,4 +414,37 @@ test('DEFAULT_CHANNELS provides direct HLS .m3u8 streams with no web embeds', ()
   assert.ok(names.some((n) => n.includes('france 24')));
 });
 
+test('parseM3U auto-classifies adult / 18+ / XXX streams into adult category', () => {
+  const m3uSample = `
+#EXTM3U
+#EXTINF:-1 tvg-id="ch1" group-title="Indonesian TV",TVRI Nasional
+https://example.com/tvri.m3u8
+#EXTINF:-1 tvg-id="ch2" group-title="Adult 18+",Red Light HD
+https://example.com/adult1.m3u8
+#EXTINF:-1 tvg-id="ch3",Midnight XXX Special
+https://example.com/adult2.m3u8
+#EXTINF:-1 tvg-id="ch4" group-title="News",CNN International
+https://example.com/cnn.m3u8
+`;
+
+  const parsed = parseM3U(m3uSample, 'nasional');
+  assert.equal(parsed.length, 4);
+
+  const tvri = parsed.find((c) => c.name === 'TVRI Nasional');
+  assert.ok(tvri);
+  assert.equal(tvri.category, 'nasional');
+
+  const adult1 = parsed.find((c) => c.name === 'Red Light HD');
+  assert.ok(adult1);
+  assert.equal(adult1.category, 'adult');
+
+  const adult2 = parsed.find((c) => c.name === 'Midnight XXX Special');
+  assert.ok(adult2);
+  assert.equal(adult2.category, 'adult');
+
+  const cnn = parsed.find((c) => c.name === 'CNN International');
+  assert.ok(cnn);
+  assert.equal(cnn.category, 'nasional');
+});
+
 console.log(`\nAll ${passed} tests passed.`);
