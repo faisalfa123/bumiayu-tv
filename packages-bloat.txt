@@ -1,0 +1,25 @@
+# ==============================================================================
+# DAFTAR PAKET BLOATWARE XIAOMI SMART TV 4A (AMAN DINONAKTIFKAN)
+# Metode: pm disable-user --user 0 <package_name> (Tanpa Root & Reversible)
+# ==============================================================================
+
+# --- Xiaomi PatchWall & Content Push Services ---
+# Layanan rekomendasi konten, poster PatchWall, dan push notifikasi iklan
+com.duokan.videodaily
+com.mitv.tvhome
+com.xiaomi.mitv.tvpush.tvpushservice
+com.xiaomi.mitv.upgrade
+com.mitv.screensaver
+com.xiaomi.screenrecorder
+com.mitv.gallery
+
+# --- Xiaomi Telemetry, Tracker & Analytics ---
+# Layanan analitik dan pengumpulan data Xiaomi yang berjalan terus di RAM 1GB
+com.xiaomi.stat
+com.miui.analytics
+com.xiaomi.mitv.tracker
+
+# --- Stock Android TV Heavy Launcher & Ads Channels ---
+# Digantikan oleh Flix Launcher yang jauh lebih ringan (< 1MB) & bebas iklan
+com.google.android.tvlauncher
+com.google.android.tvrecommendations

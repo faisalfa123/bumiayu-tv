@@ -1,0 +1,25 @@
+# ==============================================================================
+# DAFTAR PAKET DILINDUNGI (JANGAN DINONAKTIFKAN / PROTECTED WHITELIST)
+# Paket-paket ini krusial untuk kestabilan TV, Remote Suara, Play Store, dan DRM
+# ==============================================================================
+
+# Google Voice Assistant (Tombol Mic Remote Xiaomi)
+com.google.android.katniss
+
+# Google Play Store & Services (Instalasi dan Pembaruan Aplikasi)
+com.android.vending
+com.google.android.gms
+com.google.android.gsf
+
+# Core Android TV Framework & Pengaturan
+com.android.providers.settings
+com.android.settings
+com.android.systemui
+
+# Bluetooth & Input Services (Koneksi Remote Bluetooth Xiaomi)
+com.android.bluetooth
+com.android.inputdevices
+
+# Media, Audio & DRM Services (Pemutaran Netflix/Prime Video HD)
+com.google.android.media.effects
+com.android.providers.media
