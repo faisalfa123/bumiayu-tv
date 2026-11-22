@@ -75,48 +75,59 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
 }
 
 # ------------------------------------------------------------------------------
-# 2. KONEKSI WI-FI ADB KE TV
+# 2. KONEKSI WI-FI / KABEL USB ADB KE TV
 # ------------------------------------------------------------------------------
-Write-Header "KONEKSI KE XIAOMI SMART TV 4A"
-$DefaultIP = "192.168.1.5"
-if (-not [string]::IsNullOrWhiteSpace($TargetIP)) {
-    $TvIP = $TargetIP
-    Write-Info "Menggunakan IP target dari parameter: $TvIP"
+Write-Header "KONEKSI KE XIAOMI SMART TV 4A (KABEL USB / WI-FI)"
+
+# Periksa apakah TV terhubung langsung via Kabel USB
+$InitialDevices = & $AdbCmd devices
+$UsbDeviceLine = ($InitialDevices | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch ":5555" -and $_ -notmatch "List of" })
+
+if ($UsbDeviceLine) {
+    $UsbId = ($UsbDeviceLine.Trim() -split '\s+')[0]
+    Write-Success "Terdeteksi TV terhubung langsung via KABEL USB! (ID: $UsbId)"
+    Write-Info "Menggunakan mode Kabel USB (Instalasi Super Cepat tanpa butuh Wi-Fi)..."
 } else {
-    $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP')"
-    if ([string]::IsNullOrWhiteSpace($TvIP)) {
-        $TvIP = $DefaultIP
+    $DefaultIP = "192.168.1.5"
+    if (-not [string]::IsNullOrWhiteSpace($TargetIP)) {
+        $TvIP = $TargetIP
+        Write-Info "Menggunakan IP target dari parameter: $TvIP"
+    } else {
+        $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP', atau colok Kabel USB)"
+        if ([string]::IsNullOrWhiteSpace($TvIP)) {
+            $TvIP = $DefaultIP
+        }
     }
-}
 
-Write-Info "Menghubungkan ke $TvIP`:5555 via Wi-Fi ADB..."
-& $AdbCmd disconnect 2>&1 | Out-Null
-$ConnectResult = & $AdbCmd connect "$($TvIP):5555" 2>&1
-Write-Host $ConnectResult -ForegroundColor Gray
+    Write-Info "Menghubungkan ke $TvIP`:5555 via Wi-Fi ADB..."
+    & $AdbCmd disconnect 2>&1 | Out-Null
+    $ConnectResult = & $AdbCmd connect "$($TvIP):5555" 2>&1
+    Write-Host $ConnectResult -ForegroundColor Gray
 
-Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 2
 
-# Verifikasi status perangkat
-$DeviceList = & $AdbCmd devices
-$DeviceLine = ($DeviceList | Where-Object { $_ -match "$TvIP`:5555" })
-
-if ($DeviceLine -match "unauthorized") {
-    Write-Warn "PERHATIAN: Muncul dialog izin USB Debugging di layar TV Anda!"
-    Write-Warn "Centang opsi 'Selalu izinkan dari komputer ini' lalu pilih OK pada TV remote."
-    Write-Host "`nTekan tombol ENTER di keyboard komputer setelah Anda mengizinkannya di TV..." -ForegroundColor Yellow
-    Read-Host | Out-Null
-    
+    # Verifikasi status perangkat
     $DeviceList = & $AdbCmd devices
     $DeviceLine = ($DeviceList | Where-Object { $_ -match "$TvIP`:5555" })
-}
 
-if ($DeviceLine -notmatch "device") {
-    Write-Fail "Gagal terhubung ke TV ($DeviceLine)."
-    Write-Host "`nPastikan:" -ForegroundColor Yellow
-    Write-Host "1. TV dan Laptop terhubung ke Wi-Fi yang sama (griya alit)."
-    Write-Host "2. Opsi Pengembang (Developer Options) & USB Debugging sudah AKTIF di TV."
-    Write-Host "   (Buka Pengaturan > Preferensi Perangkat > Tentang > Tekan 'Build' 7 kali)."
-    exit 1
+    if ($DeviceLine -match "unauthorized") {
+        Write-Warn "PERHATIAN: Muncul dialog izin USB Debugging di layar TV Anda!"
+        Write-Warn "Centang opsi 'Selalu izinkan dari komputer ini' lalu pilih OK pada TV remote."
+        Write-Host "`nTekan tombol ENTER di keyboard komputer setelah Anda mengizinkannya di TV..." -ForegroundColor Yellow
+        Read-Host | Out-Null
+        
+        $DeviceList = & $AdbCmd devices
+        $DeviceLine = ($DeviceList | Where-Object { $_ -match "$TvIP`:5555" })
+    }
+
+    if ($DeviceLine -notmatch "device") {
+        Write-Fail "Gagal terhubung ke TV ($DeviceLine)."
+        Write-Host "`nOpsi Koneksi:" -ForegroundColor Yellow
+        Write-Host "1. Kabel USB: Hubungkan TV ke Laptop dengan kabel USB Male-to-Male."
+        Write-Host "2. Wi-Fi: Pastikan TV & Laptop di Wi-Fi yang sama dan USB Debugging aktif di TV."
+        Write-Host "3. Flashdisk: Jalankan 'copy-to-usb.bat' untuk memasang via Flashdisk tanpa kabel/Wi-Fi."
+        exit 1
+    }
 }
 
 Write-Success "TV Terhubung dengan status AUTHORIZED!"

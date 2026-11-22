@@ -129,6 +129,16 @@ function launchYouTube() {
     }
 }
 
+function openSettings(section) {
+    if (window.TvBridge && typeof window.TvBridge.openSettingsSection === 'function') {
+        window.TvBridge.openSettingsSection(section);
+    } else if (window.TvBridge && typeof window.TvBridge.openSettings === 'function') {
+        window.TvBridge.openSettings();
+    } else {
+        showToast(`Membuka Pengaturan: ${section || 'Sistem'}`);
+    }
+}
+
 // ==========================================================================
 // 3. DAFTAR PLAYLIST & VALIDATOR KONEKSI HLS / M3U8 STREAM
 // ==========================================================================
@@ -441,6 +451,7 @@ if (typeof module !== 'undefined' && module.exports) {
         clearPinInput,
         verifyEnteredPin,
         DEFAULT_PIN,
-        controlSenandung
+        controlSenandung,
+        openSettings
     };
 }

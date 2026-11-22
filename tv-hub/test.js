@@ -140,14 +140,15 @@ test('script.js berisi navigasi D-Pad panah 37, 38, 39, 40 dan OK 13, 23', () =>
     assert.ok(scriptSrc.includes('case 13:') || scriptSrc.includes('case 23:'), 'Tombol OK/Enter');
 });
 
-test('script.js memiliki fungsi kontrol API Senandung', () => {
+test('script.js memiliki fungsi kontrol API Senandung dan openSettings', () => {
     const scriptSrc = fs.readFileSync(path.join(tvHubDir, 'script.js'), 'utf8');
     assert.ok(scriptSrc.includes('controlSenandung'), 'Fungsi controlSenandung harus ada');
     assert.ok(scriptSrc.includes('/player/'), 'Endpoint player harus dipanggil');
+    assert.strictEqual(typeof script.openSettings, 'function');
 });
 
 // --------------------------------------------------------------------------
-// 5. SESI 5: DOM HTML LIGHTWEIGHT
+// 5. SESI 5: DOM HTML LIGHTWEIGHT & PENGATURAN
 // --------------------------------------------------------------------------
 console.log('\n[SESI 5: DOM HTML index.html]');
 
@@ -169,6 +170,15 @@ test('index.html memuat Baris 2: Saluran Web TV Live (Kompas TV, NHK World, 18+)
     assert.ok(html.includes('status-badge'));
 });
 
+test('index.html memuat Baris 3: Pengaturan & Sistem (Wi-Fi, Bluetooth, Apps, Device)', () => {
+    const html = fs.readFileSync(path.join(tvHubDir, 'index.html'), 'utf8');
+    assert.ok(html.includes('Pengaturan & Sistem'));
+    assert.ok(html.includes("openSettings('wifi')"));
+    assert.ok(html.includes("openSettings('bluetooth')"));
+    assert.ok(html.includes("openSettings('apps')"));
+    assert.ok(html.includes("openSettings('device')"));
+});
+
 test('index.html memuat elemen native <dialog id="adult-pin-dialog">', () => {
     const html = fs.readFileSync(path.join(tvHubDir, 'index.html'), 'utf8');
     assert.ok(html.includes('<dialog id="adult-pin-dialog"'));
@@ -182,7 +192,17 @@ test('index.html memuat pemutar video fullscreen #video-overlay', () => {
 });
 
 // --------------------------------------------------------------------------
-// 6. SINKRONISASI ASET ANDROID
+// 6. FITUR INSTALASI USB GANDA
+// --------------------------------------------------------------------------
+console.log('\n[Fitur Instalasi USB Ganda]');
+
+test('Tersedia script copy-to-usb.ps1 dan copy-to-usb.bat untuk Flashdisk USB', () => {
+    assert.strictEqual(fs.existsSync(path.join(baseDir, 'copy-to-usb.ps1')), true);
+    assert.strictEqual(fs.existsSync(path.join(baseDir, 'copy-to-usb.bat')), true);
+});
+
+// --------------------------------------------------------------------------
+// 7. SINKRONISASI ASET ANDROID
 // --------------------------------------------------------------------------
 console.log('\n[Verifikasi Sinkronisasi Aset Android]');
 
@@ -193,6 +213,10 @@ test('tv-hub-android/app/src/main/assets/hub identik dengan tv-hub/', () => {
     assert.strictEqual(fs.existsSync(path.join(androidHubDir, 'script.js')), true);
     assert.strictEqual(fs.existsSync(path.join(androidHubDir, 'assets/youtube_tv.png')), true);
     assert.strictEqual(fs.existsSync(path.join(androidHubDir, 'assets/senandung.png')), true);
+    assert.strictEqual(fs.existsSync(path.join(androidHubDir, 'assets/wifi.png')), true);
+    assert.strictEqual(fs.existsSync(path.join(androidHubDir, 'assets/bluetooth.png')), true);
+    assert.strictEqual(fs.existsSync(path.join(androidHubDir, 'assets/apps.png')), true);
+    assert.strictEqual(fs.existsSync(path.join(androidHubDir, 'assets/settings.png')), true);
 });
 
 console.log(`\n========================================================`);

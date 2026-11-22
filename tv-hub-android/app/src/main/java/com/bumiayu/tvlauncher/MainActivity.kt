@@ -219,13 +219,35 @@ class MainActivity : Activity() {
 
         @JavascriptInterface
         fun openSettings() {
+            openSettingsSection("all")
+        }
+
+        @JavascriptInterface
+        fun openSettingsSection(section: String) {
             try {
-                val intent = Intent(Settings.ACTION_SETTINGS).apply {
+                val action = when (section.lowercase()) {
+                    "wifi", "network" -> Settings.ACTION_WIFI_SETTINGS
+                    "bluetooth" -> Settings.ACTION_BLUETOOTH_SETTINGS
+                    "apps" -> Settings.ACTION_APPLICATION_SETTINGS
+                    "device", "about" -> Settings.ACTION_DEVICE_INFO_SETTINGS
+                    "sound" -> Settings.ACTION_SOUND_SETTINGS
+                    "display" -> Settings.ACTION_DISPLAY_SETTINGS
+                    "date" -> Settings.ACTION_DATE_SETTINGS
+                    else -> Settings.ACTION_SETTINGS
+                }
+                val intent = Intent(action).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 startActivity(intent)
             } catch (_e: Exception) {
-                showToast("Tidak dapat membuka Pengaturan TV.")
+                try {
+                    val fallbackIntent = Intent(Settings.ACTION_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    startActivity(fallbackIntent)
+                } catch (_ex: Exception) {
+                    showToast("Tidak dapat membuka Pengaturan TV.")
+                }
             }
         }
 

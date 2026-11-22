@@ -48,6 +48,14 @@ body {
     display: flex;
     flex-direction: column;
     gap: 25px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    padding-bottom: 50px;
+}
+
+.container::-webkit-scrollbar {
+    display: none;
 }
 
 .row-title {
