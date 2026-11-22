@@ -1,374 +1,101 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="pixel">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bumiayu TV Launcher</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bumiayu TV - Premium Home Launcher</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="ambient-bg" aria-hidden="true"></div>
-  <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-  <div class="tv-shell">
-    <header class="top-bar">
-      <div class="brand">
-        <span class="brand-dot" aria-hidden="true"></span>
-        <h1 class="brand-title">Bumiayu TV Launcher</h1>
-      </div>
-
-      <div class="top-bar-right">
-        <div class="theme-pill" id="theme-pill" aria-label="Tema aktif">
-          <span class="theme-pill-icon" id="theme-pill-icon" aria-hidden="true">👾</span>
-          <span id="theme-pill-name">Bumiayu 16-Bit Pixel Art</span>
-        </div>
-        <div class="status-badge" id="status-badge" aria-label="Status koneksi">
-          <span class="status-indicator" aria-hidden="true"></span>
-          <span id="status-text">Hub Aktif</span>
-        </div>
-        <div class="clock-block" aria-live="off">
-          <time id="live-clock" class="clock-time">--:--</time>
-          <span id="live-date" class="clock-date">Memuat tanggal...</span>
-        </div>
-      </div>
+    <!-- HEADER STATUS & JAM -->
+    <header class="header-bar">
+        <h1 class="brand-title">Bumiayu TV</h1>
+        <div id="clock-display" class="clock-display">--:--</div>
     </header>
 
-    <main id="hub-grid" class="hub-main" role="grid" aria-label="Menu Utama Bumiayu TV Launcher">
-      <!-- Row 0: Faisal's Ecosystem -->
-      <section class="hub-row" aria-labelledby="row-title-0">
-        <h2 id="row-title-0" class="row-title">Faisal's Ecosystem</h2>
-        <div class="card-row card-row-1" role="row">
-          <button
-            type="button"
-            class="card card-senandung card-senandung-hero focused"
-            role="gridcell"
-            tabindex="0"
-            data-row="0"
-            data-col="0"
-            data-app-id="senandung"
-            data-app-name="Senandung"
-          >
-            <div class="card-icon card-icon-hero" aria-hidden="true">🎵</div>
-            <div class="card-body card-body-hero">
-              <div class="card-title-row">
-                <span class="card-title card-title-hero">Senandung</span>
-                <span class="hero-badge">Pusat Musik Pribadi</span>
-              </div>
-              <span class="card-subtitle card-subtitle-hero">Audio Streaming PWA &amp; Koleksi Musik Lokal</span>
-            </div>
-            <div class="music-wave-indicator" aria-hidden="true">
-              <span class="bar bar-1"></span>
-              <span class="bar bar-2"></span>
-              <span class="bar bar-3"></span>
-              <span class="bar bar-4"></span>
-              <span class="bar bar-5"></span>
-            </div>
-          </button>
-        </div>
-      </section>
+    <main class="container">
+        <!-- BARIS 1: REKOMENDASI UTAMA / UTILITY (CLONE YOUTUBE & MUSIC CONTROLLER) -->
+        <section aria-labelledby="row-title-entertainment">
+            <h2 id="row-title-entertainment" class="row-title">Hiburan & Ekosistem</h2>
+            <div class="grid-row">
+                <!-- Shortcut SmartTube yang di-clone menjadi YouTube Official -->
+                <button class="tv-card" onclick="launchYouTube()" aria-label="Buka YouTube">
+                    <img class="icon" src="assets/youtube_tv.png" alt="YouTube">
+                    <span class="title">YouTube</span>
+                </button>
 
-      <!-- Row 1: Hiburan & Streaming -->
-      <section class="hub-row" aria-labelledby="row-title-1">
-        <h2 id="row-title-1" class="row-title">Hiburan &amp; Streaming</h2>
-        <div class="card-row card-row-4" role="row">
-          <button
-            type="button"
-            class="card card-smarttube"
-            role="gridcell"
-            tabindex="-1"
-            data-row="1"
-            data-col="0"
-            data-pkg="org.smarttube.stable"
-            data-app-name="SmartTube"
-          >
-            <div class="card-icon" aria-hidden="true">📺</div>
-            <div class="card-body">
-              <span class="card-title">SmartTube</span>
-              <span class="card-subtitle">Ad-Free 60fps YouTube</span>
+                <!-- Widget Cepat Integrasi Kontrol Server Musik Senandung -->
+                <button class="tv-card" onclick="controlSenandung('toggle-play')" aria-label="Kontrol Musik Senandung">
+                    <img class="icon" src="assets/senandung.png" alt="Senandung">
+                    <span class="title">Senandung (Play/Pause)</span>
+                </button>
             </div>
-          </button>
+        </section>
 
-          <button
-            type="button"
-            class="card card-webtv"
-            role="gridcell"
-            tabindex="-1"
-            data-row="1"
-            data-col="1"
-            data-action="webtv"
-            data-app-name="Web TV"
-          >
-            <div class="card-icon" aria-hidden="true">📡</div>
-            <div class="card-body">
-              <span class="card-title">Web TV</span>
-              <span class="card-subtitle">Nasional, Global &amp; 18+</span>
-            </div>
-          </button>
+        <!-- BARIS 2: WEB TV SALURAN NASIONAL & INTERNASIONAL (DENGAN DETEKTOR LIVE) -->
+        <section aria-labelledby="row-title-webtv">
+            <h2 id="row-title-webtv" class="row-title">Saluran Web TV Live</h2>
+            <div class="grid-row">
+                <!-- Channel Nasional: Kompas TV -->
+                <button class="tv-card" data-stream="https://op-group1-swiftservehd-1.dens.tv/s/s104/index.m3u8" onclick="playStream(this.getAttribute('data-stream'), 'Kompas TV')" aria-label="Tonton Kompas TV">
+                    <span class="status-badge status-checking">Checking...</span>
+                    <span class="title">Kompas TV</span>
+                </button>
 
-          <button
-            type="button"
-            class="card card-netflix"
-            role="gridcell"
-            tabindex="-1"
-            data-row="1"
-            data-col="2"
-            data-pkg="com.netflix.ninja"
-            data-app-name="Netflix"
-          >
-            <div class="card-icon" aria-hidden="true">🍿</div>
-            <div class="card-body">
-              <span class="card-title">Netflix</span>
-              <span class="card-subtitle">Widevine L1 HD</span>
-            </div>
-          </button>
+                <!-- Channel Internasional: NHK World -->
+                <button class="tv-card" data-stream="https://nhkwlive-ojp.akamaized.net/hls/live/2003459/nhkwlive-ojp-en/index.m3u8" onclick="playStream(this.getAttribute('data-stream'), 'NHK World Japan')" aria-label="Tonton NHK World">
+                    <span class="status-badge status-checking">Checking...</span>
+                    <span class="title">NHK World</span>
+                </button>
 
-          <button
-            type="button"
-            class="card card-prime"
-            role="gridcell"
-            tabindex="-1"
-            data-row="1"
-            data-col="3"
-            data-pkg="com.amazon.amazonvideo.livingroom"
-            data-app-name="Prime Video"
-          >
-            <div class="card-icon" aria-hidden="true">🎬</div>
-            <div class="card-body">
-              <span class="card-title">Prime Video</span>
-              <span class="card-subtitle">Film &amp; Serial</span>
+                <!-- Kategori 18+ Terkunci Proteksi Keamanan PIN -->
+                <button class="tv-card" data-stream="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" onclick="openAdultChannel(this.getAttribute('data-stream'))" aria-label="Buka Kategori Dewasa Terkunci">
+                    <span class="status-badge status-checking">Checking...</span>
+                    <span class="title">Kategori 18+ (🔒)</span>
+                </button>
             </div>
-          </button>
-        </div>
-      </section>
-
-      <!-- Row 2: Tema & Sistem -->
-      <section class="hub-row" aria-labelledby="row-title-2">
-        <h2 id="row-title-2" class="row-title">Tema &amp; Sistem</h2>
-        <div class="card-row card-row-4" role="row">
-          <button
-            type="button"
-            class="card card-theme"
-            role="gridcell"
-            tabindex="-1"
-            data-row="2"
-            data-col="0"
-            data-action="theme"
-            data-app-name="Tema Bumiayu"
-          >
-            <div class="card-icon" aria-hidden="true">🎨</div>
-            <div class="card-body">
-              <span class="card-title">Tema Bumiayu</span>
-              <span class="card-subtitle">4 Tema Anime &amp; Retro</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            class="card card-ambient"
-            role="gridcell"
-            tabindex="-1"
-            data-row="2"
-            data-col="1"
-            data-action="ambient"
-            data-app-name="Layar Santai"
-          >
-            <div class="card-icon" aria-hidden="true">🌙</div>
-            <div class="card-body">
-              <span class="card-title">Layar Santai</span>
-              <span class="card-subtitle">Jam &amp; Partikel Ambient</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            class="card card-inputs"
-            role="gridcell"
-            tabindex="-1"
-            data-row="2"
-            data-col="2"
-            data-action="inputs"
-            data-app-name="HDMI / TV Inputs"
-          >
-            <div class="card-icon" aria-hidden="true">🔌</div>
-            <div class="card-body">
-              <span class="card-title">HDMI / TV Inputs</span>
-              <span class="card-subtitle">Sumber Input Eksternal</span>
-            </div>
-          </button>
-
-          <button
-            type="button"
-            class="card card-reconfig"
-            role="gridcell"
-            tabindex="-1"
-            data-row="2"
-            data-col="3"
-            data-action="reconfig"
-            data-app-name="Pengaturan Server"
-          >
-            <div class="card-icon" aria-hidden="true">⚙️</div>
-            <div class="card-body">
-              <span class="card-title">Pengaturan Server</span>
-              <span class="card-subtitle">Senandung &amp; Keamanan</span>
-            </div>
-          </button>
-        </div>
-      </section>
+        </section>
     </main>
-  </div>
 
-  <!-- Server Re-configuration Modal -->
-  <dialog id="reconfig-modal" class="modal-dialog" aria-labelledby="reconfig-title">
-    <form id="reconfig-form" class="modal-card" method="dialog" novalidate>
-      <div class="modal-header">
-        <h2 id="reconfig-title" class="modal-title">Pengaturan Server Senandung</h2>
-        <p class="modal-desc">Sesuaikan alamat IP &amp; port server musik lokal Senandung.</p>
-      </div>
-
-      <div class="modal-fields">
-        <label class="field-group" for="input-senandung">
-          <span class="field-label">Senandung URL</span>
-          <input
-            id="input-senandung"
-            name="senandung"
-            type="url"
-            class="field-input modal-focusable"
-            placeholder="http://192.168.1.100:8080"
-            autocomplete="off"
-            spellcheck="false"
-            autofocus
-          >
-        </label>
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" id="btn-cancel-reconfig" class="btn btn-secondary modal-focusable">
-          Batal
-        </button>
-        <button type="submit" id="btn-save-reconfig" class="btn btn-primary modal-focusable">
-          Simpan Konfigurasi
-        </button>
-      </div>
-    </form>
-  </dialog>
-
-  <!-- Bumiayu Theme Picker Modal -->
-  <dialog id="theme-modal" class="modal-dialog modal-dialog-wide" aria-labelledby="theme-modal-title">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h2 id="theme-modal-title" class="modal-title">Pilih Tema Bumiayu</h2>
-        <p class="modal-desc">Ganti suasana visual &amp; efek partikel ringan 60fps untuk TV.</p>
-      </div>
-
-      <div class="theme-grid" id="theme-options-grid">
-        <button
-          type="button"
-          class="theme-option modal-focusable"
-          data-theme-id="pixel"
-          autofocus
-        >
-          <span class="theme-option-icon" aria-hidden="true">👾</span>
-          <span class="theme-option-body">
-            <span class="theme-option-title">Bumiayu 16-Bit Pixel Art</span>
-            <span class="theme-option-desc">Estetik anime retro arcade, bingkai piksel &amp; bintang</span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          class="theme-option modal-focusable"
-          data-theme-id="asri"
-        >
-          <span class="theme-option-icon" aria-hidden="true">🍁</span>
-          <span class="theme-option-body">
-            <span class="theme-option-title">Bumiayu Asri</span>
-            <span class="theme-option-desc">Musim gugur hangat, emas terakota &amp; daun berguguran</span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          class="theme-option modal-focusable"
-          data-theme-id="samudra"
-        >
-          <span class="theme-option-icon" aria-hidden="true">🌊</span>
-          <span class="theme-option-body">
-            <span class="theme-option-title">Bumiayu Samudra</span>
-            <span class="theme-option-desc">Nuansa laut dalam biru-teal &amp; gelembung mengapung</span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          class="theme-option modal-focusable"
-          data-theme-id="rintik"
-        >
-          <span class="theme-option-icon" aria-hidden="true">🌧️</span>
-          <span class="theme-option-body">
-            <span class="theme-option-title">Bumiayu Rintik</span>
-            <span class="theme-option-desc">Senja musim penghujan, biru berkabut &amp; rintik hujan</span>
-          </span>
-        </button>
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" id="btn-close-theme-modal" class="btn btn-secondary modal-focusable">
-          Tutup
-        </button>
-      </div>
-    </div>
-  </dialog>
-
-  <!-- Ambient Screensaver / Ghibli Lockscreen Overlay -->
-  <div id="ambient-overlay" class="ambient-overlay" hidden aria-hidden="true">
-    <div class="ambient-backdrop" aria-hidden="true"></div>
-    <div class="ambient-vignette" aria-hidden="true"></div>
-    <div class="ambient-content">
-      <div class="ambient-badge" id="ambient-theme-label">🌾 Bumiayu TV • Layar Tenang</div>
-      
-      <!-- Digital Clock & Indonesian Date -->
-      <div class="ambient-clock-wrap">
-        <time id="ambient-clock" class="ambient-clock">--:--</time>
-        <div id="ambient-date" class="ambient-date">Memuat tanggal...</div>
-      </div>
-
-      <!-- Widgets Grid: Weather Card & Senandung Status Card -->
-      <div class="ambient-widgets">
-        <!-- Weather Card Widget for Bumiayu -->
-        <div class="ambient-widget-card ambient-weather-card">
-          <div class="ambient-weather-icon" aria-hidden="true">⛅</div>
-          <div class="ambient-widget-info">
-            <div class="ambient-weather-temp-row">
-              <span class="ambient-temp">24°C</span>
-              <span class="ambient-weather-badge">Bumiayu</span>
-            </div>
-            <div class="ambient-weather-status">Bumiayu • Sejuk &amp; Cerah Berawan</div>
-          </div>
+    <!-- DIALOG MODAL PIN KATEGORI 18+ (NATIVE HTML5 <dialog>) -->
+    <dialog id="adult-pin-dialog" aria-labelledby="pin-dialog-title" aria-modal="true">
+        <div class="dialog-header">
+            <h3 id="pin-dialog-title">Kunci Pengaman 18+</h3>
+            <p>Masukkan 4-digit PIN menggunakan Remote D-Pad</p>
         </div>
-
-        <!-- Senandung Audio Player Widget -->
-        <div class="ambient-widget-card ambient-music-card">
-          <div class="ambient-music-icon" aria-hidden="true">🎵</div>
-          <div class="ambient-widget-info">
-            <div class="ambient-music-title">Senandung Audio Player</div>
-            <div class="ambient-music-status">Siap Memutar Musik</div>
-          </div>
-          <div class="ambient-audio-wave" aria-hidden="true">
-            <span class="wave-bar w-1"></span>
-            <span class="wave-bar w-2"></span>
-            <span class="wave-bar w-3"></span>
-            <span class="wave-bar w-4"></span>
-          </div>
+        <div id="pin-display" class="pin-display">----</div>
+        <div class="pin-keypad">
+            <button class="pin-btn" onclick="inputPinDigit('1')">1</button>
+            <button class="pin-btn" onclick="inputPinDigit('2')">2</button>
+            <button class="pin-btn" onclick="inputPinDigit('3')">3</button>
+            <button class="pin-btn" onclick="inputPinDigit('4')">4</button>
+            <button class="pin-btn" onclick="inputPinDigit('5')">5</button>
+            <button class="pin-btn" onclick="inputPinDigit('6')">6</button>
+            <button class="pin-btn" onclick="inputPinDigit('7')">7</button>
+            <button class="pin-btn" onclick="inputPinDigit('8')">8</button>
+            <button class="pin-btn" onclick="inputPinDigit('9')">9</button>
+            <button class="pin-btn" onclick="clearPinInput()">C</button>
+            <button class="pin-btn" onclick="inputPinDigit('0')">0</button>
+            <button class="pin-btn" onclick="closePinDialog()">✕</button>
         </div>
-      </div>
+    </dialog>
 
-      <div class="ambient-hint">Tekan tombol apa saja pada remote untuk melanjutkan</div>
+    <!-- OVERLAY PEMUTAR VIDEO FULLSCREEN -->
+    <div id="video-overlay" role="region" aria-label="Pemutar Video Layar Penuh">
+        <video id="main-player" playsinline></video>
+        <div id="player-osd">
+            <span id="osd-title" style="font-weight: 700; font-size: 1.1rem;">Live TV</span>
+            <span class="status-badge status-online">LIVE</span>
+            <span style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">Tekan Back untuk keluar</span>
+        </div>
     </div>
-  </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite" aria-hidden="true"></div>
+    <!-- TOAST NOTIFIKASI -->
+    <div id="toast-notification" role="status" aria-live="polite"></div>
 
-  <script src="themes.js"></script>
-  <script src="app.js"></script>
+    <!-- SCRIPT UTAMA KONTROLER -->
+    <script src="hls.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

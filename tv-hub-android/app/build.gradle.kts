@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.faisal.tvhub"
+    namespace = "com.bumiayu.tvlauncher"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.faisal.tvhub"
+        applicationId = "com.bumiayu.tvlauncher"
         minSdk = 21
         targetSdk = 33
         versionCode = 1

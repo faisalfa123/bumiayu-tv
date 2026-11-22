@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.bumiayu.tvlauncher">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -34,8 +35,8 @@
         android:allowBackup="true"
         android:banner="@drawable/tv_banner"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="Bumiayu TV Launcher"
+        android:icon="@drawable/ic_youtube_tv"
+        android:label="YouTube"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         android:usesCleartextTraffic="true">
 
@@ -43,6 +44,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation"
             android:exported="true"
+            android:hardwareAccelerated="true"
             android:launchMode="singleTask"
             android:screenOrientation="landscape">
             <intent-filter>
@@ -59,6 +61,7 @@
             android:name=".WebAppActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|keyboard|navigation"
             android:exported="false"
+            android:hardwareAccelerated="true"
             android:screenOrientation="landscape" />
 
     </application>

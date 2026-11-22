@@ -186,7 +186,7 @@ if ($InstalledPackages -match [regex]::Escape($SmartTubePkg)) {
 }
 
 # 4b. Cek & Instalasi Bumiayu TV Launcher atau Launcher Alternatif Lainnya
-if ($InstalledPackages -match "com\.faisal\.tvhub|flix|flauncher|projectivy|atvlauncher|emotn") {
+if ($InstalledPackages -match "com\.bumiayu\.tvlauncher|com\.faisal\.tvhub|flix|flauncher|projectivy|atvlauncher|emotn") {
     Write-Success "Launcher alternatif / Bumiayu TV Launcher sudah terdeteksi di dalam TV."
     $HasCustomLauncher = $true
 }
@@ -197,10 +197,14 @@ $CustomLauncherApks = Get-ChildItem -Path $ApkDir -Filter "*.apk" -ErrorAction S
 if ($CustomLauncherApks -and $CustomLauncherApks.Count -gt 0) {
     foreach ($hubApk in $CustomLauncherApks) {
         Write-Info "Memasang Bumiayu TV Launcher: $($hubApk.Name)..."
+        if ($InstalledPackages -match "com\.faisal\.tvhub") {
+            Write-Info "Mencopot paket lama com.faisal.tvhub agar bersih..."
+            & $AdbCmd uninstall com.faisal.tvhub 2>&1 | Out-Null
+        }
         $HubInstallOutput = & $AdbCmd install -r $hubApk.FullName 2>&1
         Write-Host $HubInstallOutput -ForegroundColor Gray
         if ($HubInstallOutput -match "Success") {
-            Write-Success "Berhasil memasang $($hubApk.Name) (com.faisal.tvhub)"
+            Write-Success "Berhasil memasang $($hubApk.Name) (com.bumiayu.tvlauncher)"
             $HasCustomLauncher = $true
         }
     }
@@ -326,7 +330,7 @@ foreach ($pkg in $BloatList) {
 Write-Success "Total paket bloatware yang berhasil dinonaktifkan: $DisabledCount paket."
 
 # ------------------------------------------------------------------------------
-# 6. TWEAK ANIMASI & PERFORMA UI ALA APPLE TV
+# 6. TWEAK ANIMASI & PERFORMA UI ALA APPLE TV (SESI 1 MASTER TEMPLATE)
 # ------------------------------------------------------------------------------
 Write-Header "OPTIMASI KECEPATAN & ANIMASI UI (APPLE TV TWEAKS)"
 
@@ -334,9 +338,20 @@ Write-Info "Mengatur skala animasi ke 0.5x untuk respon instan tanpa jeda..."
 & $AdbCmd shell settings put global window_animation_scale 0.5
 & $AdbCmd shell settings put global transition_animation_scale 0.5
 & $AdbCmd shell settings put global animator_duration_scale 0.5
+Write-Success "Skala animasi disetel ke 0.5x (Ultra Fast)."
 
-Write-Info "Mengoptimalkan 2D hardware acceleration..."
+Write-Info "Memaksa akselerasi 2D hardware renderer OpenGL..."
+& $AdbCmd shell setprop debug.hwui.renderer opengl
 & $AdbCmd shell settings put global force_hw_ui 1 2>&1 | Out-Null
+Write-Success "GPU Hardware Acceleration dipaksa aktif."
+
+Write-Info "Membatasi cached background apps untuk meringankan RAM 1GB..."
+& $AdbCmd shell settings put global max_cached_apps 2
+Write-Success "Batas background process disetel ke maksimal 2 aplikasi."
+
+Write-Info "Menonaktifkan background logger (Logcat) untuk menghemat siklus CPU..."
+& $AdbCmd shell setprop log.tag.all SILENT
+Write-Success "Background logging (Logcat) dinonaktifkan."
 
 Write-Success "Pengaturan kecepatan UI berhasil diterapkan!"
 

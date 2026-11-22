@@ -1,0 +1,5 @@
+{
+  "name": "numes-ai",
+  "version": "1.0.0",
+  "description": "Integrasi model AI Numes (DeepSeek, Kimi, GLM, Nemotron, Claude)"
+}
