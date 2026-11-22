@@ -4,6 +4,7 @@
 # ==============================================================================
 
 param(
+    [string]$Mode = "",
     [string]$TargetIP = "",
     [string]$SbcServerIP = ""
 )
@@ -75,25 +76,90 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
 }
 
 # ------------------------------------------------------------------------------
-# 2. KONEKSI WI-FI / KABEL USB ADB KE TV
+# 2. PILIH METODE INSTALASI (WI-FI, KABEL USB, ATAU FLASHDISK USB)
 # ------------------------------------------------------------------------------
-Write-Header "KONEKSI KE XIAOMI SMART TV 4A (KABEL USB / WI-FI)"
+if ([string]::IsNullOrWhiteSpace($Mode)) {
+    Write-Header "PILIH METODE INSTALASI BUMIAYU TV LAUNCHER"
+    Write-Host "Silakan tentukan metode yang ingin Anda gunakan:" -ForegroundColor White
+    Write-Host ""
+    Write-Host "  [1] Wi-Fi ADB        - Pasang nirkabel lewat jaringan Wi-Fi" -ForegroundColor Cyan
+    Write-Host "  [2] Kabel USB ADB    - Pasang langsung lewat kabel data USB ke TV" -ForegroundColor Green
+    Write-Host "  [3] Flashdisk USB    - Siapkan installer offline ke Flashdisk USB" -ForegroundColor Yellow
+    Write-Host ""
 
-# Periksa apakah TV terhubung langsung via Kabel USB
-$InitialDevices = & $AdbCmd devices
-$UsbDeviceLine = ($InitialDevices | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch ":5555" -and $_ -notmatch "List of" })
+    $choice = ""
+    while ($choice -notmatch "^[123]$") {
+        $choice = Read-Host "Masukkan pilihan Anda [1, 2, atau 3]"
+        if ([string]::IsNullOrWhiteSpace($choice)) { $choice = "1" }
+    }
+    switch ($choice) {
+        "1" { $Mode = "wifi" }
+        "2" { $Mode = "usb" }
+        "3" { $Mode = "flashdisk" }
+    }
+}
 
-if ($UsbDeviceLine) {
-    $UsbId = ($UsbDeviceLine.Trim() -split '\s+')[0]
-    Write-Success "Terdeteksi TV terhubung langsung via KABEL USB! (ID: $UsbId)"
-    Write-Info "Menggunakan mode Kabel USB (Instalasi Super Cepat tanpa butuh Wi-Fi)..."
-} else {
+$Mode = $Mode.ToLower().Trim()
+
+# --- JALUR 3: FLASHDISK USB OFFLINE ---
+if ($Mode -eq "flashdisk" -or $Mode -eq "3") {
+    $UsbScript = Join-Path $ScriptDir "copy-to-usb.ps1"
+    if (Test-Path $UsbScript) {
+        & $UsbScript
+    } else {
+        Write-Fail "Script copy-to-usb.ps1 tidak ditemukan!"
+    }
+    exit 0
+}
+
+# --- JALUR 2: KABEL USB ADB DIRECT ---
+if ($Mode -eq "usb" -or $Mode -eq "2") {
+    Write-Header "KONEKSI KABEL USB LANGSUNG KE TV"
+    Write-Info "Memeriksa perangkat via kabel USB..."
+
+    $UsbFound = $false
+    while (-not $UsbFound) {
+        $DeviceList = & $AdbCmd devices
+        $UsbDeviceLine = ($DeviceList | Where-Object { $_ -match "\bdevice\b" -and $_ -notmatch ":5555" -and $_ -notmatch "List of" })
+
+        if ($UsbDeviceLine) {
+            $UsbId = ($UsbDeviceLine.Trim() -split '\s+')[0]
+            Write-Success "TV Terdeteksi via Kabel USB! (Device ID: $UsbId)"
+            $UsbFound = $true
+            break
+        }
+
+        $UnauthorizedLine = ($DeviceList | Where-Object { $_ -match "\bunauthorized\b" -and $_ -notmatch ":5555" })
+        if ($UnauthorizedLine) {
+            Write-Warn "PERHATIAN: Muncul dialog izin USB Debugging di layar TV Anda!"
+            Write-Warn "Centang opsi 'Selalu izinkan dari komputer ini' lalu pilih OK pada remote TV."
+            Read-Host "Tekan ENTER setelah mengizinkan di layar TV..." | Out-Null
+            continue
+        }
+
+        Write-Warn "TV belum terdeteksi lewat kabel USB."
+        Write-Host "`nLangkah-langkah:" -ForegroundColor Yellow
+        Write-Host "1. Tancapkan kabel USB dari Laptop ke port USB TV Xiaomi Anda."
+        Write-Host "2. Di TV: Buka Pengaturan > Preferensi Perangkat > Opsi Pengembang."
+        Write-Host "3. Pastikan 'Debugging USB' dalam posisi AKTIF (ON)."
+        Write-Host ""
+        $retry = Read-Host "Tekan ENTER untuk memindai ulang kabel USB (atau ketik 'batal' untuk keluar)"
+        if ($retry -match "batal|exit|q") {
+            Write-Warn "Instalasi dibatalkan oleh pengguna."
+            exit 0
+        }
+    }
+}
+
+# --- JALUR 1: WI-FI ADB ---
+if ($Mode -eq "wifi" -or $Mode -eq "1") {
+    Write-Header "KONEKSI NIRKABEL WI-FI ADB KE TV"
     $DefaultIP = "192.168.1.5"
     if (-not [string]::IsNullOrWhiteSpace($TargetIP)) {
         $TvIP = $TargetIP
         Write-Info "Menggunakan IP target dari parameter: $TvIP"
     } else {
-        $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP', atau colok Kabel USB)"
+        $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP')"
         if ([string]::IsNullOrWhiteSpace($TvIP)) {
             $TvIP = $DefaultIP
         }
@@ -106,26 +172,24 @@ if ($UsbDeviceLine) {
 
     Start-Sleep -Seconds 2
 
-    # Verifikasi status perangkat
     $DeviceList = & $AdbCmd devices
     $DeviceLine = ($DeviceList | Where-Object { $_ -match "$TvIP`:5555" })
 
     if ($DeviceLine -match "unauthorized") {
         Write-Warn "PERHATIAN: Muncul dialog izin USB Debugging di layar TV Anda!"
-        Write-Warn "Centang opsi 'Selalu izinkan dari komputer ini' lalu pilih OK pada TV remote."
-        Write-Host "`nTekan tombol ENTER di keyboard komputer setelah Anda mengizinkannya di TV..." -ForegroundColor Yellow
-        Read-Host | Out-Null
+        Write-Warn "Centang opsi 'Selalu izinkan dari komputer ini' lalu pilih OK pada remote TV."
+        Read-Host "Tekan ENTER setelah mengizinkan di layar TV..." | Out-Null
         
         $DeviceList = & $AdbCmd devices
         $DeviceLine = ($DeviceList | Where-Object { $_ -match "$TvIP`:5555" })
     }
 
     if ($DeviceLine -notmatch "device") {
-        Write-Fail "Gagal terhubung ke TV ($DeviceLine)."
-        Write-Host "`nOpsi Koneksi:" -ForegroundColor Yellow
-        Write-Host "1. Kabel USB: Hubungkan TV ke Laptop dengan kabel USB Male-to-Male."
-        Write-Host "2. Wi-Fi: Pastikan TV & Laptop di Wi-Fi yang sama dan USB Debugging aktif di TV."
-        Write-Host "3. Flashdisk: Jalankan 'copy-to-usb.bat' untuk memasang via Flashdisk tanpa kabel/Wi-Fi."
+        Write-Fail "Gagal terhubung ke TV di $TvIP`:5555 ($ConnectResult)"
+        Write-Host "`nTips Mengatasi:" -ForegroundColor Yellow
+        Write-Host "1. Cek IP TV Anda saat ini di menu: Pengaturan TV > Jaringan > Status."
+        Write-Host "2. Pastikan TV dan Laptop terhubung ke Wi-Fi yang sama."
+        Write-Host "3. Jika Wi-Fi bermasalah, silakan gunakan pilihan [2] Kabel USB atau [3] Flashdisk USB!"
         exit 1
     }
 }
@@ -217,6 +281,8 @@ if ($CustomLauncherApks -and $CustomLauncherApks.Count -gt 0) {
         if ($HubInstallOutput -match "Success") {
             Write-Success "Berhasil memasang $($hubApk.Name) (com.bumiayu.tvlauncher)"
             $HasCustomLauncher = $true
+            Write-Info "Membuka Bumiayu TV Launcher di TV..."
+            & $AdbCmd shell am start -n com.bumiayu.tvlauncher/.MainActivity 2>&1 | Out-Null
         }
     }
 }
