@@ -41,7 +41,7 @@ if (Get-Command adb -ErrorAction SilentlyContinue) {
 }
 
 # 2. KONEKSI KE TV
-$DefaultIP = "192.168.1.5"
+$DefaultIP = "192.168.1.4"
 $TvIP = Read-Host "Masukkan Alamat IP TV Anda (Tekan ENTER untuk '$DefaultIP')"
 if ([string]::IsNullOrWhiteSpace($TvIP)) {
     $TvIP = $DefaultIP

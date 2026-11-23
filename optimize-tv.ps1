@@ -154,7 +154,7 @@ if ($Mode -eq "usb" -or $Mode -eq "2") {
 # --- JALUR 1: WI-FI ADB ---
 if ($Mode -eq "wifi" -or $Mode -eq "1") {
     Write-Header "KONEKSI NIRKABEL WI-FI ADB KE TV"
-    $DefaultIP = "192.168.1.5"
+    $DefaultIP = "192.168.1.4"
     if (-not [string]::IsNullOrWhiteSpace($TargetIP)) {
         $TvIP = $TargetIP
         Write-Info "Menggunakan IP target dari parameter: $TvIP"
