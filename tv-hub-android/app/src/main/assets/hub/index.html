@@ -95,10 +95,18 @@
             </div>
         </div>
 
-        <!-- TAB PANE 2: LIVE TV (SALURAN AKTIF 16:9 DENGAN POSTER) -->
+        <!-- TAB PANE 2: LIVE TV (DILENGKAPI SUB-TAB FILTER M3U) -->
         <div id="pane-livetv" class="tab-pane" role="tabpanel" aria-labelledby="tab-livetv" hidden>
+            <!-- SUB-CATEGORY FILTER BAR (TV REMOTE FRIENDLY) -->
+            <div class="subfilter-container" role="toolbar" aria-label="Filter Saluran">
+                <button type="button" class="subfilter-pill active" data-filter="all" tabindex="0">Semua Saluran</button>
+                <button type="button" class="subfilter-pill" data-filter="nasional" tabindex="0">TV Nasional</button>
+                <button type="button" class="subfilter-pill" data-filter="m3u" tabindex="0">M3U Global & Movies</button>
+                <button type="button" class="subfilter-pill" data-filter="fav" tabindex="0">Favorit</button>
+            </div>
+
             <div class="shelf-section">
-                <h3 class="shelf-title">Saluran Televisi Siaran Langsung</h3>
+                <h3 class="shelf-title" id="livetv-shelf-title">Semua Siaran Langsung Terverifikasi Aktif</h3>
                 <div class="shelf-grid channels-full-grid" id="full-channels-grid">
                     <!-- Populated dynamically with active streams -->
                 </div>

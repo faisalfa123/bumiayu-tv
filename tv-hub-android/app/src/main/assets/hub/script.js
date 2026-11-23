@@ -38,6 +38,17 @@ const CHANNELS = [
     { id: "nusantaratv", name: "Nusantara TV", genre: "Berita & Budaya", desc: "Warta berita terkini nusantara, kebudayaan daerah, dan program inspiratif.", stream: "https://nusantaratv.siar.us/nusantaratv/live/playlist.m3u8", poster: "assets/nusantaratv.png" },
     { id: "jawapostv", name: "Jawa Pos TV", genre: "Warta Metropolitan", desc: "Berita investigasi, liputan kota metropolitan, dan kabar regional Jawa Pos.", stream: "http://122.248.43.242:1935/JAWAPOSTVJKT/_definst_/myStream/playlist.m3u8", poster: "assets/jawapostv.png" },
     { id: "tv9", name: "TV9 Nusantara", genre: "Religi & Budaya", desc: "Siaran dakwah santun menyejukkan, warta keislaman dan khazanah nusantara.", stream: "https://5bf7b725107e5.streamlock.net/tv9/tv9/playlist.m3u8", poster: "assets/tv9.png" },
+    // Saluran Tambahan Nasional & Global Terverifikasi
+    { id: "brtv", name: "BRTV Indonesia", genre: "Kreatif & Inspiratif", desc: "Program warta inovasi kreatif anak bangsa dan siaran inspirasi nusantara.", stream: "https://5bf7b725107e5.streamlock.net/brtv/brtv/playlist.m3u8", poster: "assets/brtv.png", category: "nasional" },
+    { id: "tvri_world", name: "TVRI World HD", genre: "Global 1080p", desc: "Siaran internasional resmi Indonesia berbahasa Inggris dengan kualitas jernih 1080p.", stream: "https://ott-balancer.tvri.go.id/live/eds/TVRIWorld/hls/TVRIWorld.m3u8", poster: "assets/tvri_world.png", category: "nasional" },
+
+    // Saluran M3U Global & Sinema Terverifikasi Aktif
+    { id: "m3u_redbull", name: "Red Bull TV", genre: "Sports & Balap", desc: "Siaran langsung olahraga ekstrem, balap dunia, dan petualangan global 1080p.", stream: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8", poster: "assets/m3u_redbull.png", category: "m3u" },
+    { id: "m3u_00sreplay", name: "00s Cinema Replay", genre: "Film & Bioskop", desc: "Koleksi tayangan film dan serial bioskop box office terfavorit.", stream: "https://jmp2.uk/plu-62ba60f059624e000781c436.m3u8", poster: "assets/m3u_00sreplay.png", category: "m3u" },
+    { id: "m3u_music1hd", name: "1HD Music TV", genre: "Musik Video Hits", desc: "Saluran musik video internasional 24 jam kualitas jernih 1080p.", stream: "http://176.118.197.101/1HD/index.m3u8", poster: "assets/m3u_music1hd.png", category: "m3u" },
+    { id: "m3u_persiana", name: "Persiana Music", genre: "Konser & Pop", desc: "Siaran live konser musik dan klip video populer kualitas HD.", stream: "https://musichls.persiana.live/hls/stream.m3u8", poster: "assets/m3u_persiana.png", category: "m3u" },
+    { id: "m3u_blender", name: "Blender Cinema HD", genre: "Animasi & CGI 60fps", desc: "Karya sinema animasi pemenang festival internasional 60fps.", stream: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8", poster: "assets/m3u_blender.png", category: "m3u" },
+    { id: "m3u_akamai_hd", name: "Akamai Ultra Live HD", genre: "Dokumenter Alam", desc: "Siaran pemandangan alam dan keindahan bumi resolusi tinggi ultra stabil.", stream: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8", poster: "assets/m3u_akamai_hd.png", category: "m3u" }
 ];
 
 const ADULT_CHANNELS = [
@@ -72,6 +83,7 @@ function initLauncher() {
     renderChannels();
     setupBillboardListeners();
     setupVaultKeypad();
+    setupSubfilterListeners();
     setupDpadNavigation();
 
     // Focus immediately on TizenTube Cobalt (first card on Home pane)
@@ -98,6 +110,9 @@ function updateClock() {
 /* ==============================================================================
    CHANNEL RENDERING
    ============================================================================== */
+
+let currentLiveFilter = "all"; // "all", "nasional", "m3u", "fav"
+
 function renderChannels() {
     const homeStrip = document.getElementById("home-channels-strip");
     const fullGrid = document.getElementById("full-channels-grid");
@@ -111,11 +126,43 @@ function renderChannels() {
 
     if (fullGrid) {
         fullGrid.innerHTML = "";
-        CHANNELS.forEach((ch, idx) => {
+        let list = CHANNELS;
+        if (currentLiveFilter === "nasional") {
+            list = CHANNELS.filter(c => !c.category || c.category === "nasional");
+        } else if (currentLiveFilter === "m3u") {
+            list = CHANNELS.filter(c => c.category === "m3u");
+        } else if (currentLiveFilter === "fav") {
+            list = CHANNELS.slice(0, 6);
+        }
+
+        list.forEach((ch, idx) => {
             fullGrid.appendChild(createChannelCard(ch, idx));
         });
     }
 }
+
+function setupSubfilterListeners() {
+    const pills = document.querySelectorAll(".subfilter-pill");
+    const titleEl = document.getElementById("livetv-shelf-title");
+
+    pills.forEach(pill => {
+        pill.addEventListener("click", () => {
+            pills.forEach(p => p.classList.remove("active"));
+            pill.classList.add("active");
+            currentLiveFilter = pill.getAttribute("data-filter") || "all";
+
+            if (titleEl) {
+                if (currentLiveFilter === "nasional") titleEl.textContent = "Saluran Televisi Nasional Indonesia";
+                else if (currentLiveFilter === "m3u") titleEl.textContent = "Saluran M3U Global, Sinema & Olahraga";
+                else if (currentLiveFilter === "fav") titleEl.textContent = "Saluran Televisi Favorit Utama";
+                else titleEl.textContent = "Semua Siaran Langsung Terverifikasi Aktif";
+            }
+
+            renderChannels();
+        });
+    });
+}
+
 
 function createChannelCard(ch, index) {
     const btn = document.createElement("button");
@@ -269,6 +316,13 @@ function setupDpadNavigation() {
                     e.preventDefault();
                     const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
                     if (activePane) {
+                        if (TABS[activeTabIndex] === "livetv") {
+                            const activeSub = activePane.querySelector(".subfilter-pill.active") || activePane.querySelector(".subfilter-pill");
+                            if (activeSub) {
+                                activeSub.focus();
+                                return;
+                            }
+                        }
                         const firstCard = activePane.querySelector(".tv-card");
                         if (firstCard) firstCard.focus();
                     }
@@ -354,7 +408,13 @@ function setupDpadNavigation() {
                             prevCards[targetCol].focus();
                         }
                     } else {
-                        // ONLY when at the topmost row of the very first shelf -> jump up to Nav Tab!
+                        if (TABS[activeTabIndex] === "livetv") {
+                            const activeSub = document.querySelector(".subfilter-pill.active") || document.querySelector(".subfilter-pill");
+                            if (activeSub) {
+                                activeSub.focus();
+                                return;
+                            }
+                        }
                         const currentTab = document.querySelectorAll(".nav-tab")[activeTabIndex];
                         if (currentTab) currentTab.focus();
                     }

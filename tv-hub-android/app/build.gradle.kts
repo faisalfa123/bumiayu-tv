@@ -11,8 +11,8 @@ android {
         applicationId = "com.bumiayu.tvlauncher"
         minSdk = 21
         targetSdk = 33
-        versionCode = 5
-        versionName = "2.0.3"
+        versionCode = 6
+        versionName = "2.0.4"
     }
 
     buildTypes {

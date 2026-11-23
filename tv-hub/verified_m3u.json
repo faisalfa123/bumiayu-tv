@@ -1,0 +1,116 @@
+[
+  {
+    "id": "m3u_redbull",
+    "name": "Red Bull TV",
+    "genre": "Sports & Action",
+    "desc": "Siaran langsung olahraga ekstrem, balap, dan petualangan global 1080p.",
+    "stream": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master_928.m3u8",
+    "tag": "GLOBAL SPORTS",
+    "theme": [
+      239,
+      68,
+      68
+    ],
+    "bg": [
+      20,
+      10,
+      24
+    ],
+    "category": "m3u"
+  },
+  {
+    "id": "m3u_music1hd",
+    "name": "1HD Music TV",
+    "genre": "Musik Hits 1080p",
+    "desc": "Saluran musik video internasional 24 jam kualitas jernih 1080p.",
+    "stream": "http://176.118.197.101/1HD/index.m3u8",
+    "tag": "MUSIC VIDEO",
+    "theme": [
+      236,
+      72,
+      153
+    ],
+    "bg": [
+      24,
+      10,
+      28
+    ],
+    "category": "m3u"
+  },
+  {
+    "id": "m3u_persiana",
+    "name": "Persiana Music",
+    "genre": "Konser & Musik Pop",
+    "desc": "Siaran live konser musik dan klip video populer kualitas HD.",
+    "stream": "https://musichls.persiana.live/hls/stream.m3u8",
+    "tag": "GLOBAL MUSIC",
+    "theme": [
+      168,
+      85,
+      247
+    ],
+    "bg": [
+      22,
+      12,
+      38
+    ],
+    "category": "m3u"
+  },
+  {
+    "id": "m3u_00sreplay",
+    "name": "00s Cinema Replay",
+    "genre": "Film & Box Office",
+    "desc": "Koleksi tayangan film dan serial bioskop terfavorit.",
+    "stream": "https://jmp2.uk/plu-62ba60f059624e000781c436.m3u8",
+    "tag": "MOVIES & CINEMA",
+    "theme": [
+      245,
+      158,
+      11
+    ],
+    "bg": [
+      28,
+      18,
+      10
+    ],
+    "category": "m3u"
+  },
+  {
+    "id": "m3u_blender",
+    "name": "Blender Cinema HD",
+    "genre": "Animasi & CGI 60fps",
+    "desc": "Karya sinema animasi pemenang festival internasional 60fps.",
+    "stream": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+    "tag": "CINEMA 60FPS",
+    "theme": [
+      14,
+      165,
+      233
+    ],
+    "bg": [
+      10,
+      24,
+      40
+    ],
+    "category": "m3u"
+  },
+  {
+    "id": "m3u_akamai_hd",
+    "name": "Akamai Ultra 4K/HD",
+    "genre": "Pemandangan & Dokumenter",
+    "desc": "Siaran alam dan keindahan bumi resolusi tinggi ultra stabil.",
+    "stream": "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8",
+    "tag": "ULTRA LIVE HD",
+    "theme": [
+      34,
+      197,
+      94
+    ],
+    "bg": [
+      10,
+      30,
+      22
+    ],
+    "category": "m3u"
+  }
+]

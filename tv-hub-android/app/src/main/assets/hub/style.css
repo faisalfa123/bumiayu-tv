@@ -772,3 +772,42 @@ html, body {
 .channel-live-pill {
     animation: livePulse 2s infinite ease-in-out;
 }
+
+/* ==============================================================================
+   SUB-FILTER TOOLBAR (SEKAT & KATEGORI M3U / NASIONAL)
+   ============================================================================== */
+.subfilter-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-left: 4px;
+}
+
+.subfilter-pill {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--text-sec);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: transform var(--trans-fast), background-color var(--trans-fast), color var(--trans-fast), border-color var(--trans-fast);
+}
+
+.subfilter-pill.active {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: var(--focus-cyan);
+    color: #ffffff;
+}
+
+.subfilter-pill:focus {
+    transform: scale(1.08);
+    background: var(--focus-cyan);
+    border-color: var(--focus-cyan);
+    color: #0b0f19;
+    font-weight: 700;
+    outline: none;
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.4);
+}
