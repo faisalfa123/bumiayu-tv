@@ -71,7 +71,7 @@
                     </button>
 
                     <!-- Card 2: TizenTube Cobalt -->
-                    <button class="tv-card yt-hero-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="YouTube bebas iklan berbasis Samsung Tizen TV dengan performa ultra ringan." data-badge="YOUTUBE 2" tabindex="-1">
+                    <button class="tv-card yt-hero-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="YouTube bebas iklan berbasis Samsung Tizen TV dengan performa ultra ringan." data-badge="YOUTUBE 2" tabindex="0">
                         <div class="card-thumb-wrap">
                             <img src="assets/tizentube.png" alt="TizenTube" class="card-poster">
                         </div>
@@ -82,7 +82,7 @@
                     </button>
 
                     <!-- Card 3: Senandung Musik -->
-                    <button class="tv-card music-hero-card" onclick="controlSenandung('toggle-play')" data-title="Senandung Audio" data-desc="Pusat musik pribadi streaming audio PWA dan pemutar lagu lokal." data-badge="MUSIK" tabindex="-1">
+                    <button class="tv-card music-hero-card" onclick="controlSenandung('toggle-play')" data-title="Senandung Audio" data-desc="Pusat musik pribadi streaming audio PWA dan pemutar lagu lokal." data-badge="MUSIK" tabindex="0">
                         <div class="card-thumb-wrap">
                             <img src="assets/senandung.png" alt="Senandung" class="card-logo">
                         </div>
@@ -98,17 +98,17 @@
             <div class="shelf-section">
                 <h3 class="shelf-title">Sorotan Siaran TV Nasional</h3>
                 <div class="shelf-grid channels-shelf" id="home-channels-strip">
-                    <!-- Populated dynamically or static top picks -->
+                    <!-- Populated dynamically with active streams -->
                 </div>
             </div>
         </div>
 
-        <!-- TAB PANE 2: LIVE TV (15+ CHANNELS WITH 16:9 POSTERS) -->
+        <!-- TAB PANE 2: LIVE TV (SALURAN AKTIF 16:9 DENGAN POSTER) -->
         <div id="pane-livetv" class="tab-pane" role="tabpanel" aria-labelledby="tab-livetv" hidden>
             <div class="shelf-section">
-                <h3 class="shelf-title">Semua Saluran Siaran Langsung (17 Saluran Nasional & Dunia)</h3>
+                <h3 class="shelf-title">Semua Saluran Siaran Langsung Nasional & Internasional (Aktif)</h3>
                 <div class="shelf-grid channels-full-grid" id="full-channels-grid">
-                    <!-- Generated dynamically with full metadata -->
+                    <!-- Populated dynamically with active streams -->
                 </div>
             </div>
         </div>
@@ -118,27 +118,27 @@
             <div class="shelf-section">
                 <h3 class="shelf-title">Aplikasi Android TV Terpasang</h3>
                 <div class="shelf-grid apps-shelf">
-                    <button class="tv-card app-card" data-pkg="org.smarttube.stable" data-title="SmartTube" data-desc="Aplikasi pemutar YouTube tanpa iklan." tabindex="-1">
+                    <button class="tv-card app-card" data-pkg="org.smarttube.stable" data-title="SmartTube" data-desc="Aplikasi pemutar YouTube tanpa iklan." tabindex="0">
                         <img src="assets/youtube_tv.png" alt="SmartTube" class="app-icon">
                         <span class="card-title">SmartTube</span>
                     </button>
 
-                    <button class="tv-card app-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="Samsung Tizen YouTube untuk Android TV." tabindex="-1">
+                    <button class="tv-card app-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="Samsung Tizen YouTube untuk Android TV." tabindex="0">
                         <img src="assets/tizentube.png" alt="TizenTube" class="app-icon">
                         <span class="card-title">TizenTube</span>
                     </button>
 
-                    <button class="tv-card app-card" data-pkg="com.netflix.ninja" data-title="Netflix" data-desc="Layanan film dan serial streaming HD Widevine L1." tabindex="-1">
+                    <button class="tv-card app-card" data-pkg="com.netflix.ninja" data-title="Netflix" data-desc="Layanan film dan serial streaming HD Widevine L1." tabindex="0">
                         <img src="assets/apps.png" alt="Netflix" class="app-icon">
                         <span class="card-title">Netflix</span>
                     </button>
 
-                    <button class="tv-card app-card" data-pkg="com.amazon.amazonvideo.livingroom" data-title="Prime Video" data-desc="Amazon Prime Video TV." tabindex="-1">
+                    <button class="tv-card app-card" data-pkg="com.amazon.amazonvideo.livingroom" data-title="Prime Video" data-desc="Amazon Prime Video TV." tabindex="0">
                         <img src="assets/apps.png" alt="Prime Video" class="app-icon">
                         <span class="card-title">Prime Video</span>
                     </button>
 
-                    <button class="tv-card app-card" onclick="openSettings('apps')" data-title="Pengelola Aplikasi" data-desc="Lihat dan kelola semua aplikasi terinstal." tabindex="-1">
+                    <button class="tv-card app-card" onclick="openSettings('apps')" data-title="Pengelola Aplikasi" data-desc="Lihat dan kelola semua aplikasi terinstal." tabindex="0">
                         <img src="assets/settings.png" alt="Pengelola Aplikasi" class="app-icon">
                         <span class="card-title">Kelola Semua</span>
                     </button>
@@ -152,35 +152,35 @@
                 <h3 class="shelf-title">Pengaturan Sistem & Sambungan TV</h3>
                 <div class="shelf-grid settings-shelf">
                     <!-- Wi-Fi -->
-                    <button class="tv-card settings-card" onclick="openSettings('wifi')" data-title="Wi-Fi & Jaringan" data-desc="Kelola sambungan Wi-Fi, IP, dan status koneksi internet." data-badge="KONEKSI" tabindex="-1">
+                    <button class="tv-card settings-card" onclick="openSettings('wifi')" data-title="Wi-Fi & Jaringan" data-desc="Kelola sambungan Wi-Fi, IP, dan status koneksi internet." data-badge="KONEKSI" tabindex="0">
                         <img src="assets/wifi.png" alt="Wi-Fi" class="settings-icon">
                         <span class="card-title">Wi-Fi & Jaringan</span>
                         <span class="card-sub">Status & IP TV</span>
                     </button>
 
                     <!-- Bluetooth -->
-                    <button class="tv-card settings-card" onclick="openSettings('bluetooth')" data-title="Remote & Aksesoris" data-desc="Hubungkan remote Bluetooth, speaker nirkabel, dan gamepad." data-badge="BLUETOOTH" tabindex="-1">
+                    <button class="tv-card settings-card" onclick="openSettings('bluetooth')" data-title="Remote & Aksesoris" data-desc="Hubungkan remote Bluetooth, speaker nirkabel, dan gamepad." data-badge="BLUETOOTH" tabindex="0">
                         <img src="assets/bluetooth.png" alt="Bluetooth" class="settings-icon">
                         <span class="card-title">Remote & Bluetooth</span>
                         <span class="card-sub">Perangkat Nirkabel</span>
                     </button>
 
                     <!-- Kelola Aplikasi -->
-                    <button class="tv-card settings-card" onclick="openSettings('apps')" data-title="Kelola Aplikasi" data-desc="Copot pemasangan atau bersihkan cache aplikasi." data-badge="MEMORI" tabindex="-1">
+                    <button class="tv-card settings-card" onclick="openSettings('apps')" data-title="Kelola Aplikasi" data-desc="Copot pemasangan atau bersihkan cache aplikasi." data-badge="MEMORI" tabindex="0">
                         <img src="assets/apps.png" alt="Aplikasi" class="settings-icon">
                         <span class="card-title">Kelola Aplikasi</span>
                         <span class="card-sub">Manajemen Storage</span>
                     </button>
 
                     <!-- Setelan Perangkat -->
-                    <button class="tv-card settings-card" onclick="openSettings('device')" data-title="Setelan Perangkat Lengkap" data-desc="Buka panel pengaturan inti Android TV 9." data-badge="SISTEM" tabindex="-1">
+                    <button class="tv-card settings-card" onclick="openSettings('device')" data-title="Setelan Perangkat Lengkap" data-desc="Buka panel pengaturan inti Android TV 9." data-badge="SISTEM" tabindex="0">
                         <img src="assets/settings.png" alt="Sistem" class="settings-icon">
                         <span class="card-title">Setelan Perangkat</span>
                         <span class="card-sub">Pengaturan Android</span>
                     </button>
                 </div>
                 <div class="secret-hint" aria-hidden="true">
-                    <span>💡 Tips Navigasi: Gunakan tombol D-Pad untuk menjelajah menu.</span>
+                    <span>💡 Tips: Gunakan tombol D-Pad untuk memilih menu.</span>
                 </div>
             </div>
         </div>
@@ -230,7 +230,7 @@
     </dialog>
 
     <!-- FULLSCREEN HLS VIDEO PLAYER OVERLAY -->
-    <div id="video-overlay" class="video-overlay" hidden>
+    <div id="video-overlay" class="video-overlay" style="display:none">
         <div class="video-top-bar">
             <button id="btn-back-player" class="btn-back">← Kembali</button>
             <div class="player-channel-info">
@@ -242,8 +242,8 @@
         <div class="player-hud-hint">Tekan BACK di remote untuk keluar | D-Pad Kiri/Kanan ganti channel</div>
     </div>
 
-    <!-- HLS.JS & LOGIC SCRIPT -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
+    <!-- LOCAL BUNDLED HLS.JS & LOGIC SCRIPT -->
+    <script src="hls.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -1,26 +1,27 @@
 /* ==============================================================================
-   BUMIAYU TV - GOOGLE TV MODERN NAVIGATION & MEDIA ENGINE
+   BUMIAYU TV - GOOGLE TV MODERN NAVIGATION & MEDIA ENGINE (v2.1.0)
    Hardware Optimized for Xiaomi Smart TV 4A 32" (Android TV 9)
+   Pure 2D Spatial Grid Navigation with Keyboard & Remote D-Pad Support
    ============================================================================== */
 
 const CHANNELS = [
-    { id: "kompastv", name: "Kompas TV", genre: "Nasional News", desc: "Siaran langsung berita nasional independen, investigasi mendalam, dan warta terkini.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s104/index.m3u8", poster: "assets/kompastv.png" },
-    { id: "metrotv", name: "Metro TV", genre: "Nasional News", desc: "Saluran berita 24 jam dengan program talkshow politik dan ekonomi nasional.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s103/index.m3u8", poster: "assets/metrotv.png" },
-    { id: "tvone", name: "TV One", genre: "Nasional News & Sport", desc: "Warta berita, debat politik nasional, dan liputan olahraga terhangat.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s105/index.m3u8", poster: "assets/tvone.png" },
-    { id: "trans7", name: "Trans7", genre: "Hiburan & Edukasi", desc: "Program ragam hiburan keluarga, petualangan alam, dan edukasi populer Indonesia.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s108/index.m3u8", poster: "assets/trans7.png" },
-    { id: "transtv", name: "Trans TV", genre: "Bioskop & Lifestyle", desc: "Film bioskop box office terpopuler, gaya hidup, dan reality show keluarga.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s107/index.m3u8", poster: "assets/transtv.png" },
-    { id: "nettv", name: "Net TV", genre: "Televisi Masa Kini", desc: "Program kreatif anak muda, komedi segar, drama, dan konser musik spektakuler.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s111/index.m3u8", poster: "assets/nettv.png" },
-    { id: "indosiar", name: "Indosiar", genre: "Mega Series & Liga 1", desc: "Siaran langsung kompetisi sepak bola Liga 1 Indonesia dan drama realita.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s102/index.m3u8", poster: "assets/indosiar.png" },
-    { id: "sctv", name: "SCTV", genre: "Sinetron & Olahraga", desc: "Sinetron primetime unggulan, liputan berita Liputan6, dan kompetisi bergengsi.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s101/index.m3u8", poster: "assets/sctv.png" },
-    { id: "rcti", name: "RCTI", genre: "Kebanggaan Bersama", desc: "Saluran televisi swasta pertama Indonesia dengan tayangan hiburan keluarga dan ajang pencarian bakat.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s100/index.m3u8", poster: "assets/rcti.png" },
-    { id: "cnnid", name: "CNN Indonesia", genre: "Berita & Finansial", desc: "Berita akurat dan terpercaya dengan standar jurnalisme global dalam Bahasa Indonesia.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s106/index.m3u8", poster: "assets/cnnid.png" },
-    { id: "cnbcid", name: "CNBC Indonesia", genre: "Pasar Modal & Bisnis", desc: "Analisis pasar modal, tren investasi, berita ekonomi makro, dan bisnis global.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s110/index.m3u8", poster: "assets/cnbcid.png" },
-    { id: "inews", name: "iNews", genre: "Inspirasi & Daerah", desc: "Jaringan televisi berita daerah terbesar di Indonesia dengan siaran olahraga pilihan.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s109/index.m3u8", poster: "assets/inews.png" },
-    { id: "tvri", name: "TVRI Nasional", genre: "Saluran Pemersatu", desc: "Lembaga penyiaran publik yang menjangkau seluruh pelosok kepulauan nusantara.", stream: "https://op-group1-swiftservehd-1.dens.tv/s/s112/index.m3u8", poster: "assets/tvri.png" },
-    { id: "nhkworld", name: "NHK World Japan", genre: "Internasional (Jepang)", desc: "Warta berita dunia, dokumenter sains, dan kebudayaan Jepang berbahasa Inggris 24/7.", stream: "https://nhkwlive-ojp.akamaized.net/hls/live/2003459/nhkwlive-ojp-en/index.m3u8", poster: "assets/nhkworld.png" },
+    { id: "trans7", name: "Trans7", genre: "Nasional Hiburan", desc: "Program ragam hiburan keluarga, petualangan alam, dan edukasi populer Indonesia.", stream: "https://live.cnbcindonesia.com/trans7/smil:trans7.smil/playlist.m3u8", poster: "assets/trans7.png" },
+    { id: "transtv", name: "Trans TV", genre: "Bioskop & Lifestyle", desc: "Film bioskop box office terpopuler, gaya hidup, dan reality show keluarga.", stream: "https://live.cnbcindonesia.com/transtv/smil:transtv.smil/playlist.m3u8", poster: "assets/transtv.png" },
+    { id: "metrotv", name: "Metro TV", genre: "Nasional News", desc: "Saluran berita 24 jam dengan program talkshow politik dan ekonomi nasional.", stream: "https://edge.medcom.id/live-edge/smil:metro.smil/playlist.m3u8", poster: "assets/metrotv.png" },
+    { id: "tvri", name: "TVRI Nasional", genre: "Saluran Pemersatu", desc: "Lembaga penyiaran publik yang menjangkau seluruh pelosok kepulauan nusantara.", stream: "https://ott-balancer.tvri.go.id/live/eds/Nasional/hls/Nasional.m3u8", poster: "assets/tvri.png" },
+    { id: "tvri_bali", name: "TVRI Bali", genre: "Seni & Wisata", desc: "Warta budaya, seni tradisi Dewata, dan pariwisata Pulau Bali.", stream: "https://ott-balancer.tvri.go.id/live/eds/Bali/hls/Bali.m3u8", poster: "assets/tvri.png" },
+    { id: "tvri_sumut", name: "TVRI Sumatera Utara", genre: "Warta Regional", desc: "Warta berita, kebudayaan Melayu Batak, dan ragam acara Sumatera Utara.", stream: "https://ott-balancer.tvri.go.id/live/eds/Sumut/hls/Sumut.m3u8", poster: "assets/tvri.png" },
+    { id: "tvri_kalsel", name: "TVRI Kalimantan Selatan", genre: "Warta Borneo", desc: "Liputan Borneo, warta budaya Banjar, dan siaran regional Kalsel.", stream: "https://ott-balancer.tvri.go.id/live/eds/Kalsel/hls/Kalsel.m3u8", poster: "assets/tvri.png" },
+    { id: "tvri_jateng", name: "TVRI Jawa Tengah", genre: "Daerah & Budaya", desc: "Siaran kearifan lokal, budaya, dan warta regional Jawa Tengah.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jateng/hls/Jateng.m3u8", poster: "assets/tvri.png" },
+    { id: "tvri_jatim", name: "TVRI Jawa Timur", genre: "Daerah & Informasi", desc: "Siaran informasi daerah dan hiburan masyarakat Jawa Timur.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jatim/hls/Jatim.m3u8", poster: "assets/tvri.png" },
+    { id: "tvri_jogja", name: "TVRI Yogyakarta", genre: "Budaya Nusantara", desc: "Warta budaya istimewa, seni tradisi, dan liputan Yogyakarta.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jogjakarta/hls/Jogjakarta.m3u8", poster: "assets/tvri.png" },
+    { id: "nhkworld", name: "NHK World Japan", genre: "Internasional (Jepang)", desc: "Warta berita dunia, dokumenter sains, dan kebudayaan Jepang berbahasa Inggris 24/7.", stream: "https://media-tyo.hls.nhkworld.jp/hls/w/live/master.m3u8", poster: "assets/nhkworld.png" },
     { id: "dw", name: "DW English", genre: "Internasional (Jerman)", desc: "Saluran berita internasional Jerman menyajikan liputan peristiwa dunia dan laporan mendalam.", stream: "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8", poster: "assets/dw.png" },
-    { id: "france24", name: "France 24", genre: "Internasional (Prancis)", desc: "Perspektif berita Eropa dan Timur Tengah langsung dari Paris dalam Bahasa Inggris.", stream: "https://static.france24.com/live/F24_EN_LO_HLS/live_tv.m3u8", poster: "assets/france24.png" },
-    { id: "aljazeera", name: "Al Jazeera", genre: "Internasional (Qatar)", desc: "Jurnalisme investigasi independen pemenang penghargaan dengan jaringan reporter terluas.", stream: "https://live-hls-web-aje.getaj.net/AJE/01.m3u8", poster: "assets/aljazeera.png" }
+    { id: "ahsantv", name: "Ahsan TV", genre: "Edukasi Islami", desc: "Siaran kajian keluarga dan edukasi Islam berkualitas.", stream: "https://5bf7b725107e5.streamlock.net/ahsantv/ahsantv/playlist.m3u8", poster: "assets/settings.png" },
+    { id: "ugtv", name: "UGTV Gunadarma", genre: "Pendidikan & Sains", desc: "Televisi edukasi, sains terapan, dan warta kampus Universitas Gunadarma.", stream: "https://cdn.gunadarma.ac.id/streams/ugtv/ingestugtv.m3u8", poster: "assets/settings.png" },
+    { id: "aktv", name: "AKTV", genre: "Inspirasi Regional", desc: "Siaran warta lokal dan ragam acara seni budaya Jawa Barat.", stream: "https://akativi.siar.us/live/akativi.m3u8", poster: "assets/settings.png" },
+    { id: "ammedia", name: "AM Media", genre: "Religi & Komunitas", desc: "Saluran siaran dakwah dan informasi komunitas.", stream: "https://ammedia.siar.us/ammedia/live/playlist.m3u8", poster: "assets/settings.png" },
+    { id: "muxtest", name: "Big Buck Bunny HD", genre: "Uji Coba 60fps", desc: "Video streaming pengujian performa hardware dekoder HLS 1080p 60fps.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/settings.png" }
 ];
 
 const ADULT_CHANNELS = [
@@ -34,7 +35,7 @@ let currentChannelIndex = 0;
 let hlsPlayer = null;
 
 // Secret Remote Sequence Tracking (UP, UP, DOWN, DOWN)
-const SECRET_COMBO = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown"];
+const SECRET_COMBO = [38, 38, 40, 40]; // Keycodes for ArrowUp & ArrowDown
 let keyHistory = [];
 
 // Vault State Management
@@ -49,13 +50,20 @@ function initLauncher() {
     updateClock();
     setInterval(updateClock, 1000);
     renderChannels();
-    setupDpadNavigation();
     setupBillboardListeners();
     setupVaultKeypad();
+    setupDpadNavigation();
 
-    // Default focus on first card of Home pane
-    const firstCard = document.querySelector("#pane-home .tv-card");
-    if (firstCard) firstCard.focus();
+    // Default focus: focus first card on Home pane
+    setTimeout(() => {
+        const firstCard = document.querySelector("#pane-home .tv-card");
+        if (firstCard) {
+            firstCard.focus();
+        } else {
+            const firstTab = document.querySelector(".nav-tab");
+            if (firstTab) firstTab.focus();
+        }
+    }, 150);
 }
 
 function updateClock() {
@@ -92,7 +100,7 @@ function renderChannels() {
 function createChannelCard(ch, index) {
     const btn = document.createElement("button");
     btn.className = "tv-card channel-card";
-    btn.tabIndex = -1;
+    btn.tabIndex = 0;
     btn.setAttribute("data-stream", ch.stream);
     btn.setAttribute("data-title", ch.name);
     btn.setAttribute("data-desc", ch.desc);
@@ -102,7 +110,7 @@ function createChannelCard(ch, index) {
 
     btn.innerHTML = `
         <div class="channel-poster-wrap">
-            <img src="${ch.poster}" alt="${ch.name}" class="channel-poster-img" loading="lazy">
+            <img src="${ch.poster}" alt="${ch.name}" class="channel-poster-img" onerror="this.src='assets/settings.png'">
             <span class="channel-live-pill">LIVE</span>
         </div>
         <div class="channel-card-body">
@@ -143,7 +151,7 @@ function setupBillboardListeners() {
 /* ==============================================================================
    TAB SWITCHING ENGINE
    ============================================================================== */
-function switchTab(index) {
+function switchTab(index, shouldFocusPane = false) {
     if (index < 0 || index >= TABS.length) return;
     activeTabIndex = index;
     const targetTab = TABS[activeTabIndex];
@@ -154,7 +162,6 @@ function switchTab(index) {
         const isActive = i === activeTabIndex;
         tab.classList.toggle("active", isActive);
         tab.setAttribute("aria-selected", String(isActive));
-        tab.tabIndex = isActive ? 0 : -1;
     });
 
     // Update Panes
@@ -167,81 +174,159 @@ function switchTab(index) {
         }
     });
 
-    // Reset key sequence on tab switch
     keyHistory = [];
+
+    if (shouldFocusPane) {
+        const currentPane = document.getElementById(`pane-${targetTab}`);
+        if (currentPane) {
+            const firstCard = currentPane.querySelector(".tv-card");
+            if (firstCard) firstCard.focus();
+        }
+    }
 }
 
 /* ==============================================================================
-   D-PAD SPATIAL NAVIGATION & SECRET COMBO
+   2D SPATIAL D-PAD NAVIGATION ENGINE
    ============================================================================== */
 function setupDpadNavigation() {
     document.addEventListener("keydown", (e) => {
-        const key = e.key;
+        const code = e.keyCode || e.which;
 
-        // Check Secret Combo on Settings Tab
+        // Overlay & Modal Handlers first
+        const videoOverlay = document.getElementById("video-overlay");
+        if (videoOverlay && videoOverlay.style.display === "block") {
+            handleVideoPlayerKeys(e, code);
+            return;
+        }
+
+        const vaultModal = document.getElementById("vault-modal");
+        if (vaultModal && vaultModal.open) {
+            handleVaultModalKeys(e, code);
+            return;
+        }
+
+        // Secret Combo Tracking on Settings Tab
         if (TABS[activeTabIndex] === "settings") {
-            keyHistory.push(key);
-            if (keyHistory.length > SECRET_COMBO.length) {
-                keyHistory.shift();
-            }
-            if (isSecretComboMatched()) {
-                e.preventDefault();
-                keyHistory = [];
-                triggerSecretVault();
-                return;
-            }
-        }
-
-        // Global Back key handler
-        if (key === "Escape" || key === "Backspace") {
-            const videoOverlay = document.getElementById("video-overlay");
-            if (videoOverlay && !videoOverlay.hidden) {
-                e.preventDefault();
-                closePlayer();
-                return;
-            }
-
-            const vaultModal = document.getElementById("vault-modal");
-            if (vaultModal && vaultModal.open) {
-                e.preventDefault();
-                closeVault();
-                return;
-            }
-        }
-
-        // Tab Row Navigation
-        const activeEl = document.activeElement;
-        if (activeEl && activeEl.classList.contains("nav-tab")) {
-            if (key === "ArrowRight") {
-                e.preventDefault();
-                const next = (activeTabIndex + 1) % TABS.length;
-                switchTab(next);
-                document.querySelectorAll(".nav-tab")[next].focus();
-            } else if (key === "ArrowLeft") {
-                e.preventDefault();
-                const prev = (activeTabIndex - 1 + TABS.length) % TABS.length;
-                switchTab(prev);
-                document.querySelectorAll(".nav-tab")[prev].focus();
-            } else if (key === "ArrowDown") {
-                e.preventDefault();
-                const currentPane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
-                if (currentPane) {
-                    const firstCard = currentPane.querySelector(".tv-card");
-                    if (firstCard) firstCard.focus();
+            if (code === 38 || code === 40) { // Up or Down
+                keyHistory.push(code);
+                if (keyHistory.length > SECRET_COMBO.length) {
+                    keyHistory.shift();
                 }
+                if (isSecretComboMatched()) {
+                    e.preventDefault();
+                    keyHistory = [];
+                    triggerSecretVault();
+                    return;
+                }
+            } else {
+                keyHistory = [];
+            }
+        }
+
+        const current = document.activeElement;
+
+        // CASE A: Focus is on Top Navigation Tabs
+        if (current && current.classList.contains("nav-tab")) {
+            const tabs = Array.from(document.querySelectorAll(".nav-tab"));
+            const curIdx = tabs.indexOf(current);
+
+            switch (code) {
+                case 39: // Right
+                    e.preventDefault();
+                    if (curIdx + 1 < tabs.length) {
+                        tabs[curIdx + 1].focus();
+                        switchTab(curIdx + 1, false);
+                    }
+                    break;
+                case 37: // Left
+                    e.preventDefault();
+                    if (curIdx - 1 >= 0) {
+                        tabs[curIdx - 1].focus();
+                        switchTab(curIdx - 1, false);
+                    }
+                    break;
+                case 40: // Down -> Move into Active Pane Cards
+                    e.preventDefault();
+                    const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
+                    if (activePane) {
+                        const firstCard = activePane.querySelector(".tv-card");
+                        if (firstCard) firstCard.focus();
+                    }
+                    break;
+                case 13: // Enter / Center OK
+                case 23:
+                    e.preventDefault();
+                    switchTab(curIdx, true);
+                    break;
             }
             return;
         }
 
-        // Move Up to Tab Bar from top row cards
-        if (key === "ArrowUp" && activeEl && activeEl.classList.contains("tv-card")) {
-            const currentPane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
-            const allCards = Array.from(currentPane ? currentPane.querySelectorAll(".tv-card") : []);
-            const currentIndex = allCards.indexOf(activeEl);
-            if (currentIndex >= 0 && currentIndex < 4) {
-                e.preventDefault();
-                const currentTabBtn = document.querySelectorAll(".nav-tab")[activeTabIndex];
-                if (currentTabBtn) currentTabBtn.focus();
+        // CASE B: Focus is on a Card inside Active Pane
+        if (current && current.classList.contains("tv-card")) {
+            const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
+            if (!activePane) return;
+
+            const cards = Array.from(activePane.querySelectorAll(".tv-card"));
+            const curIdx = cards.indexOf(current);
+            if (curIdx === -1) return;
+
+            // Compute columns based on grid layout
+            const parentShelf = current.closest(".shelf-grid");
+            let cols = 4;
+            if (parentShelf) {
+                if (parentShelf.classList.contains("dual-yt-shelf")) cols = 3;
+                else if (parentShelf.classList.contains("channels-shelf")) cols = 4;
+                else if (parentShelf.classList.contains("channels-full-grid")) cols = 4;
+                else if (parentShelf.classList.contains("apps-shelf")) cols = 4;
+                else if (parentShelf.classList.contains("settings-shelf")) cols = 4;
+            }
+
+            switch (code) {
+                case 39: // Right
+                    e.preventDefault();
+                    if (curIdx + 1 < cards.length) {
+                        cards[curIdx + 1].focus();
+                    }
+                    break;
+
+                case 37: // Left
+                    e.preventDefault();
+                    if (curIdx - 1 >= 0) {
+                        cards[curIdx - 1].focus();
+                    }
+                    break;
+
+                case 40: // Down
+                    e.preventDefault();
+                    if (curIdx + cols < cards.length) {
+                        cards[curIdx + cols].focus();
+                    }
+                    break;
+
+                case 38: // Up
+                    e.preventDefault();
+                    if (curIdx - cols >= 0) {
+                        cards[curIdx - cols].focus();
+                    } else {
+                        // At top row of cards -> jump up to active Navigation Tab!
+                        const currentTab = document.querySelectorAll(".nav-tab")[activeTabIndex];
+                        if (currentTab) currentTab.focus();
+                    }
+                    break;
+
+                case 13: // Enter / OK
+                case 23: // DPAD_CENTER
+                    e.preventDefault();
+                    current.click();
+                    break;
+
+                case 27: // Escape / Back
+                case 4:
+                    // Jump to Nav tab on Back press if in pane
+                    const currentTab = document.querySelectorAll(".nav-tab")[activeTabIndex];
+                    if (currentTab) currentTab.focus();
+                    break;
             }
         }
     });
@@ -306,6 +391,75 @@ function triggerSecretVault() {
     if (firstKey) firstKey.focus();
 }
 
+function handleVaultModalKeys(e, code) {
+    if (code === 27 || code === 4) { // Escape / Back
+        e.preventDefault();
+        closeVault();
+        return;
+    }
+
+    const current = document.activeElement;
+    if (!current) return;
+
+    // Inside Vault Unlocked View
+    const contentEl = document.getElementById("vault-content");
+    if (contentEl && !contentEl.hidden) {
+        const adultCards = Array.from(contentEl.querySelectorAll(".tv-card, .btn-lock, #btn-cancel-vault"));
+        const idx = adultCards.indexOf(current);
+        if (idx !== -1) {
+            if (code === 39 && idx + 1 < adultCards.length) { e.preventDefault(); adultCards[idx + 1].focus(); }
+            else if (code === 37 && idx - 1 >= 0) { e.preventDefault(); adultCards[idx - 1].focus(); }
+            else if (code === 13 || code === 23) { e.preventDefault(); current.click(); }
+        }
+        return;
+    }
+
+    // Inside Numeric Keypad Grid (3 columns)
+    const keypad = document.getElementById("vault-keypad");
+    if (!keypad || keypad.hidden) return;
+
+    const btns = Array.from(keypad.querySelectorAll(".pin-btn"));
+    const curIdx = btns.indexOf(current);
+
+    if (curIdx !== -1) {
+        switch (code) {
+            case 39: // Right
+                e.preventDefault();
+                if (curIdx + 1 < btns.length) btns[curIdx + 1].focus();
+                break;
+            case 37: // Left
+                e.preventDefault();
+                if (curIdx - 1 >= 0) btns[curIdx - 1].focus();
+                break;
+            case 40: // Down (grid 3 cols)
+                e.preventDefault();
+                if (curIdx + 3 < btns.length) btns[curIdx + 3].focus();
+                else {
+                    const cancelBtn = document.getElementById("btn-cancel-vault");
+                    if (cancelBtn) cancelBtn.focus();
+                }
+                break;
+            case 38: // Up (grid 3 cols)
+                e.preventDefault();
+                if (curIdx - 3 >= 0) btns[curIdx - 3].focus();
+                break;
+            case 13: // OK
+            case 23:
+                e.preventDefault();
+                current.click();
+                break;
+        }
+    } else if (current.id === "btn-cancel-vault") {
+        if (code === 38) {
+            e.preventDefault();
+            btns[btns.length - 1].focus();
+        } else if (code === 13 || code === 23) {
+            e.preventDefault();
+            closeVault();
+        }
+    }
+}
+
 function setupVaultKeypad() {
     const keypad = document.getElementById("vault-keypad");
     if (!keypad) return;
@@ -318,23 +472,13 @@ function setupVaultKeypad() {
     });
 
     const btnCloseVault = document.getElementById("btn-close-vault");
-    if (btnCloseVault) {
-        btnCloseVault.addEventListener("click", () => {
-            closeVault();
-        });
-    }
+    if (btnCloseVault) btnCloseVault.addEventListener("click", closeVault);
 
     const btnCancel = document.getElementById("btn-cancel-vault");
-    if (btnCancel) {
-        btnCancel.addEventListener("click", () => {
-            closeVault();
-        });
-    }
+    if (btnCancel) btnCancel.addEventListener("click", closeVault);
 }
 
 function handleVaultKey(key) {
-    const statusEl = document.getElementById("vault-status-msg");
-
     if (key === "clear") {
         currentPinInput = "";
         updatePinDisplay();
@@ -349,9 +493,7 @@ function handleVaultKey(key) {
     if (currentPinInput.length < 4) {
         currentPinInput += key;
         updatePinDisplay();
-
         if (currentPinInput.length === 4) {
-            // Auto submit when 4 digits entered
             setTimeout(verifyVaultPin, 120);
         }
     }
@@ -448,7 +590,7 @@ function renderAdultChannels() {
 
         btn.innerHTML = `
             <div class="channel-poster-wrap">
-                <img src="${ch.poster}" alt="${ch.name}" class="channel-poster-img">
+                <img src="${ch.poster}" alt="${ch.name}" class="channel-poster-img" onerror="this.src='assets/settings.png'">
                 <span class="channel-live-pill" style="background:#e11d48">18+</span>
             </div>
             <div class="channel-card-body">
@@ -477,6 +619,9 @@ function closeVault() {
     if (modal) modal.close();
     currentPinInput = "";
     vaultState = "LOCKED";
+    // Refocus settings card
+    const firstSettings = document.querySelector("#pane-settings .tv-card");
+    if (firstSettings) firstSettings.focus();
 }
 
 function getStoredPin() {
@@ -493,7 +638,7 @@ function storePin(pin) {
 }
 
 /* ==============================================================================
-   HLS FULLSCREEN PLAYER ENGINE
+   HLS FULLSCREEN PLAYER ENGINE (OFFLINE & LOCAL EMBEDDED FALLBACK)
    ============================================================================== */
 function playStream(url, name, index) {
     if (typeof index === "number") currentChannelIndex = index;
@@ -503,47 +648,130 @@ function playStream(url, name, index) {
     const video = document.getElementById("tv-video-player");
 
     if (nameEl) nameEl.textContent = name || "Channel Live";
-    if (overlay) overlay.hidden = false;
+    if (overlay) {
+        overlay.style.display = "block";
+        overlay.hidden = false;
+    }
 
     if (!video) return;
 
     if (hlsPlayer) {
-        hlsPlayer.destroy();
+        try { hlsPlayer.destroy(); } catch (_) {}
         hlsPlayer = null;
     }
 
-    if (window.Hls && Hls.isSupported()) {
-        hlsPlayer = new Hls({ enableWorker: false, lowLatencyMode: true });
-        hlsPlayer.loadSource(url);
-        hlsPlayer.attachMedia(video);
-        hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+    // Check Hls availability (local or global)
+    if (typeof Hls !== "undefined" && Hls.isSupported() && url.includes(".m3u8")) {
+        try {
+            hlsPlayer = new Hls({
+                maxBufferLength: 15,
+                maxMaxBufferLength: 30,
+                enableWorker: false, // Safer on WebView
+                lowLatencyMode: false,
+                backBufferLength: 10
+            });
+            hlsPlayer.loadSource(url);
+            hlsPlayer.attachMedia(video);
+            hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play().catch(() => {});
+            });
+            hlsPlayer.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            hlsPlayer.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hlsPlayer.recoverMediaError();
+                            break;
+                        default:
+                            destroyPlayer();
+                            break;
+                    }
+                }
+            });
+        } catch (e) {
+            // Direct native fallback
+            video.src = url;
             video.play().catch(() => {});
-        });
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        }
+    } else {
         video.src = url;
+        video.load();
         video.play().catch(() => {});
     }
 
     const backBtn = document.getElementById("btn-back-player");
-    if (backBtn) {
-        backBtn.onclick = closePlayer;
-        backBtn.focus();
+    if (backBtn) backBtn.focus();
+}
+
+function handleVideoPlayerKeys(e, code) {
+    if (code === 27 || code === 4 || e.key === "Escape" || e.key === "Backspace") {
+        e.preventDefault();
+        closePlayer();
+        return;
+    }
+
+    // Switch channels left/right with D-Pad
+    if (code === 39) { // Next Channel
+        e.preventDefault();
+        currentChannelIndex = (currentChannelIndex + 1) % CHANNELS.length;
+        const next = CHANNELS[currentChannelIndex];
+        playStream(next.stream, next.name, currentChannelIndex);
+    } else if (code === 37) { // Previous Channel
+        e.preventDefault();
+        currentChannelIndex = (currentChannelIndex - 1 + CHANNELS.length) % CHANNELS.length;
+        const prev = CHANNELS[currentChannelIndex];
+        playStream(prev.stream, prev.name, currentChannelIndex);
+    }
+}
+
+function destroyPlayer() {
+    const video = document.getElementById("tv-video-player");
+    if (hlsPlayer) {
+        try { hlsPlayer.destroy(); } catch (_) {}
+        hlsPlayer = null;
+    }
+    if (video) {
+        video.pause();
+        video.removeAttribute("src");
+        video.load();
     }
 }
 
 function closePlayer() {
     const overlay = document.getElementById("video-overlay");
-    const video = document.getElementById("tv-video-player");
+    destroyPlayer();
+    if (overlay) {
+        overlay.style.display = "none";
+        overlay.hidden = true;
+    }
 
-    if (hlsPlayer) {
-        hlsPlayer.destroy();
-        hlsPlayer = null;
+    // Refocus active pane first card
+    const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
+    if (activePane) {
+        const first = activePane.querySelector(".tv-card");
+        if (first) first.focus();
     }
-    if (video) {
-        video.pause();
-        video.src = "";
-    }
-    if (overlay) overlay.hidden = true;
+}
+
+// Android Back Hook
+if (typeof window !== "undefined") {
+    window.onAndroidBack = function() {
+        const overlay = document.getElementById("video-overlay");
+        if (overlay && overlay.style.display === "block") {
+            closePlayer();
+            return true;
+        }
+
+        const vaultModal = document.getElementById("vault-modal");
+        if (vaultModal && vaultModal.open) {
+            closeVault();
+            return true;
+        }
+
+        return false;
+    };
 }
 
 /* ==============================================================================
