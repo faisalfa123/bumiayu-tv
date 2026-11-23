@@ -41,10 +41,11 @@ const CHANNELS = [
 ];
 
 const ADULT_CHANNELS = [
-    { id: "vault_adult_1", name: "Saluran Privat Dewasa 1", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 1080p.", stream: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8", poster: "assets/vault_adult_1.png" },
+    { id: "vault_adult_1", name: "Saluran Privat Dewasa 1", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 1080p.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult_1.png" },
     { id: "vault_adult_2", name: "Saluran Privat Dewasa 2", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 60fps.", stream: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8", poster: "assets/vault_adult_2.png" },
-    { id: "vault_adult_3", name: "Saluran Privat Dewasa 3", genre: "18+ Cadangan HLS", desc: "Siaran cadangan kecepatan tinggi proteksi PIN.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" }
+    { id: "vault_adult_3", name: "Saluran Privat Dewasa 3", genre: "18+ Multi-Bitrate HD", desc: "Siaran cadangan kecepatan tinggi proteksi PIN.", stream: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8", poster: "assets/vault_adult_3.png" }
 ];
+
 
 let activeTabIndex = 0;
 const TABS = ["home", "livetv", "apps", "settings"];
@@ -60,47 +61,6 @@ let currentPinInput = "";
 let tempPinSetup = "";
 let vaultState = "LOCKED";
 
-let currentScreen = "PLAYBOX"; // "PLAYBOX" or "LEGION"
-
-function openLegionView(tabName = "home") {
-    currentScreen = "LEGION";
-    const pbView = document.getElementById("playbox-view");
-    const legionView = document.getElementById("legion-view");
-    if (pbView) pbView.style.display = "none";
-    if (legionView) legionView.style.display = "block";
-
-    const tabIdx = TABS.indexOf(tabName);
-    if (tabIdx !== -1) {
-        switchTab(tabIdx, true);
-    } else {
-        switchTab(0, true);
-    }
-}
-
-function openPlayboxView() {
-    currentScreen = "PLAYBOX";
-    const pbView = document.getElementById("playbox-view");
-    const legionView = document.getElementById("legion-view");
-    if (legionView) legionView.style.display = "none";
-    if (pbView) pbView.style.display = "flex";
-
-    const firstCard = document.getElementById("pb-card-livetv");
-    if (firstCard) firstCard.focus();
-}
-
-function setupPlayboxListeners() {
-    const cardLive = document.getElementById("pb-card-livetv");
-    const cardYt = document.getElementById("pb-card-youtube");
-    const cardCat = document.getElementById("pb-card-catalog");
-    const btnSettings = document.getElementById("pb-btn-settings");
-    const btnBackPb = document.getElementById("btn-back-to-playbox");
-
-    if (cardLive) cardLive.addEventListener("click", () => openLegionView("livetv"));
-    if (cardYt) cardYt.addEventListener("click", () => openLegionView("apps"));
-    if (cardCat) cardCat.addEventListener("click", () => openLegionView("home"));
-    if (btnSettings) btnSettings.addEventListener("click", () => openLegionView("settings"));
-    if (btnBackPb) btnBackPb.addEventListener("click", () => openPlayboxView());
-}
 
 
 /* ==============================================================================
@@ -113,15 +73,17 @@ function initLauncher() {
     setupBillboardListeners();
     setupVaultKeypad();
     setupDpadNavigation();
-    setupPlayboxListeners();
 
-    // Start cleanly on Playbox Landing View
+    // Focus immediately on TizenTube Cobalt (first card on Home pane)
     setTimeout(() => {
-        const pbCard = document.getElementById("pb-card-livetv");
-        if (pbCard) {
-            pbCard.focus();
+        const firstCard = document.querySelector("#pane-home .tv-card");
+        if (firstCard) {
+            firstCard.focus();
+        } else {
+            const firstTab = document.querySelector(".nav-tab");
+            if (firstTab) firstTab.focus();
         }
-    }, 150);
+    }, 120);
 }
 
 function updateClock() {
@@ -320,68 +282,7 @@ function setupDpadNavigation() {
             return;
         }
 
-        // CASE 0: PLAYBOX SCREEN NAVIGATION
-        if (currentScreen === "PLAYBOX") {
-            const pbCards = Array.from(document.querySelectorAll(".playbox-card"));
-            const btnSettings = document.getElementById("pb-btn-settings");
-            const curIdx = pbCards.indexOf(current);
 
-            switch (code) {
-                case 39: // Right
-                    e.preventDefault();
-                    if (curIdx !== -1 && curIdx + 1 < pbCards.length) {
-                        pbCards[curIdx + 1].focus();
-                    }
-                    break;
-                case 37: // Left
-                    e.preventDefault();
-                    if (curIdx !== -1 && curIdx - 1 >= 0) {
-                        pbCards[curIdx - 1].focus();
-                    }
-                    break;
-                case 38: // Up -> to settings icon
-                    e.preventDefault();
-                    if (btnSettings) btnSettings.focus();
-                    break;
-                case 40: // Down -> back to cards
-                    e.preventDefault();
-                    if (current === btnSettings && pbCards.length > 0) {
-                        pbCards[0].focus();
-                    }
-                    break;
-                case 13:
-                case 23:
-                    e.preventDefault();
-                    if (current) current.click();
-                    break;
-            }
-            return;
-        }
-
-        // Focus on Back to Playbox Button in Legion Hub
-        if (current && current.id === "btn-back-to-playbox") {
-            switch (code) {
-                case 39: // Right -> to first nav tab
-                    e.preventDefault();
-                    const firstTab = document.querySelectorAll(".nav-tab")[0];
-                    if (firstTab) firstTab.focus();
-                    break;
-                case 40: // Down -> into active pane
-                    e.preventDefault();
-                    const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
-                    if (activePane) {
-                        const firstCard = activePane.querySelector(".tv-card");
-                        if (firstCard) firstCard.focus();
-                    }
-                    break;
-                case 13:
-                case 23:
-                    e.preventDefault();
-                    openPlayboxView();
-                    break;
-            }
-            return;
-        }
 
         // CASE B: Focus is on a Card inside Active Pane (PER-SHELF GRID NAVIGATION)
         if (current && current.classList.contains("tv-card")) {
@@ -467,9 +368,9 @@ function setupDpadNavigation() {
 
                 case 27: // Escape / Back
                 case 4:
-                    // Back from Legion catalog returns to Playbox
                     e.preventDefault();
-                    openPlayboxView();
+                    const curTab = document.querySelectorAll(".nav-tab")[activeTabIndex];
+                    if (curTab) curTab.focus();
                     break;
             }
         }
@@ -821,11 +722,15 @@ function playStream(url, name, index) {
     if (typeof Hls !== "undefined" && Hls.isSupported() && url.includes(".m3u8")) {
         try {
             hlsPlayer = new Hls({
-                maxBufferLength: 15,
-                maxMaxBufferLength: 30,
-                enableWorker: false, // Safer on WebView
+                maxBufferLength: 8,
+                maxMaxBufferLength: 15,
+                maxBufferSize: 30 * 1000 * 1000, // 30MB ram cap
+                enableWorker: false,
                 lowLatencyMode: false,
-                backBufferLength: 10
+                backBufferLength: 4,
+                fragLoadingTimeOut: 12000,
+                manifestLoadingTimeOut: 10000,
+                levelLoadingTimeOut: 10000
             });
             hlsPlayer.loadSource(url);
             hlsPlayer.attachMedia(video);
@@ -941,8 +846,8 @@ if (typeof window !== "undefined") {
         }
 
         // Return to home if on another tab
-        if (currentScreen === "LEGION") {
-            openPlayboxView();
+        if (activeTabIndex !== 0) {
+            switchTab(0, true);
             return true;
         }
 
