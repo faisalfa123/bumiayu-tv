@@ -35,8 +35,8 @@ const CHANNELS = [
 ];
 
 const ADULT_CHANNELS = [
-    { id: "adult_1", name: "Dewasa Vault 1", genre: "18+ Private", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" },
-    { id: "adult_2", name: "Dewasa Vault 2", genre: "18+ Private", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" }
+    { id: "adult_1", name: "Saluran Privat Dewasa 1", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 1080p.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" },
+    { id: "adult_2", name: "Saluran Privat Dewasa 2", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 60fps.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" }
 ];
 
 let activeTabIndex = 0;
@@ -209,9 +209,9 @@ function setupDpadNavigation() {
             return;
         }
 
-        const vaultModal = document.getElementById("vault-modal");
-        if (vaultModal && vaultModal.open) {
-            handleVaultModalKeys(e, code);
+        const vaultScreen = document.getElementById("vault-screen");
+        if (vaultScreen && vaultScreen.style.display !== "none") {
+            handleVaultScreenKeys(e, code);
             return;
         }
 
@@ -359,113 +359,133 @@ function isSecretComboMatched() {
 }
 
 /* ==============================================================================
-   STEALTH 18+ VAULT & FIRST-TIME PIN WIZARD
+   STEALTH 18+ VAULT & DEDICATED FULLSCREEN LOCK SCREEN (NETFLIX / APPLE TV STYLE)
+   Strictly Zero Floating Dialogs Covering Video
    ============================================================================== */
 function triggerSecretVault() {
-    const modal = document.getElementById("vault-modal");
-    if (!modal) return;
+    const vaultScreen = document.getElementById("vault-screen");
+    const pinView = document.getElementById("vault-pin-view");
+    const unlockedView = document.getElementById("vault-unlocked-view");
+    if (!vaultScreen || !pinView || !unlockedView) return;
 
     currentPinInput = "";
+    tempPinSetup = "";
     const savedPin = getStoredPin();
 
-    const titleEl = document.getElementById("vault-modal-title");
-    const descEl = document.getElementById("vault-modal-desc");
-    const statusEl = document.getElementById("vault-status-msg");
-    const contentEl = document.getElementById("vault-content");
-    const keypadEl = document.getElementById("vault-keypad");
+    const titleEl = document.getElementById("vault-pin-title");
+    const descEl = document.getElementById("vault-pin-desc");
+    const errorEl = document.getElementById("vault-pin-error");
 
-    if (contentEl) contentEl.hidden = true;
-    if (keypadEl) keypadEl.hidden = false;
+    vaultScreen.style.display = "flex";
+    pinView.style.display = "flex";
+    unlockedView.style.display = "none";
     updatePinDisplay();
 
     if (!savedPin) {
         vaultState = "SETUP_1";
         if (titleEl) titleEl.textContent = "🆕 Atur PIN 4-Digit Baru";
         if (descEl) descEl.textContent = "Tentukan 4 digit angka rahasia Anda.";
-        if (statusEl) {
-            statusEl.textContent = "Masukkan 4 digit PIN baru pilihan Anda";
-            statusEl.className = "vault-status-msg";
+        if (errorEl) {
+            errorEl.textContent = "Buat 4 digit PIN baru untuk mengamankan brankas";
+            errorEl.className = "pin-status-banner";
         }
     } else {
         vaultState = "ENTER_PIN";
-        if (titleEl) titleEl.textContent = "🔐 Buka Brankas 18+";
-        if (descEl) descEl.textContent = "Masukkan 4 digit PIN rahasia Anda.";
-        if (statusEl) {
-            statusEl.textContent = "Sesi 18+ tersembunyi total dari layar utama";
-            statusEl.className = "vault-status-msg";
+        if (titleEl) titleEl.textContent = "🔐 Brankas Privasi";
+        if (descEl) descEl.textContent = "Masukkan 4-digit PIN profil Anda.";
+        if (errorEl) {
+            errorEl.textContent = "";
+            errorEl.className = "pin-status-banner";
         }
     }
 
-    modal.showModal();
-    const firstKey = modal.querySelector(".pin-btn");
-    if (firstKey) firstKey.focus();
+    // Focus first key
+    setTimeout(() => {
+        const firstKey = pinView.querySelector(".pin-key");
+        if (firstKey) firstKey.focus();
+    }, 80);
 }
 
-function handleVaultModalKeys(e, code) {
-    if (code === 27 || code === 4) { // Escape / Back
+function handleVaultScreenKeys(e, code) {
+    if (code === 27 || code === 4 || e.key === "Escape" || e.key === "Backspace") {
         e.preventDefault();
         closeVault();
         return;
     }
 
+    // Remote Physical Number Keys (0-9)
+    if (vaultState === "ENTER_PIN" || vaultState === "SETUP_1" || vaultState === "SETUP_CONFIRM") {
+        let numKey = null;
+        if (code >= 48 && code <= 57) numKey = String(code - 48); // 0-9 top row
+        else if (code >= 96 && code <= 105) numKey = String(code - 96); // 0-9 numpad
+        if (numKey !== null) {
+            e.preventDefault();
+            handleVaultKey(numKey);
+            return;
+        }
+    }
+
     const current = document.activeElement;
     if (!current) return;
 
-    // Inside Vault Unlocked View
-    const contentEl = document.getElementById("vault-content");
-    if (contentEl && !contentEl.hidden) {
-        const adultCards = Array.from(contentEl.querySelectorAll(".tv-card, .btn-lock, #btn-cancel-vault"));
-        const idx = adultCards.indexOf(current);
-        if (idx !== -1) {
-            if (code === 39 && idx + 1 < adultCards.length) { e.preventDefault(); adultCards[idx + 1].focus(); }
-            else if (code === 37 && idx - 1 >= 0) { e.preventDefault(); adultCards[idx - 1].focus(); }
-            else if (code === 13 || code === 23) { e.preventDefault(); current.click(); }
+    const unlockedView = document.getElementById("vault-unlocked-view");
+    // Inside Unlocked Adult Shelf
+    if (unlockedView && unlockedView.style.display !== "none") {
+        const adultItems = Array.from(unlockedView.querySelectorAll(".tv-card, #btn-lock-vault"));
+        const curIdx = adultItems.indexOf(current);
+        if (curIdx !== -1) {
+            if (code === 39 && curIdx + 1 < adultItems.length) { // Right
+                e.preventDefault();
+                adultItems[curIdx + 1].focus();
+            } else if (code === 37 && curIdx - 1 >= 0) { // Left
+                e.preventDefault();
+                adultItems[curIdx - 1].focus();
+            } else if (code === 40 && current.id === "btn-lock-vault") { // Down from lock button to cards
+                e.preventDefault();
+                const firstCard = unlockedView.querySelector(".tv-card");
+                if (firstCard) firstCard.focus();
+            } else if (code === 38 && current.classList.contains("tv-card")) { // Up from cards to lock button
+                e.preventDefault();
+                const lockBtn = document.getElementById("btn-lock-vault");
+                if (lockBtn) lockBtn.focus();
+            } else if (code === 13 || code === 23) { // OK
+                e.preventDefault();
+                current.click();
+            }
         }
         return;
     }
 
-    // Inside Numeric Keypad Grid (3 columns)
-    const keypad = document.getElementById("vault-keypad");
-    if (!keypad || keypad.hidden) return;
+    // Inside PIN Keypad Grid (3 columns)
+    const pinView = document.getElementById("vault-pin-view");
+    if (!pinView || pinView.style.display === "none") return;
 
-    const btns = Array.from(keypad.querySelectorAll(".pin-btn"));
-    const curIdx = btns.indexOf(current);
+    const keys = Array.from(pinView.querySelectorAll(".pin-key"));
+    const curIdx = keys.indexOf(current);
 
     if (curIdx !== -1) {
         switch (code) {
             case 39: // Right
                 e.preventDefault();
-                if (curIdx + 1 < btns.length) btns[curIdx + 1].focus();
+                if (curIdx + 1 < keys.length) keys[curIdx + 1].focus();
                 break;
             case 37: // Left
                 e.preventDefault();
-                if (curIdx - 1 >= 0) btns[curIdx - 1].focus();
+                if (curIdx - 1 >= 0) keys[curIdx - 1].focus();
                 break;
             case 40: // Down (grid 3 cols)
                 e.preventDefault();
-                if (curIdx + 3 < btns.length) btns[curIdx + 3].focus();
-                else {
-                    const cancelBtn = document.getElementById("btn-cancel-vault");
-                    if (cancelBtn) cancelBtn.focus();
-                }
+                if (curIdx + 3 < keys.length) keys[curIdx + 3].focus();
                 break;
             case 38: // Up (grid 3 cols)
                 e.preventDefault();
-                if (curIdx - 3 >= 0) btns[curIdx - 3].focus();
+                if (curIdx - 3 >= 0) keys[curIdx - 3].focus();
                 break;
             case 13: // OK
             case 23:
                 e.preventDefault();
                 current.click();
                 break;
-        }
-    } else if (current.id === "btn-cancel-vault") {
-        if (code === 38) {
-            e.preventDefault();
-            btns[btns.length - 1].focus();
-        } else if (code === 13 || code === 23) {
-            e.preventDefault();
-            closeVault();
         }
     }
 }
@@ -474,29 +494,26 @@ function setupVaultKeypad() {
     const keypad = document.getElementById("vault-keypad");
     if (!keypad) return;
 
-    keypad.querySelectorAll(".pin-btn").forEach(btn => {
+    keypad.querySelectorAll(".pin-key").forEach(btn => {
         btn.addEventListener("click", () => {
             const key = btn.getAttribute("data-key");
-            handleVaultKey(key);
+            if (key) handleVaultKey(key);
         });
     });
 
-    const btnCloseVault = document.getElementById("btn-close-vault");
-    if (btnCloseVault) btnCloseVault.addEventListener("click", closeVault);
+    const btnLockVault = document.getElementById("btn-lock-vault");
+    if (btnLockVault) btnLockVault.addEventListener("click", closeVault);
 
-    const btnCancel = document.getElementById("btn-cancel-vault");
+    const btnCancel = document.getElementById("btn-cancel-pin");
     if (btnCancel) btnCancel.addEventListener("click", closeVault);
 }
 
 function handleVaultKey(key) {
     if (key === "clear") {
-        currentPinInput = "";
-        updatePinDisplay();
-        return;
-    }
-
-    if (key === "submit") {
-        verifyVaultPin();
+        if (currentPinInput.length > 0) {
+            currentPinInput = currentPinInput.slice(0, -1);
+            updatePinDisplay();
+        }
         return;
     }
 
@@ -504,34 +521,28 @@ function handleVaultKey(key) {
         currentPinInput += key;
         updatePinDisplay();
         if (currentPinInput.length === 4) {
-            setTimeout(verifyVaultPin, 120);
+            setTimeout(verifyVaultPin, 140);
         }
     }
 }
 
 function verifyVaultPin() {
-    const statusEl = document.getElementById("vault-status-msg");
-    const titleEl = document.getElementById("vault-modal-title");
-    const descEl = document.getElementById("vault-modal-desc");
+    const errorEl = document.getElementById("vault-pin-error");
+    const titleEl = document.getElementById("vault-pin-title");
+    const descEl = document.getElementById("vault-pin-desc");
 
-    if (currentPinInput.length !== 4) {
-        if (statusEl) {
-            statusEl.textContent = "Harap masukkan lengkap 4 digit angka!";
-            statusEl.className = "vault-status-msg error";
-        }
-        return;
-    }
+    if (currentPinInput.length !== 4) return;
 
     if (vaultState === "SETUP_1") {
         tempPinSetup = currentPinInput;
         currentPinInput = "";
         vaultState = "SETUP_CONFIRM";
         updatePinDisplay();
-        if (titleEl) titleEl.textContent = "🔄 Konfirmasi PIN Baru";
+        if (titleEl) titleEl.textContent = "🔄 Konfirmasi PIN";
         if (descEl) descEl.textContent = "Ulangi 4 digit angka yang sama.";
-        if (statusEl) {
-            statusEl.textContent = "Ketik ulang PIN untuk memastikan";
-            statusEl.className = "vault-status-msg";
+        if (errorEl) {
+            errorEl.textContent = "Ketik ulang PIN Anda sekali lagi";
+            errorEl.className = "pin-status-banner";
         }
     } else if (vaultState === "SETUP_CONFIRM") {
         if (currentPinInput === tempPinSetup) {
@@ -543,9 +554,9 @@ function verifyVaultPin() {
             vaultState = "SETUP_1";
             updatePinDisplay();
             if (titleEl) titleEl.textContent = "🆕 Atur PIN 4-Digit Baru";
-            if (statusEl) {
-                statusEl.textContent = "PIN tidak cocok! Silakan buat ulang dari awal.";
-                statusEl.className = "vault-status-msg error";
+            if (errorEl) {
+                errorEl.textContent = "PIN tidak cocok! Silakan buat ulang dari awal.";
+                errorEl.className = "pin-status-banner error";
             }
         }
     } else if (vaultState === "ENTER_PIN") {
@@ -555,9 +566,9 @@ function verifyVaultPin() {
         } else {
             currentPinInput = "";
             updatePinDisplay();
-            if (statusEl) {
-                statusEl.textContent = "PIN Salah! Coba lagi.";
-                statusEl.className = "vault-status-msg error";
+            if (errorEl) {
+                errorEl.textContent = "PIN Salah! Coba lagi.";
+                errorEl.className = "pin-status-banner error";
             }
         }
     }
@@ -565,22 +576,17 @@ function verifyVaultPin() {
 
 function unlockVaultSuccess() {
     vaultState = "UNLOCKED";
-    const titleEl = document.getElementById("vault-modal-title");
-    const statusEl = document.getElementById("vault-status-msg");
-    const keypadEl = document.getElementById("vault-keypad");
-    const contentEl = document.getElementById("vault-content");
+    const pinView = document.getElementById("vault-pin-view");
+    const unlockedView = document.getElementById("vault-unlocked-view");
 
-    if (titleEl) titleEl.textContent = "🔓 Sesi Rahasia 18+ Terbuka";
-    if (statusEl) {
-        statusEl.textContent = "Berhasil masuk ke brankas rahasia.";
-        statusEl.className = "vault-status-msg";
-    }
-    if (keypadEl) keypadEl.hidden = true;
-    if (contentEl) {
-        contentEl.hidden = false;
+    if (pinView) pinView.style.display = "none";
+    if (unlockedView) {
+        unlockedView.style.display = "flex";
         renderAdultChannels();
-        const firstAdult = contentEl.querySelector(".tv-card");
-        if (firstAdult) firstAdult.focus();
+        setTimeout(() => {
+            const firstAdult = unlockedView.querySelector(".tv-card");
+            if (firstAdult) firstAdult.focus();
+        }, 100);
     }
 }
 
@@ -596,11 +602,11 @@ function renderAdultChannels() {
         btn.setAttribute("data-stream", ch.stream);
         btn.setAttribute("data-title", ch.name);
         btn.setAttribute("data-desc", "Siaran terkunci proteksi keamanan 18+");
-        btn.setAttribute("data-badge", "18+ PROTECTED");
+        btn.setAttribute("data-badge", "18+ PRIVASI");
 
         btn.innerHTML = `
             <div class="channel-poster-wrap">
-                <img src="${ch.poster}" alt="${ch.name}" class="channel-poster-img" onerror="this.src='assets/settings.png'">
+                <img src="${ch.poster}" alt="${ch.name}" class="channel-poster-img" onerror="this.src='assets/vault_adult.png'">
                 <span class="channel-live-pill" style="background:#e11d48">18+</span>
             </div>
             <div class="channel-card-body">
@@ -618,17 +624,20 @@ function renderAdultChannels() {
 }
 
 function updatePinDisplay() {
-    const el = document.getElementById("vault-pin-display");
-    if (!el) return;
-    const len = currentPinInput.length;
-    el.textContent = "•".repeat(len) + "-".repeat(4 - len);
+    for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`pindot-${i}`);
+        if (dot) {
+            dot.classList.toggle("filled", i < currentPinInput.length);
+        }
+    }
 }
 
 function closeVault() {
-    const modal = document.getElementById("vault-modal");
-    if (modal) modal.close();
+    const vaultScreen = document.getElementById("vault-screen");
+    if (vaultScreen) vaultScreen.style.display = "none";
     currentPinInput = "";
     vaultState = "LOCKED";
+
     // Refocus settings card
     const firstSettings = document.querySelector("#pane-settings .tv-card");
     if (firstSettings) firstSettings.focus();
@@ -652,6 +661,10 @@ function storePin(pin) {
    ============================================================================== */
 function playStream(url, name, index) {
     if (typeof index === "number") currentChannelIndex = index;
+
+    // Immediately hide vault screen so video plays 100% full without dialog blocking
+    const vaultScreen = document.getElementById("vault-screen");
+    if (vaultScreen) vaultScreen.style.display = "none";
 
     const overlay = document.getElementById("video-overlay");
     const nameEl = document.getElementById("player-channel-name");
@@ -757,6 +770,19 @@ function closePlayer() {
         overlay.hidden = true;
     }
 
+    // If closing player from an unlocked vault session, return to vault shelf
+    if (vaultState === "UNLOCKED") {
+        const vaultScreen = document.getElementById("vault-screen");
+        const unlockedView = document.getElementById("vault-unlocked-view");
+        if (vaultScreen && unlockedView) {
+            vaultScreen.style.display = "flex";
+            unlockedView.style.display = "flex";
+            const firstAdult = unlockedView.querySelector(".tv-card");
+            if (firstAdult) firstAdult.focus();
+            return;
+        }
+    }
+
     // Refocus active pane first card
     const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
     if (activePane) {
@@ -774,9 +800,15 @@ if (typeof window !== "undefined") {
             return true;
         }
 
-        const vaultModal = document.getElementById("vault-modal");
-        if (vaultModal && vaultModal.open) {
+        const vaultScreen = document.getElementById("vault-screen");
+        if (vaultScreen && vaultScreen.style.display !== "none") {
             closeVault();
+            return true;
+        }
+
+        // Return to home if on another tab
+        if (activeTabIndex !== 0) {
+            switchTab(0, true);
             return true;
         }
 

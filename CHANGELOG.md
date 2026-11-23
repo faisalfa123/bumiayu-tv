@@ -44,6 +44,11 @@ The versioning format follows our project SOP defined in `VERSIONING_RULES.md`:
 - Dilengkapi **Panduan Pengaturan PIN Mandiri**: Saat pertama kali dibuka, pengguna langsung diminta membuat 4-digit PIN pilihan sendiri dan melakukan konfirmasi sebelum brankas dapat terbuka.
 - Menyediakan poster khusus `assets/vault_adult.png` dan `assets/vault_lock.png`.
 
+#### 6. Perbaikan Kritis: Dialog Menutupi Video & Fullscreen TV Lock Screen (Bug Fix Patch)
+- **Perbaikan Modal Menutupi Video:** Memperbaiki bug di mana modal dialog melayang tetap terbuka dan menutupi 80% layar saat video dewasa diputar. Kini saat saluran diklik, tampilan kunci otomatis tertutup total dan video tayang 100% fullscreen tanpa ada elemen keypad yang menghalangi.
+- **Dedicated Fullscreen TV Lock Screen (Ala Apple TV / Netflix Profile PIN):** Mengganti modal melayang yang kaku dengan antarmuka fullscreen elegan: 4 lingkaran dot PIN (`○ ○ ○ ○` -> `● ● ● ●`), keypad numerik D-Pad yang responsif, serta dukungan input langsung dari tombol angka remote fisik (0-9).
+- **Perbaikan Rasio 16:9 Thumbnail Hub:** Memperbaiki kontainer poster TizenTube, SmartTube, dan Senandung dari format kotak (90x90) menjadi rasio asli 16:9 (130x74px) sehingga logo dan teks tidak lagi terpotong di layar TV.
+
 ---
 
 ## [2.0.0] - 2026-11-23 [STABLE RELEASE]

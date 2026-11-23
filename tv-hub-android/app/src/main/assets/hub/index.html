@@ -49,7 +49,7 @@
         <!-- TAB PANE 1: BERANDA -->
         <div id="pane-home" class="tab-pane active" role="tabpanel" aria-labelledby="tab-home">
             <div class="shelf-section">
-                <h3 class="shelf-title">Dual YouTube Hub & Musik</h3>
+                <h3 class="shelf-title">Streaming & Musik</h3>
                 <div class="shelf-grid dual-yt-shelf">
                     <!-- Card 1: TizenTube Cobalt (DEFAULT) -->
                     <button class="tv-card yt-hero-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="YouTube Leanback tanpa iklan berbasis Samsung Tizen TV. Performa ultra ringan dan cepat." data-badge="YOUTUBE UTAMA" tabindex="0">
@@ -88,7 +88,7 @@
 
             <!-- Quick TV Row in Home -->
             <div class="shelf-section">
-                <h3 class="shelf-title">Sorotan Siaran TV Nasional</h3>
+                <h3 class="shelf-title">Saluran Sorotan</h3>
                 <div class="shelf-grid channels-shelf" id="home-channels-strip">
                     <!-- Populated dynamically with active streams -->
                 </div>
@@ -98,7 +98,7 @@
         <!-- TAB PANE 2: LIVE TV (SALURAN AKTIF 16:9 DENGAN POSTER) -->
         <div id="pane-livetv" class="tab-pane" role="tabpanel" aria-labelledby="tab-livetv" hidden>
             <div class="shelf-section">
-                <h3 class="shelf-title">Semua Saluran Siaran Langsung Nasional & Internasional (Aktif)</h3>
+                <h3 class="shelf-title">Saluran Televisi Siaran Langsung</h3>
                 <div class="shelf-grid channels-full-grid" id="full-channels-grid">
                     <!-- Populated dynamically with active streams -->
                 </div>
@@ -108,7 +108,7 @@
         <!-- TAB PANE 3: APLIKASI -->
         <div id="pane-apps" class="tab-pane" role="tabpanel" aria-labelledby="tab-apps" hidden>
             <div class="shelf-section">
-                <h3 class="shelf-title">Aplikasi Android TV Terpasang</h3>
+                <h3 class="shelf-title">Aplikasi Terpasang</h3>
                 <div class="shelf-grid apps-shelf">
                     <button class="tv-card app-card" data-pkg="org.smarttube.stable" data-title="SmartTube" data-desc="Aplikasi pemutar YouTube tanpa iklan." tabindex="0">
                         <img src="assets/youtube_tv.png" alt="SmartTube" class="app-icon">
@@ -141,7 +141,7 @@
         <!-- TAB PANE 4: PENGATURAN & SISTEM -->
         <div id="pane-settings" class="tab-pane" role="tabpanel" aria-labelledby="tab-settings" hidden>
             <div class="shelf-section">
-                <h3 class="shelf-title">Pengaturan Sistem & Sambungan TV</h3>
+                <h3 class="shelf-title">Pengaturan TV & Jaringan</h3>
                 <div class="shelf-grid settings-shelf">
                     <!-- Wi-Fi -->
                     <button class="tv-card settings-card" onclick="openSettings('wifi')" data-title="Wi-Fi & Jaringan" data-desc="Kelola sambungan Wi-Fi, IP, dan status koneksi internet." data-badge="KONEKSI" tabindex="0">
@@ -185,48 +185,62 @@
         </div>
     </main>
 
-    <!-- STEALTH 18+ VAULT DIALOG (TRIGGERED BY SECRET REMOTE COMBO UP-UP-DOWN-DOWN) -->
-    <dialog id="vault-modal" class="modal-dialog" aria-labelledby="vault-modal-title" aria-modal="true">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="vault-modal-title">🔐 Brankas Rahasia 18+</h3>
-                <p id="vault-modal-desc">Masukkan 4-digit PIN menggunakan Remote D-Pad.</p>
-            </div>
+    <!-- DEDICATED FULLSCREEN 18+ VAULT (APPLE TV / NETFLIX PIN PROFILE STYLE - NO CLUMSY MODAL) -->
+    <div id="vault-screen" class="vault-screen" style="display:none" role="region" aria-label="Brankas Privasi">
+        <!-- 1. FULLSCREEN PIN ENTRY VIEW -->
+        <div id="vault-pin-view" class="vault-pin-view">
+            <div class="pin-card-box">
+                <div class="pin-lock-icon" aria-hidden="true">🔒</div>
+                <h2 id="vault-pin-title" class="pin-title">Brankas Privasi</h2>
+                <p id="vault-pin-desc" class="pin-desc">Masukkan 4-digit PIN keamanan Anda</p>
 
-            <div id="vault-pin-display" class="pin-display">----</div>
-            <p id="vault-status-msg" class="vault-status-msg" aria-live="polite"></p>
-
-            <div class="pin-keypad" id="vault-keypad">
-                <button type="button" class="pin-btn" data-key="1">1</button>
-                <button type="button" class="pin-btn" data-key="2">2</button>
-                <button type="button" class="pin-btn" data-key="3">3</button>
-                <button type="button" class="pin-btn" data-key="4">4</button>
-                <button type="button" class="pin-btn" data-key="5">5</button>
-                <button type="button" class="pin-btn" data-key="6">6</button>
-                <button type="button" class="pin-btn" data-key="7">7</button>
-                <button type="button" class="pin-btn" data-key="8">8</button>
-                <button type="button" class="pin-btn" data-key="9">9</button>
-                <button type="button" class="pin-btn btn-danger" data-key="clear">Hapus</button>
-                <button type="button" class="pin-btn" data-key="0">0</button>
-                <button type="button" class="pin-btn btn-primary" data-key="submit">OK</button>
-            </div>
-
-            <!-- UNLOCKED VAULT CONTENT -->
-            <div id="vault-content" class="vault-content" hidden>
-                <div class="vault-banner">
-                    <span class="vault-badge">SESI RAHASIA AKTIF</span>
-                    <button type="button" id="btn-close-vault" class="btn-lock">🔒 Kunci Kembali</button>
+                <!-- Clean 4-Dot PIN Indicator (Apple TV Style) -->
+                <div class="pin-dots-container" aria-label="Indikator PIN">
+                    <span class="pin-dot" id="pindot-0"></span>
+                    <span class="pin-dot" id="pindot-1"></span>
+                    <span class="pin-dot" id="pindot-2"></span>
+                    <span class="pin-dot" id="pindot-3"></span>
                 </div>
-                <div class="shelf-grid channels-shelf" id="adult-channels-grid">
-                    <!-- Populated dynamically when unlocked -->
-                </div>
-            </div>
 
-            <div class="modal-footer">
-                <button type="button" id="btn-cancel-vault" class="btn-secondary">Tutup</button>
+                <div id="vault-pin-error" class="pin-status-banner" aria-live="polite"></div>
+
+                <!-- D-Pad Navigable Numeric Pad -->
+                <div class="pin-keypad-grid" id="vault-keypad">
+                    <button type="button" class="pin-key" data-key="1" tabindex="0">1</button>
+                    <button type="button" class="pin-key" data-key="2" tabindex="0">2</button>
+                    <button type="button" class="pin-key" data-key="3" tabindex="0">3</button>
+                    <button type="button" class="pin-key" data-key="4" tabindex="0">4</button>
+                    <button type="button" class="pin-key" data-key="5" tabindex="0">5</button>
+                    <button type="button" class="pin-key" data-key="6" tabindex="0">6</button>
+                    <button type="button" class="pin-key" data-key="7" tabindex="0">7</button>
+                    <button type="button" class="pin-key" data-key="8" tabindex="0">8</button>
+                    <button type="button" class="pin-key" data-key="9" tabindex="0">9</button>
+                    <button type="button" class="pin-key btn-danger" data-key="clear" tabindex="0">⌫ Hapus</button>
+                    <button type="button" class="pin-key" data-key="0" tabindex="0">0</button>
+                    <button type="button" class="pin-key btn-cancel" id="btn-cancel-pin" tabindex="0">Batal</button>
+                </div>
             </div>
         </div>
-    </dialog>
+
+        <!-- 2. FULLSCREEN UNLOCKED ADULT CHANNELS SHELF -->
+        <div id="vault-unlocked-view" class="vault-unlocked-view" style="display:none">
+            <div class="vault-top-bar">
+                <div class="vault-branding">
+                    <span class="vault-live-pill">● SESI DEWASA AKTIF</span>
+                    <h2 class="vault-shelf-title">Saluran Khusus Dewasa (18+)</h2>
+                </div>
+                <div class="vault-controls">
+                    <button type="button" id="btn-lock-vault" class="btn-lock-action" tabindex="0">🔒 Kunci & Keluar</button>
+                </div>
+            </div>
+
+            <div class="vault-grid-container">
+                <div class="shelf-grid channels-full-grid" id="adult-channels-grid">
+                    <!-- Populated dynamically with 16:9 cinematic adult cards -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- FULLSCREEN HLS VIDEO PLAYER OVERLAY -->
     <div id="video-overlay" class="video-overlay" style="display:none">
