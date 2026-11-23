@@ -142,7 +142,6 @@ function createChannelCard(ch, index) {
 function setupBillboardListeners() {
     const bTitle = document.getElementById("billboard-title");
     const bDesc = document.getElementById("billboard-desc");
-    const bBadge = document.getElementById("billboard-badge");
 
     document.addEventListener("focusin", (e) => {
         const target = e.target;
@@ -150,11 +149,9 @@ function setupBillboardListeners() {
 
         const title = target.getAttribute("data-title");
         const desc = target.getAttribute("data-desc");
-        const badge = target.getAttribute("data-badge");
 
         if (title && bTitle) bTitle.textContent = title;
         if (desc && bDesc) bDesc.textContent = desc;
-        if (badge && bBadge) bBadge.textContent = badge;
     });
 }
 
