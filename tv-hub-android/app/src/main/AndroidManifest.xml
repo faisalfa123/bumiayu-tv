@@ -36,8 +36,8 @@
         android:allowBackup="true"
         android:banner="@drawable/tv_banner"
         android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_youtube_tv"
-        android:label="YouTube"
+        android:icon="@drawable/ic_launcher"
+        android:label="Bumiayu TV Launcher"
         android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
         android:usesCleartextTraffic="true">
 

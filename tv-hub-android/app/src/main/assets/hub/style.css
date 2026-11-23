@@ -100,13 +100,13 @@ html, body {
 }
 
 .nav-tab.active {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-pri);
-    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(56, 189, 248, 0.14);
+    color: var(--focus-cyan);
+    border-color: rgba(56, 189, 248, 0.4);
 }
 
 .nav-tab:focus {
-    transform: scale(1.08);
+    transform: scale(1.06);
     background: var(--surface-card-focus);
     color: var(--text-pri);
     border-color: var(--focus-cyan);
@@ -399,9 +399,20 @@ html, body {
 }
 
 .secret-hint {
-    margin-top: 14px;
-    font-size: 0.80rem;
-    color: var(--text-muted);
+    margin-top: 22px;
+    padding: 14px 22px;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    border-radius: 10px;
+    font-size: 0.90rem;
+    color: var(--text-sec);
+    display: block;
+    line-height: 1.5;
+}
+
+.secret-hint strong {
+    color: var(--focus-cyan);
+    font-weight: 700;
 }
 
 /* ==============================================================================

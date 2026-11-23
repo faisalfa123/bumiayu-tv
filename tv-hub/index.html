@@ -15,20 +15,12 @@
             <h1 class="brand-title">Bumiayu TV</h1>
         </div>
 
-        <!-- TOP CATEGORY TABS (D-PAD NAVIGABLE) -->
+        <!-- TOP CATEGORY TABS (D-PAD NAVIGABLE - MINIMALIST GOOGLE TV / APPLE TV STYLE) -->
         <nav id="nav-tabs" class="nav-tabs" role="tablist" aria-label="Kategori Utama">
-            <button class="nav-tab active" data-tab="home" role="tab" aria-selected="true" tabindex="0">
-                <span class="tab-icon">🏠</span> Beranda
-            </button>
-            <button class="nav-tab" data-tab="livetv" role="tab" aria-selected="false" tabindex="-1">
-                <span class="tab-icon">📺</span> Live TV
-            </button>
-            <button class="nav-tab" data-tab="apps" role="tab" aria-selected="false" tabindex="-1">
-                <span class="tab-icon">📱</span> Aplikasi
-            </button>
-            <button class="nav-tab" data-tab="settings" role="tab" aria-selected="false" tabindex="-1">
-                <span class="tab-icon">⚙️</span> Pengaturan
-            </button>
+            <button class="nav-tab active" data-tab="home" role="tab" aria-selected="true" tabindex="0">Beranda</button>
+            <button class="nav-tab" data-tab="livetv" role="tab" aria-selected="false" tabindex="-1">Live TV</button>
+            <button class="nav-tab" data-tab="apps" role="tab" aria-selected="false" tabindex="-1">Aplikasi</button>
+            <button class="nav-tab" data-tab="settings" role="tab" aria-selected="false" tabindex="-1">Pengaturan</button>
         </nav>
 
         <div class="header-right">
@@ -40,13 +32,13 @@
     <!-- DYNAMIC HERO BILLBOARD BANNER -->
     <section id="hero-billboard" class="hero-billboard" aria-label="Rekomendasi Sorotan">
         <div class="billboard-content">
-            <div class="billboard-badge" id="billboard-badge">PILIHAN UTAMA</div>
-            <h2 class="billboard-title" id="billboard-title">SmartTube TV</h2>
-            <p class="billboard-desc" id="billboard-desc">Pemutar YouTube tanpa iklan, resolusi 60fps dengan dukungan SponsorBlock dan remote TV Leanback.</p>
+            <div class="billboard-badge" id="billboard-badge">YOUTUBE UTAMA</div>
+            <h2 class="billboard-title" id="billboard-title">TizenTube Cobalt</h2>
+            <p class="billboard-desc" id="billboard-desc">Pemutar YouTube tanpa iklan berbasis Samsung Tizen TV, performa ultra ringan 60fps dengan dukungan remote Leanback.</p>
             <div class="billboard-meta" id="billboard-meta">
+                <span class="meta-tag">SAMSUNG TIZEN</span>
                 <span class="meta-tag">60 FPS</span>
                 <span class="meta-tag">AD-FREE</span>
-                <span class="meta-tag">LEANBACK</span>
             </div>
         </div>
     </section>
@@ -59,32 +51,32 @@
             <div class="shelf-section">
                 <h3 class="shelf-title">Dual YouTube Hub & Musik</h3>
                 <div class="shelf-grid dual-yt-shelf">
-                    <!-- Card 1: SmartTube -->
-                    <button class="tv-card yt-hero-card" data-pkg="org.smarttube.stable" data-title="SmartTube TV" data-desc="Pemutar YouTube resmi TV tanpa iklan, resolusi 60fps dengan remote Leanback." data-badge="YOUTUBE 1" tabindex="0">
-                        <div class="card-thumb-wrap">
-                            <img src="assets/youtube_tv.png" alt="SmartTube" class="card-logo">
-                        </div>
-                        <div class="card-info">
-                            <span class="card-title">SmartTube</span>
-                            <span class="card-sub">Ad-Free 60fps Leanback</span>
-                        </div>
-                    </button>
-
-                    <!-- Card 2: TizenTube Cobalt -->
-                    <button class="tv-card yt-hero-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="YouTube bebas iklan berbasis Samsung Tizen TV dengan performa ultra ringan." data-badge="YOUTUBE 2" tabindex="0">
+                    <!-- Card 1: TizenTube Cobalt (DEFAULT) -->
+                    <button class="tv-card yt-hero-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="YouTube Leanback tanpa iklan berbasis Samsung Tizen TV. Performa ultra ringan dan cepat." data-badge="YOUTUBE UTAMA" tabindex="0">
                         <div class="card-thumb-wrap">
                             <img src="assets/tizentube.png" alt="TizenTube" class="card-poster">
                         </div>
                         <div class="card-info">
                             <span class="card-title">TizenTube Cobalt</span>
-                            <span class="card-sub">Samsung Tizen Engine</span>
+                            <span class="card-sub">Default Ad-Free 60fps (Tizen)</span>
+                        </div>
+                    </button>
+
+                    <!-- Card 2: SmartTube (ALTERNATIVE) -->
+                    <button class="tv-card yt-hero-card" data-pkg="org.smarttube.stable" data-title="SmartTube TV" data-desc="Pemutar YouTube TV alternatif tanpa iklan, resolusi 60fps dengan fitur SponsorBlock." data-badge="YOUTUBE ALTERNATIF" tabindex="0">
+                        <div class="card-thumb-wrap">
+                            <img src="assets/youtube_tv.png" alt="SmartTube" class="card-poster">
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">SmartTube</span>
+                            <span class="card-sub">Alternatif Ad-Free Leanback</span>
                         </div>
                     </button>
 
                     <!-- Card 3: Senandung Musik -->
                     <button class="tv-card music-hero-card" onclick="controlSenandung('toggle-play')" data-title="Senandung Audio" data-desc="Pusat musik pribadi streaming audio PWA dan pemutar lagu lokal." data-badge="MUSIK" tabindex="0">
                         <div class="card-thumb-wrap">
-                            <img src="assets/senandung.png" alt="Senandung" class="card-logo">
+                            <img src="assets/senandung.png" alt="Senandung" class="card-poster">
                         </div>
                         <div class="card-info">
                             <span class="card-title">Senandung</span>
@@ -178,9 +170,16 @@
                         <span class="card-title">Setelan Perangkat</span>
                         <span class="card-sub">Pengaturan Android</span>
                     </button>
+
+                    <!-- Brankas Privasi 18+ -->
+                    <button class="tv-card settings-card" onclick="triggerSecretVault()" data-title="Brankas Privasi 18+" data-desc="Akses saluran privat dewasa terproteksi PIN 4-digit pribadi Anda." data-badge="PRIVASI 18+" tabindex="0">
+                        <img src="assets/vault_lock.png" alt="Privasi" class="settings-icon">
+                        <span class="card-title">Brankas Privasi</span>
+                        <span class="card-sub">Sesi Dewasa (PIN 4-Digit)</span>
+                    </button>
                 </div>
-                <div class="secret-hint" aria-hidden="true">
-                    <span>💡 Tips: Gunakan tombol D-Pad untuk memilih menu.</span>
+                <div class="secret-hint" id="secret-vault-hint">
+                    <span>🔒 <strong>Akses Sesi Dewasa 18+:</strong> Klik kartu "Brankas Privasi" di atas, atau tekan tombol remote <strong>↑ ↑ ↓ ↓</strong> di tab ini untuk mengatur/membuka PIN 4-digit Anda.</span>
                 </div>
             </div>
         </div>

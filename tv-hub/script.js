@@ -5,28 +5,38 @@
    ============================================================================== */
 
 const CHANNELS = [
+    // 17 Saluran Inti (Pertahankan Penuh & Tanpa Perubahan URL)
     { id: "trans7", name: "Trans7", genre: "Nasional Hiburan", desc: "Program ragam hiburan keluarga, petualangan alam, dan edukasi populer Indonesia.", stream: "https://live.cnbcindonesia.com/trans7/smil:trans7.smil/playlist.m3u8", poster: "assets/trans7.png" },
     { id: "transtv", name: "Trans TV", genre: "Bioskop & Lifestyle", desc: "Film bioskop box office terpopuler, gaya hidup, dan reality show keluarga.", stream: "https://live.cnbcindonesia.com/transtv/smil:transtv.smil/playlist.m3u8", poster: "assets/transtv.png" },
     { id: "metrotv", name: "Metro TV", genre: "Nasional News", desc: "Saluran berita 24 jam dengan program talkshow politik dan ekonomi nasional.", stream: "https://edge.medcom.id/live-edge/smil:metro.smil/playlist.m3u8", poster: "assets/metrotv.png" },
     { id: "tvri", name: "TVRI Nasional", genre: "Saluran Pemersatu", desc: "Lembaga penyiaran publik yang menjangkau seluruh pelosok kepulauan nusantara.", stream: "https://ott-balancer.tvri.go.id/live/eds/Nasional/hls/Nasional.m3u8", poster: "assets/tvri.png" },
-    { id: "tvri_bali", name: "TVRI Bali", genre: "Seni & Wisata", desc: "Warta budaya, seni tradisi Dewata, dan pariwisata Pulau Bali.", stream: "https://ott-balancer.tvri.go.id/live/eds/Bali/hls/Bali.m3u8", poster: "assets/tvri.png" },
-    { id: "tvri_sumut", name: "TVRI Sumatera Utara", genre: "Warta Regional", desc: "Warta berita, kebudayaan Melayu Batak, dan ragam acara Sumatera Utara.", stream: "https://ott-balancer.tvri.go.id/live/eds/Sumut/hls/Sumut.m3u8", poster: "assets/tvri.png" },
-    { id: "tvri_kalsel", name: "TVRI Kalimantan Selatan", genre: "Warta Borneo", desc: "Liputan Borneo, warta budaya Banjar, dan siaran regional Kalsel.", stream: "https://ott-balancer.tvri.go.id/live/eds/Kalsel/hls/Kalsel.m3u8", poster: "assets/tvri.png" },
-    { id: "tvri_jateng", name: "TVRI Jawa Tengah", genre: "Daerah & Budaya", desc: "Siaran kearifan lokal, budaya, dan warta regional Jawa Tengah.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jateng/hls/Jateng.m3u8", poster: "assets/tvri.png" },
-    { id: "tvri_jatim", name: "TVRI Jawa Timur", genre: "Daerah & Informasi", desc: "Siaran informasi daerah dan hiburan masyarakat Jawa Timur.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jatim/hls/Jatim.m3u8", poster: "assets/tvri.png" },
-    { id: "tvri_jogja", name: "TVRI Yogyakarta", genre: "Budaya Nusantara", desc: "Warta budaya istimewa, seni tradisi, dan liputan Yogyakarta.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jogjakarta/hls/Jogjakarta.m3u8", poster: "assets/tvri.png" },
+    { id: "tvri_bali", name: "TVRI Bali", genre: "Seni & Wisata", desc: "Warta budaya, seni tradisi Dewata, dan pariwisata Pulau Bali.", stream: "https://ott-balancer.tvri.go.id/live/eds/Bali/hls/Bali.m3u8", poster: "assets/tvri_bali.png" },
+    { id: "tvri_sumut", name: "TVRI Sumatera Utara", genre: "Warta Regional", desc: "Warta berita, kebudayaan Melayu Batak, dan ragam acara Sumatera Utara.", stream: "https://ott-balancer.tvri.go.id/live/eds/Sumut/hls/Sumut.m3u8", poster: "assets/tvri_sumut.png" },
+    { id: "tvri_kalsel", name: "TVRI Kalimantan Selatan", genre: "Warta Borneo", desc: "Liputan Borneo, warta budaya Banjar, dan siaran regional Kalsel.", stream: "https://ott-balancer.tvri.go.id/live/eds/Kalsel/hls/Kalsel.m3u8", poster: "assets/tvri_kalsel.png" },
+    { id: "tvri_jateng", name: "TVRI Jawa Tengah", genre: "Daerah & Budaya", desc: "Siaran kearifan lokal, budaya, dan warta regional Jawa Tengah.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jateng/hls/Jateng.m3u8", poster: "assets/tvri_jateng.png" },
+    { id: "tvri_jatim", name: "TVRI Jawa Timur", genre: "Daerah & Informasi", desc: "Siaran informasi daerah dan hiburan masyarakat Jawa Timur.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jatim/hls/Jatim.m3u8", poster: "assets/tvri_jatim.png" },
+    { id: "tvri_jogja", name: "TVRI Yogyakarta", genre: "Budaya Nusantara", desc: "Warta budaya istimewa, seni tradisi, dan liputan Yogyakarta.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jogjakarta/hls/Jogjakarta.m3u8", poster: "assets/tvri_jogja.png" },
     { id: "nhkworld", name: "NHK World Japan", genre: "Internasional (Jepang)", desc: "Warta berita dunia, dokumenter sains, dan kebudayaan Jepang berbahasa Inggris 24/7.", stream: "https://media-tyo.hls.nhkworld.jp/hls/w/live/master.m3u8", poster: "assets/nhkworld.png" },
     { id: "dw", name: "DW English", genre: "Internasional (Jerman)", desc: "Saluran berita internasional Jerman menyajikan liputan peristiwa dunia dan laporan mendalam.", stream: "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8", poster: "assets/dw.png" },
-    { id: "ahsantv", name: "Ahsan TV", genre: "Edukasi Islami", desc: "Siaran kajian keluarga dan edukasi Islam berkualitas.", stream: "https://5bf7b725107e5.streamlock.net/ahsantv/ahsantv/playlist.m3u8", poster: "assets/settings.png" },
-    { id: "ugtv", name: "UGTV Gunadarma", genre: "Pendidikan & Sains", desc: "Televisi edukasi, sains terapan, dan warta kampus Universitas Gunadarma.", stream: "https://cdn.gunadarma.ac.id/streams/ugtv/ingestugtv.m3u8", poster: "assets/settings.png" },
-    { id: "aktv", name: "AKTV", genre: "Inspirasi Regional", desc: "Siaran warta lokal dan ragam acara seni budaya Jawa Barat.", stream: "https://akativi.siar.us/live/akativi.m3u8", poster: "assets/settings.png" },
-    { id: "ammedia", name: "AM Media", genre: "Religi & Komunitas", desc: "Saluran siaran dakwah dan informasi komunitas.", stream: "https://ammedia.siar.us/ammedia/live/playlist.m3u8", poster: "assets/settings.png" },
-    { id: "muxtest", name: "Big Buck Bunny HD", genre: "Uji Coba 60fps", desc: "Video streaming pengujian performa hardware dekoder HLS 1080p 60fps.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/settings.png" }
+    { id: "ahsantv", name: "Ahsan TV", genre: "Edukasi Islami", desc: "Siaran kajian keluarga dan edukasi Islam berkualitas.", stream: "https://5bf7b725107e5.streamlock.net/ahsantv/ahsantv/playlist.m3u8", poster: "assets/ahsantv.png" },
+    { id: "ugtv", name: "UGTV Gunadarma", genre: "Pendidikan & Sains", desc: "Televisi edukasi, sains terapan, dan warta kampus Universitas Gunadarma.", stream: "https://cdn.gunadarma.ac.id/streams/ugtv/ingestugtv.m3u8", poster: "assets/ugtv.png" },
+    { id: "aktv", name: "AKTV", genre: "Inspirasi Regional", desc: "Siaran warta lokal dan ragam acara seni budaya Jawa Barat.", stream: "https://akativi.siar.us/live/akativi.m3u8", poster: "assets/aktv.png" },
+    { id: "ammedia", name: "AM Media", genre: "Religi & Komunitas", desc: "Saluran siaran dakwah dan informasi komunitas.", stream: "https://ammedia.siar.us/ammedia/live/playlist.m3u8", poster: "assets/ammedia.png" },
+    { id: "muxtest", name: "Big Buck Bunny HD", genre: "Uji Coba 60fps", desc: "Video streaming pengujian performa hardware dekoder HLS 1080p 60fps.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/muxtest.png" },
+
+    // Saluran Tambahan Nasional & Regional Terverifikasi Aktif
+    { id: "tvri_jabar", name: "TVRI Jawa Barat", genre: "Warta Parahyangan", desc: "Siaran informasi, seni budaya Sunda, dan warta seputar Jawa Barat.", stream: "https://ott-balancer.tvri.go.id/live/eds/Jabar/hls/Jabar.m3u8", poster: "assets/tvri_jabar.png" },
+    { id: "tvri_kaltim", name: "TVRI Kalimantan Timur", genre: "Warta IKN & Borneo", desc: "Liputan Ibu Kota Nusantara, budaya Dayak, dan warta Kalimantan Timur.", stream: "https://ott-balancer.tvri.go.id/live/eds/Kaltim/hls/Kaltim.m3u8", poster: "assets/tvri_kaltim.png" },
+    { id: "tvri_sulsel", name: "TVRI Sulawesi Selatan", genre: "Warta Celebes", desc: "Siaran berita Makassar, kebudayaan Bugis-Makassar, dan Sulawesi Selatan.", stream: "https://ott-balancer.tvri.go.id/live/eds/Sulsel/hls/Sulsel.m3u8", poster: "assets/tvri_sulsel.png" },
+    { id: "tvri_papua", name: "TVRI Papua", genre: "Bumi Cenderawasih", desc: "Warta pembangunan kepulauan Papua, seni budaya, dan pesona timur Indonesia.", stream: "https://ott-balancer.tvri.go.id/live/eds/Papua/hls/Papua.m3u8", poster: "assets/tvri_papua.png" },
+    { id: "tvri_aceh", name: "TVRI Aceh", genre: "Serambi Mekkah", desc: "Siaran syiar keislaman, warta pembangunan Serambi Mekkah, dan kebudayaan Aceh.", stream: "https://ott-balancer.tvri.go.id/live/eds/Aceh/hls/Aceh.m3u8", poster: "assets/tvri_aceh.png" },
+    { id: "tvri_sumbar", name: "TVRI Sumatera Barat", genre: "Ranah Minang", desc: "Warta budaya Ranah Minangkabau, kuliner tradisi, dan berita Sumatera Barat.", stream: "https://ott-balancer.tvri.go.id/live/eds/Sumbar/hls/Sumbar.m3u8", poster: "assets/tvri_sumbar.png" },
+    { id: "tvri_riau", name: "TVRI Riau", genre: "Lancang Kuning", desc: "Warta Melayu Riau, kepulauan Selat Malaka, dan kemajuan daerah Riau.", stream: "https://ott-balancer.tvri.go.id/live/eds/Riau/hls/Riau.m3u8", poster: "assets/tvri_riau.png" }
 ];
 
 const ADULT_CHANNELS = [
-    { id: "adult_1", name: "Dewasa Vault 1", genre: "18+ Private", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/settings.png" },
-    { id: "adult_2", name: "Dewasa Vault 2", genre: "18+ Private", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/settings.png" }
+    { id: "adult_1", name: "Dewasa Vault 1", genre: "18+ Private", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" },
+    { id: "adult_2", name: "Dewasa Vault 2", genre: "18+ Private", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" }
 ];
 
 let activeTabIndex = 0;
