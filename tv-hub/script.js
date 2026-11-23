@@ -31,12 +31,19 @@ const CHANNELS = [
     { id: "tvri_papua", name: "TVRI Papua", genre: "Bumi Cenderawasih", desc: "Warta pembangunan kepulauan Papua, seni budaya, dan pesona timur Indonesia.", stream: "https://ott-balancer.tvri.go.id/live/eds/Papua/hls/Papua.m3u8", poster: "assets/tvri_papua.png" },
     { id: "tvri_aceh", name: "TVRI Aceh", genre: "Serambi Mekkah", desc: "Siaran syiar keislaman, warta pembangunan Serambi Mekkah, dan kebudayaan Aceh.", stream: "https://ott-balancer.tvri.go.id/live/eds/Aceh/hls/Aceh.m3u8", poster: "assets/tvri_aceh.png" },
     { id: "tvri_sumbar", name: "TVRI Sumatera Barat", genre: "Ranah Minang", desc: "Warta budaya Ranah Minangkabau, kuliner tradisi, dan berita Sumatera Barat.", stream: "https://ott-balancer.tvri.go.id/live/eds/Sumbar/hls/Sumbar.m3u8", poster: "assets/tvri_sumbar.png" },
-    { id: "tvri_riau", name: "TVRI Riau", genre: "Lancang Kuning", desc: "Warta Melayu Riau, kepulauan Selat Malaka, dan kemajuan daerah Riau.", stream: "https://ott-balancer.tvri.go.id/live/eds/Riau/hls/Riau.m3u8", poster: "assets/tvri_riau.png" }
+    { id: "tvri_riau", name: "TVRI Riau", genre: "Lancang Kuning", desc: "Warta Melayu Riau, kepulauan Selat Malaka, dan kemajuan daerah Riau.", stream: "https://ott-balancer.tvri.go.id/live/eds/Riau/hls/Riau.m3u8", poster: "assets/tvri_riau.png" },
+
+    // Saluran Tambahan Nasional & Regional Populer Terverifikasi
+    { id: "rtv", name: "RTV (Rajawali TV)", genre: "Kartun & Keluarga", desc: "Program animasi unggulan anak-anak, serial tokusatsu, dan hiburan keluarga.", stream: "https://rtvstream.rtv.co.id:4555/hls/rtv.m3u8", poster: "assets/rtv.png" },
+    { id: "nusantaratv", name: "Nusantara TV", genre: "Berita & Budaya", desc: "Warta berita terkini nusantara, kebudayaan daerah, dan program inspiratif.", stream: "https://nusantaratv.siar.us/nusantaratv/live/playlist.m3u8", poster: "assets/nusantaratv.png" },
+    { id: "jawapostv", name: "Jawa Pos TV", genre: "Warta Metropolitan", desc: "Berita investigasi, liputan kota metropolitan, dan kabar regional Jawa Pos.", stream: "http://122.248.43.242:1935/JAWAPOSTVJKT/_definst_/myStream/playlist.m3u8", poster: "assets/jawapostv.png" },
+    { id: "tv9", name: "TV9 Nusantara", genre: "Religi & Budaya", desc: "Siaran dakwah santun menyejukkan, warta keislaman dan khazanah nusantara.", stream: "https://5bf7b725107e5.streamlock.net/tv9/tv9/playlist.m3u8", poster: "assets/tv9.png" },
 ];
 
 const ADULT_CHANNELS = [
-    { id: "adult_1", name: "Saluran Privat Dewasa 1", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 1080p.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" },
-    { id: "adult_2", name: "Saluran Privat Dewasa 2", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 60fps.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" }
+    { id: "vault_adult_1", name: "Saluran Privat Dewasa 1", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 1080p.", stream: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8", poster: "assets/vault_adult_1.png" },
+    { id: "vault_adult_2", name: "Saluran Privat Dewasa 2", genre: "18+ Sesi Khusus", desc: "Siaran saluran khusus privat dewasa 60fps.", stream: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8", poster: "assets/vault_adult_2.png" },
+    { id: "vault_adult_3", name: "Saluran Privat Dewasa 3", genre: "18+ Cadangan HLS", desc: "Siaran cadangan kecepatan tinggi proteksi PIN.", stream: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", poster: "assets/vault_adult.png" }
 ];
 
 let activeTabIndex = 0;
@@ -51,7 +58,50 @@ let keyHistory = [];
 // Vault State Management
 let currentPinInput = "";
 let tempPinSetup = "";
-let vaultState = "LOCKED"; // "SETUP_1", "SETUP_CONFIRM", "ENTER_PIN", "UNLOCKED"
+let vaultState = "LOCKED";
+
+let currentScreen = "PLAYBOX"; // "PLAYBOX" or "LEGION"
+
+function openLegionView(tabName = "home") {
+    currentScreen = "LEGION";
+    const pbView = document.getElementById("playbox-view");
+    const legionView = document.getElementById("legion-view");
+    if (pbView) pbView.style.display = "none";
+    if (legionView) legionView.style.display = "block";
+
+    const tabIdx = TABS.indexOf(tabName);
+    if (tabIdx !== -1) {
+        switchTab(tabIdx, true);
+    } else {
+        switchTab(0, true);
+    }
+}
+
+function openPlayboxView() {
+    currentScreen = "PLAYBOX";
+    const pbView = document.getElementById("playbox-view");
+    const legionView = document.getElementById("legion-view");
+    if (legionView) legionView.style.display = "none";
+    if (pbView) pbView.style.display = "flex";
+
+    const firstCard = document.getElementById("pb-card-livetv");
+    if (firstCard) firstCard.focus();
+}
+
+function setupPlayboxListeners() {
+    const cardLive = document.getElementById("pb-card-livetv");
+    const cardYt = document.getElementById("pb-card-youtube");
+    const cardCat = document.getElementById("pb-card-catalog");
+    const btnSettings = document.getElementById("pb-btn-settings");
+    const btnBackPb = document.getElementById("btn-back-to-playbox");
+
+    if (cardLive) cardLive.addEventListener("click", () => openLegionView("livetv"));
+    if (cardYt) cardYt.addEventListener("click", () => openLegionView("apps"));
+    if (cardCat) cardCat.addEventListener("click", () => openLegionView("home"));
+    if (btnSettings) btnSettings.addEventListener("click", () => openLegionView("settings"));
+    if (btnBackPb) btnBackPb.addEventListener("click", () => openPlayboxView());
+}
+
 
 /* ==============================================================================
    INITIALIZATION & CLOCK
@@ -250,6 +300,9 @@ function setupDpadNavigation() {
                     if (curIdx - 1 >= 0) {
                         tabs[curIdx - 1].focus();
                         switchTab(curIdx - 1, false);
+                    } else {
+                        const backPb = document.getElementById("btn-back-to-playbox");
+                        if (backPb) backPb.focus();
                     }
                     break;
                 case 40: // Down -> Move into Active Pane Cards
@@ -269,54 +322,140 @@ function setupDpadNavigation() {
             return;
         }
 
-        // CASE B: Focus is on a Card inside Active Pane
+        // CASE 0: PLAYBOX SCREEN NAVIGATION
+        if (currentScreen === "PLAYBOX") {
+            const pbCards = Array.from(document.querySelectorAll(".playbox-card"));
+            const btnSettings = document.getElementById("pb-btn-settings");
+            const curIdx = pbCards.indexOf(current);
+
+            switch (code) {
+                case 39: // Right
+                    e.preventDefault();
+                    if (curIdx !== -1 && curIdx + 1 < pbCards.length) {
+                        pbCards[curIdx + 1].focus();
+                    }
+                    break;
+                case 37: // Left
+                    e.preventDefault();
+                    if (curIdx !== -1 && curIdx - 1 >= 0) {
+                        pbCards[curIdx - 1].focus();
+                    }
+                    break;
+                case 38: // Up -> to settings icon
+                    e.preventDefault();
+                    if (btnSettings) btnSettings.focus();
+                    break;
+                case 40: // Down -> back to cards
+                    e.preventDefault();
+                    if (current === btnSettings && pbCards.length > 0) {
+                        pbCards[0].focus();
+                    }
+                    break;
+                case 13:
+                case 23:
+                    e.preventDefault();
+                    if (current) current.click();
+                    break;
+            }
+            return;
+        }
+
+        // Focus on Back to Playbox Button in Legion Hub
+        if (current && current.id === "btn-back-to-playbox") {
+            switch (code) {
+                case 39: // Right -> to first nav tab
+                    e.preventDefault();
+                    const firstTab = document.querySelectorAll(".nav-tab")[0];
+                    if (firstTab) firstTab.focus();
+                    break;
+                case 40: // Down -> into active pane
+                    e.preventDefault();
+                    const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
+                    if (activePane) {
+                        const firstCard = activePane.querySelector(".tv-card");
+                        if (firstCard) firstCard.focus();
+                    }
+                    break;
+                case 13:
+                case 23:
+                    e.preventDefault();
+                    openPlayboxView();
+                    break;
+            }
+            return;
+        }
+
+        // CASE B: Focus is on a Card inside Active Pane (PER-SHELF GRID NAVIGATION)
         if (current && current.classList.contains("tv-card")) {
             const activePane = document.getElementById(`pane-${TABS[activeTabIndex]}`);
             if (!activePane) return;
 
-            const cards = Array.from(activePane.querySelectorAll(".tv-card"));
-            const curIdx = cards.indexOf(current);
-            if (curIdx === -1) return;
+            const currentShelf = current.closest(".shelf-section");
+            const allShelves = Array.from(activePane.querySelectorAll(".shelf-section"));
+            const shelfIndex = allShelves.indexOf(currentShelf);
 
-            // Compute columns based on grid layout
-            const parentShelf = current.closest(".shelf-grid");
+            const cardsInCurrentShelf = currentShelf ? Array.from(currentShelf.querySelectorAll(".tv-card")) : [];
+            const idxInShelf = cardsInCurrentShelf.indexOf(current);
+
             let cols = 4;
-            if (parentShelf) {
-                if (parentShelf.classList.contains("dual-yt-shelf")) cols = 3;
-                else if (parentShelf.classList.contains("channels-shelf")) cols = 4;
-                else if (parentShelf.classList.contains("channels-full-grid")) cols = 4;
-                else if (parentShelf.classList.contains("apps-shelf")) cols = 4;
-                else if (parentShelf.classList.contains("settings-shelf")) cols = 4;
+            const gridEl = current.closest(".shelf-grid");
+            if (gridEl) {
+                if (gridEl.classList.contains("dual-yt-shelf")) cols = 3;
+                else if (gridEl.classList.contains("channels-shelf")) cols = 4;
+                else if (gridEl.classList.contains("channels-full-grid")) cols = 4;
+                else if (gridEl.classList.contains("apps-shelf")) cols = 4;
+                else if (gridEl.classList.contains("settings-shelf")) cols = 4;
             }
 
             switch (code) {
                 case 39: // Right
                     e.preventDefault();
-                    if (curIdx + 1 < cards.length) {
-                        cards[curIdx + 1].focus();
+                    if (idxInShelf + 1 < cardsInCurrentShelf.length) {
+                        cardsInCurrentShelf[idxInShelf + 1].focus();
                     }
                     break;
 
                 case 37: // Left
                     e.preventDefault();
-                    if (curIdx - 1 >= 0) {
-                        cards[curIdx - 1].focus();
+                    if (idxInShelf - 1 >= 0) {
+                        cardsInCurrentShelf[idxInShelf - 1].focus();
                     }
                     break;
 
                 case 40: // Down
                     e.preventDefault();
-                    if (curIdx + cols < cards.length) {
-                        cards[curIdx + cols].focus();
+                    // If more rows exist inside this same shelf:
+                    if (idxInShelf + cols < cardsInCurrentShelf.length) {
+                        cardsInCurrentShelf[idxInShelf + cols].focus();
+                    } else if (shelfIndex !== -1 && shelfIndex + 1 < allShelves.length) {
+                        // Move down to next shelf below!
+                        const nextShelf = allShelves[shelfIndex + 1];
+                        const nextCards = Array.from(nextShelf.querySelectorAll(".tv-card"));
+                        if (nextCards.length > 0) {
+                            const targetCol = Math.min(idxInShelf % cols, nextCards.length - 1);
+                            nextCards[targetCol].focus();
+                        }
                     }
                     break;
 
-                case 38: // Up
+                case 38: // Up (PREVENT JUMPING DIRECTLY TO TOP BAR FROM BOTTOM SHELF)
                     e.preventDefault();
-                    if (curIdx - cols >= 0) {
-                        cards[curIdx - cols].focus();
+                    if (idxInShelf - cols >= 0) {
+                        // Move up within same shelf
+                        cardsInCurrentShelf[idxInShelf - cols].focus();
+                    } else if (shelfIndex > 0) {
+                        // Move up to previous shelf above!
+                        const prevShelf = allShelves[shelfIndex - 1];
+                        const prevCards = Array.from(prevShelf.querySelectorAll(".tv-card"));
+                        if (prevCards.length > 0) {
+                            // Target corresponding column on the last row of previous shelf
+                            const prevCols = prevShelf.querySelector(".shelf-grid") && prevShelf.querySelector(".shelf-grid").classList.contains("dual-yt-shelf") ? 3 : 4;
+                            const lastRowStart = Math.floor((prevCards.length - 1) / prevCols) * prevCols;
+                            const targetCol = Math.min(lastRowStart + (idxInShelf % cols), prevCards.length - 1);
+                            prevCards[targetCol].focus();
+                        }
                     } else {
-                        // At top row of cards -> jump up to active Navigation Tab!
+                        // ONLY when at the topmost row of the very first shelf -> jump up to Nav Tab!
                         const currentTab = document.querySelectorAll(".nav-tab")[activeTabIndex];
                         if (currentTab) currentTab.focus();
                     }
@@ -330,9 +469,9 @@ function setupDpadNavigation() {
 
                 case 27: // Escape / Back
                 case 4:
-                    // Jump to Nav tab on Back press if in pane
-                    const currentTab = document.querySelectorAll(".nav-tab")[activeTabIndex];
-                    if (currentTab) currentTab.focus();
+                    // Back from Legion catalog returns to Playbox
+                    e.preventDefault();
+                    openPlayboxView();
                     break;
             }
         }
@@ -804,8 +943,8 @@ if (typeof window !== "undefined") {
         }
 
         // Return to home if on another tab
-        if (activeTabIndex !== 0) {
-            switchTab(0, true);
+        if (currentScreen === "LEGION") {
+            openPlayboxView();
             return true;
         }
 

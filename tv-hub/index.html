@@ -8,9 +8,104 @@
 </head>
 <body>
 
+    <!-- =========================================================================
+         VIEW 1: PLAYBOX MINIMALIST HOME SCREEN
+         ========================================================================= -->
+    <div id="playbox-view" class="playbox-view">
+        <header class="playbox-header">
+            <div class="playbox-brand">
+                <span class="playbox-title">playbox</span>
+                <span class="playbox-badge">TV</span>
+            </div>
+            <div class="playbox-quick-actions">
+                <button type="button" class="playbox-icon-btn" id="pb-btn-settings" title="Pengaturan" tabindex="0">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="playbox-cards-container">
+            <!-- Playbox Card 1: Live TV -->
+            <button type="button" class="playbox-card" id="pb-card-livetv" data-dest="livetv" tabindex="0">
+                <div class="pb-card-content">
+                    <div class="pb-card-text">
+                        <h2 class="pb-card-title">Live TV's</h2>
+                        <span class="pb-card-count">+28 Saluran Aktif</span>
+                        <span class="pb-card-sub">Siaran Nasional & Regional</span>
+                    </div>
+                    <div class="pb-card-icon-wrap">
+                        <svg class="pb-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="6" y="16" width="52" height="38" rx="8"></rect>
+                            <polyline points="20 8 32 16 44 8"></polyline>
+                            <line x1="26" y1="35" x2="38" y2="35"></line>
+                            <polyline points="32 29 38 35 32 41"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </button>
+
+            <!-- Playbox Card 2: YouTube Hub -->
+            <button type="button" class="playbox-card" id="pb-card-youtube" data-dest="apps" tabindex="0">
+                <div class="pb-card-content">
+                    <div class="pb-card-text">
+                        <h2 class="pb-card-title">YouTube Hub</h2>
+                        <span class="pb-card-count">TizenTube & SmartTube</span>
+                        <span class="pb-card-sub">Streaming 60fps Ad-Free</span>
+                    </div>
+                    <div class="pb-card-icon-wrap">
+                        <svg class="pb-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="8" y="14" width="48" height="36" rx="8"></rect>
+                            <polygon points="26,24 42,32 26,40" fill="currentColor"></polygon>
+                        </svg>
+                    </div>
+                </div>
+            </button>
+
+            <!-- Playbox Card 3: Katalog Lengkap -->
+            <button type="button" class="playbox-card" id="pb-card-catalog" data-dest="home" tabindex="0">
+                <div class="pb-card-content">
+                    <div class="pb-card-text">
+                        <h2 class="pb-card-title">Katalog Lengkap</h2>
+                        <span class="pb-card-count">Semua Kategori</span>
+                        <span class="pb-card-sub">Sorotan & Koleksi Penuh</span>
+                    </div>
+                    <div class="pb-card-icon-wrap">
+                        <svg class="pb-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="8" y="8" width="20" height="20" rx="4"></rect>
+                            <rect x="36" y="8" width="20" height="20" rx="4"></rect>
+                            <rect x="8" y="36" width="20" height="20" rx="4"></rect>
+                            <rect x="36" y="36" width="20" height="20" rx="4"></rect>
+                        </svg>
+                    </div>
+                </div>
+            </button>
+        </section>
+
+        <footer class="playbox-footer">
+            <div class="playbox-footer-left">
+                <span class="pb-info-badge">● Bumiayu TV Leanback</span>
+                <span class="pb-hint-text">Tekan OK untuk membuka | D-Pad untuk navigasi</span>
+            </div>
+            <div class="playbox-footer-right">
+                <span id="pb-clock" class="pb-clock">--:--</span>
+                <span class="pb-weather">Bumiayu 27°C</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- =========================================================================
+         VIEW 2: LEGION CATALOG HUB (CINEMATIC GOOGLE TV STYLE)
+         ========================================================================= -->
+    <div id="legion-view" class="legion-view" style="display:none">
+
+
     <!-- TOP NAVIGATION & STATUS BAR -->
     <header class="top-nav-bar">
         <div class="brand-group">
+            <button type="button" id="btn-back-to-playbox" class="btn-back-playbox" tabindex="0" title="Kembali ke Playbox">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span>Playbox</span>
+            </button>
             <span class="brand-dot" aria-hidden="true"></span>
             <h1 class="brand-title">Bumiayu TV</h1>
         </div>

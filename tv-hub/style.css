@@ -706,3 +706,239 @@ html, body {
     font-weight: 600;
     pointer-events: none;
 }
+
+
+/* ==============================================================================
+   PLAYBOX MINIMALIST HOME VIEW (CLEAN LANDING SCREEN)
+   ============================================================================== */
+.playbox-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at 50% 35%, #182030 0%, #0a0b12 85%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 38px 64px 34px 64px;
+    z-index: 50;
+}
+
+.playbox-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.playbox-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.playbox-title {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.playbox-badge {
+    font-size: 13px;
+    font-weight: 700;
+    background: #eab308;
+    color: #000000;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.playbox-quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.playbox-icon-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: transform var(--trans-fast), background var(--trans-fast), border-color var(--trans-fast);
+}
+
+.playbox-icon-btn:focus {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+    transform: scale(1.12);
+    outline: none;
+}
+
+/* Playbox Cards Row */
+.playbox-cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    width: 100%;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+.playbox-card {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 32px 28px;
+    height: 230px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1), border-color 160ms, background 160ms;
+}
+
+.playbox-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    height: 100%;
+    width: 100%;
+}
+
+.pb-card-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.pb-card-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+}
+
+.pb-card-count {
+    font-size: 15px;
+    font-weight: 600;
+    color: #38bdf8;
+    margin-bottom: 4px;
+}
+
+.pb-card-sub {
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.pb-card-icon-wrap {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pb-icon {
+    width: 44px;
+    height: 44px;
+}
+
+/* Playbox Card Focus State */
+.playbox-card:focus {
+    transform: translateY(-6px) scale(1.03);
+    border-color: #38bdf8;
+    background: linear-gradient(135deg, rgba(38, 56, 82, 0.95) 0%, rgba(19, 32, 54, 0.98) 100%);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    outline: none;
+}
+
+.playbox-card:focus .pb-card-icon-wrap {
+    background: #38bdf8;
+    color: #0b1120;
+}
+
+/* Playbox Footer */
+.playbox-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 18px;
+}
+
+.playbox-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.pb-info-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: #38bdf8;
+}
+
+.pb-hint-text {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.playbox-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.pb-clock {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+
+.pb-weather {
+    font-size: 14px;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+/* Back to Playbox Button in Legion Hub */
+.btn-back-playbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #e2e8f0;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    margin-right: 12px;
+    transition: transform var(--trans-fast), background var(--trans-fast);
+}
+
+.btn-back-playbox:focus {
+    background: #38bdf8;
+    color: #0f172a;
+    border-color: #38bdf8;
+    transform: scale(1.08);
+    outline: none;
+}
