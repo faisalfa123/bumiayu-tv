@@ -18,7 +18,7 @@
                 <span class="playbox-badge">TV</span>
             </div>
             <div class="playbox-quick-actions">
-                <button type="button" class="playbox-icon-btn" id="pb-btn-settings" title="Pengaturan" tabindex="0">
+                <button type="button" class="playbox-icon-btn" id="pb-btn-settings" onclick="openLegionView('settings')" title="Pengaturan" tabindex="0">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 </button>
             </div>
@@ -26,7 +26,7 @@
 
         <section class="playbox-cards-container">
             <!-- Playbox Card 1: Live TV -->
-            <button type="button" class="playbox-card" id="pb-card-livetv" data-dest="livetv" tabindex="0">
+            <button type="button" class="playbox-card" id="pb-card-livetv" onclick="openLegionView('livetv')" tabindex="0">
                 <div class="pb-card-content">
                     <div class="pb-card-text">
                         <h2 class="pb-card-title">Live TV's</h2>
@@ -45,7 +45,7 @@
             </button>
 
             <!-- Playbox Card 2: YouTube Hub -->
-            <button type="button" class="playbox-card" id="pb-card-youtube" data-dest="apps" tabindex="0">
+            <button type="button" class="playbox-card" id="pb-card-youtube" onclick="openLegionView('apps')" tabindex="0">
                 <div class="pb-card-content">
                     <div class="pb-card-text">
                         <h2 class="pb-card-title">YouTube Hub</h2>
@@ -62,7 +62,7 @@
             </button>
 
             <!-- Playbox Card 3: Katalog Lengkap -->
-            <button type="button" class="playbox-card" id="pb-card-catalog" data-dest="home" tabindex="0">
+            <button type="button" class="playbox-card" id="pb-card-catalog" onclick="openLegionView('home')" tabindex="0">
                 <div class="pb-card-content">
                     <div class="pb-card-text">
                         <h2 class="pb-card-title">Katalog Lengkap</h2>
@@ -102,7 +102,7 @@
     <!-- TOP NAVIGATION & STATUS BAR -->
     <header class="top-nav-bar">
         <div class="brand-group">
-            <button type="button" id="btn-back-to-playbox" class="btn-back-playbox" tabindex="0" title="Kembali ke Playbox">
+            <button type="button" id="btn-back-to-playbox" onclick="openPlayboxView()" class="btn-back-playbox" tabindex="0" title="Kembali ke Playbox">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 <span>Playbox</span>
             </button>
