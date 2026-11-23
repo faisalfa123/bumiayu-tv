@@ -113,15 +113,13 @@ function initLauncher() {
     setupBillboardListeners();
     setupVaultKeypad();
     setupDpadNavigation();
+    setupPlayboxListeners();
 
-    // Default focus: focus first card on Home pane
+    // Start cleanly on Playbox Landing View
     setTimeout(() => {
-        const firstCard = document.querySelector("#pane-home .tv-card");
-        if (firstCard) {
-            firstCard.focus();
-        } else {
-            const firstTab = document.querySelector(".nav-tab");
-            if (firstTab) firstTab.focus();
+        const pbCard = document.getElementById("pb-card-livetv");
+        if (pbCard) {
+            pbCard.focus();
         }
     }, 150);
 }
