@@ -3,129 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bumiayu TV - Premium Home Launcher</title>
+    <title>Bumiayu TV - Google TV Modern Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- HEADER STATUS & JAM -->
-    <header class="header-bar">
-        <h1 class="brand-title">Bumiayu TV</h1>
-        <div id="clock-display" class="clock-display">--:--</div>
+    <!-- TOP NAVIGATION & STATUS BAR -->
+    <header class="top-nav-bar">
+        <div class="brand-group">
+            <span class="brand-dot" aria-hidden="true"></span>
+            <h1 class="brand-title">Bumiayu TV</h1>
+        </div>
+
+        <!-- TOP CATEGORY TABS (D-PAD NAVIGABLE) -->
+        <nav id="nav-tabs" class="nav-tabs" role="tablist" aria-label="Kategori Utama">
+            <button class="nav-tab active" data-tab="home" role="tab" aria-selected="true" tabindex="0">
+                <span class="tab-icon">🏠</span> Beranda
+            </button>
+            <button class="nav-tab" data-tab="livetv" role="tab" aria-selected="false" tabindex="-1">
+                <span class="tab-icon">📺</span> Live TV
+            </button>
+            <button class="nav-tab" data-tab="apps" role="tab" aria-selected="false" tabindex="-1">
+                <span class="tab-icon">📱</span> Aplikasi
+            </button>
+            <button class="nav-tab" data-tab="settings" role="tab" aria-selected="false" tabindex="-1">
+                <span class="tab-icon">⚙️</span> Pengaturan
+            </button>
+        </nav>
+
+        <div class="header-right">
+            <span id="net-status" class="net-pill online">● Online</span>
+            <div id="clock-display" class="clock-display">--:--</div>
+        </div>
     </header>
 
-    <main class="container">
-        <!-- BARIS 1: REKOMENDASI UTAMA / UTILITY (CLONE YOUTUBE & MUSIC CONTROLLER) -->
-        <section aria-labelledby="row-title-entertainment">
-            <h2 id="row-title-entertainment" class="row-title">Hiburan & Ekosistem</h2>
-            <div class="grid-row">
-                <!-- Shortcut SmartTube yang di-clone menjadi YouTube Official -->
-                <button class="tv-card" onclick="launchYouTube()" aria-label="Buka YouTube">
-                    <img class="icon" src="assets/youtube_tv.png" alt="YouTube">
-                    <span class="title">YouTube</span>
-                </button>
-
-                <!-- Widget Cepat Integrasi Kontrol Server Musik Senandung -->
-                <button class="tv-card" onclick="controlSenandung('toggle-play')" aria-label="Kontrol Musik Senandung">
-                    <img class="icon" src="assets/senandung.png" alt="Senandung">
-                    <span class="title">Senandung (Play/Pause)</span>
-                </button>
+    <!-- DYNAMIC HERO BILLBOARD BANNER -->
+    <section id="hero-billboard" class="hero-billboard" aria-label="Rekomendasi Sorotan">
+        <div class="billboard-content">
+            <div class="billboard-badge" id="billboard-badge">PILIHAN UTAMA</div>
+            <h2 class="billboard-title" id="billboard-title">SmartTube TV</h2>
+            <p class="billboard-desc" id="billboard-desc">Pemutar YouTube tanpa iklan, resolusi 60fps dengan dukungan SponsorBlock dan remote TV Leanback.</p>
+            <div class="billboard-meta" id="billboard-meta">
+                <span class="meta-tag">60 FPS</span>
+                <span class="meta-tag">AD-FREE</span>
+                <span class="meta-tag">LEANBACK</span>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- BARIS 2: WEB TV SALURAN NASIONAL & INTERNASIONAL (DENGAN DETEKTOR LIVE) -->
-        <section aria-labelledby="row-title-webtv">
-            <h2 id="row-title-webtv" class="row-title">Saluran Web TV Live</h2>
-            <div class="grid-row">
-                <!-- Channel Nasional: Kompas TV -->
-                <button class="tv-card" data-stream="https://op-group1-swiftservehd-1.dens.tv/s/s104/index.m3u8" onclick="playStream(this.getAttribute('data-stream'), 'Kompas TV')" aria-label="Tonton Kompas TV">
-                    <span class="status-badge status-checking">Checking...</span>
-                    <span class="title">Kompas TV</span>
-                </button>
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="main-viewport">
 
-                <!-- Channel Internasional: NHK World -->
-                <button class="tv-card" data-stream="https://nhkwlive-ojp.akamaized.net/hls/live/2003459/nhkwlive-ojp-en/index.m3u8" onclick="playStream(this.getAttribute('data-stream'), 'NHK World Japan')" aria-label="Tonton NHK World">
-                    <span class="status-badge status-checking">Checking...</span>
-                    <span class="title">NHK World</span>
-                </button>
+        <!-- TAB PANE 1: BERANDA -->
+        <div id="pane-home" class="tab-pane active" role="tabpanel" aria-labelledby="tab-home">
+            <div class="shelf-section">
+                <h3 class="shelf-title">Dual YouTube Hub & Musik</h3>
+                <div class="shelf-grid dual-yt-shelf">
+                    <!-- Card 1: SmartTube -->
+                    <button class="tv-card yt-hero-card" data-pkg="org.smarttube.stable" data-title="SmartTube TV" data-desc="Pemutar YouTube resmi TV tanpa iklan, resolusi 60fps dengan remote Leanback." data-badge="YOUTUBE 1" tabindex="0">
+                        <div class="card-thumb-wrap">
+                            <img src="assets/youtube_tv.png" alt="SmartTube" class="card-logo">
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">SmartTube</span>
+                            <span class="card-sub">Ad-Free 60fps Leanback</span>
+                        </div>
+                    </button>
 
-                <!-- Kategori 18+ Terkunci Proteksi Keamanan PIN -->
-                <button class="tv-card" data-stream="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" onclick="openAdultChannel(this.getAttribute('data-stream'))" aria-label="Buka Kategori Dewasa Terkunci">
-                    <span class="status-badge status-checking">Checking...</span>
-                    <span class="title">Kategori 18+ (🔒)</span>
-                </button>
+                    <!-- Card 2: TizenTube Cobalt -->
+                    <button class="tv-card yt-hero-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="YouTube bebas iklan berbasis Samsung Tizen TV dengan performa ultra ringan." data-badge="YOUTUBE 2" tabindex="-1">
+                        <div class="card-thumb-wrap">
+                            <img src="assets/tizentube.png" alt="TizenTube" class="card-poster">
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">TizenTube Cobalt</span>
+                            <span class="card-sub">Samsung Tizen Engine</span>
+                        </div>
+                    </button>
+
+                    <!-- Card 3: Senandung Musik -->
+                    <button class="tv-card music-hero-card" onclick="controlSenandung('toggle-play')" data-title="Senandung Audio" data-desc="Pusat musik pribadi streaming audio PWA dan pemutar lagu lokal." data-badge="MUSIK" tabindex="-1">
+                        <div class="card-thumb-wrap">
+                            <img src="assets/senandung.png" alt="Senandung" class="card-logo">
+                        </div>
+                        <div class="card-info">
+                            <span class="card-title">Senandung</span>
+                            <span class="card-sub">Audio Player Hub</span>
+                        </div>
+                    </button>
+                </div>
             </div>
-        </section>
 
-        <!-- BARIS 3: PENGATURAN & SISTEM LENGKAP -->
-        <section aria-labelledby="row-title-settings">
-            <h2 id="row-title-settings" class="row-title">Pengaturan & Sistem</h2>
-            <div class="grid-row">
-                <!-- Wi-Fi & Jaringan -->
-                <button class="tv-card" onclick="openSettings('wifi')" aria-label="Pengaturan Wi-Fi dan Jaringan">
-                    <img class="icon" src="assets/wifi.png" alt="Wi-Fi">
-                    <span class="title">Wi-Fi & Jaringan</span>
-                </button>
-
-                <!-- Bluetooth & Remote -->
-                <button class="tv-card" onclick="openSettings('bluetooth')" aria-label="Pengaturan Bluetooth dan Remote">
-                    <img class="icon" src="assets/bluetooth.png" alt="Bluetooth">
-                    <span class="title">Remote & Bluetooth</span>
-                </button>
-
-                <!-- Kelola Aplikasi -->
-                <button class="tv-card" onclick="openSettings('apps')" aria-label="Kelola Aplikasi">
-                    <img class="icon" src="assets/apps.png" alt="Aplikasi">
-                    <span class="title">Kelola Aplikasi</span>
-                </button>
-
-                <!-- Pengaturan Perangkat / Sistem Lengkap -->
-                <button class="tv-card" onclick="openSettings('device')" aria-label="Pengaturan Sistem Perangkat">
-                    <img class="icon" src="assets/settings.png" alt="Pengaturan">
-                    <span class="title">Setelan Perangkat</span>
-                </button>
+            <!-- Quick TV Row in Home -->
+            <div class="shelf-section">
+                <h3 class="shelf-title">Sorotan Siaran TV Nasional</h3>
+                <div class="shelf-grid channels-shelf" id="home-channels-strip">
+                    <!-- Populated dynamically or static top picks -->
+                </div>
             </div>
-        </section>
+        </div>
+
+        <!-- TAB PANE 2: LIVE TV (15+ CHANNELS WITH 16:9 POSTERS) -->
+        <div id="pane-livetv" class="tab-pane" role="tabpanel" aria-labelledby="tab-livetv" hidden>
+            <div class="shelf-section">
+                <h3 class="shelf-title">Semua Saluran Siaran Langsung (17 Saluran Nasional & Dunia)</h3>
+                <div class="shelf-grid channels-full-grid" id="full-channels-grid">
+                    <!-- Generated dynamically with full metadata -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PANE 3: APLIKASI -->
+        <div id="pane-apps" class="tab-pane" role="tabpanel" aria-labelledby="tab-apps" hidden>
+            <div class="shelf-section">
+                <h3 class="shelf-title">Aplikasi Android TV Terpasang</h3>
+                <div class="shelf-grid apps-shelf">
+                    <button class="tv-card app-card" data-pkg="org.smarttube.stable" data-title="SmartTube" data-desc="Aplikasi pemutar YouTube tanpa iklan." tabindex="-1">
+                        <img src="assets/youtube_tv.png" alt="SmartTube" class="app-icon">
+                        <span class="card-title">SmartTube</span>
+                    </button>
+
+                    <button class="tv-card app-card" data-pkg="io.gh.reisxd.tizentube.cobalt" data-title="TizenTube Cobalt" data-desc="Samsung Tizen YouTube untuk Android TV." tabindex="-1">
+                        <img src="assets/tizentube.png" alt="TizenTube" class="app-icon">
+                        <span class="card-title">TizenTube</span>
+                    </button>
+
+                    <button class="tv-card app-card" data-pkg="com.netflix.ninja" data-title="Netflix" data-desc="Layanan film dan serial streaming HD Widevine L1." tabindex="-1">
+                        <img src="assets/apps.png" alt="Netflix" class="app-icon">
+                        <span class="card-title">Netflix</span>
+                    </button>
+
+                    <button class="tv-card app-card" data-pkg="com.amazon.amazonvideo.livingroom" data-title="Prime Video" data-desc="Amazon Prime Video TV." tabindex="-1">
+                        <img src="assets/apps.png" alt="Prime Video" class="app-icon">
+                        <span class="card-title">Prime Video</span>
+                    </button>
+
+                    <button class="tv-card app-card" onclick="openSettings('apps')" data-title="Pengelola Aplikasi" data-desc="Lihat dan kelola semua aplikasi terinstal." tabindex="-1">
+                        <img src="assets/settings.png" alt="Pengelola Aplikasi" class="app-icon">
+                        <span class="card-title">Kelola Semua</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PANE 4: PENGATURAN & SISTEM -->
+        <div id="pane-settings" class="tab-pane" role="tabpanel" aria-labelledby="tab-settings" hidden>
+            <div class="shelf-section">
+                <h3 class="shelf-title">Pengaturan Sistem & Sambungan TV</h3>
+                <div class="shelf-grid settings-shelf">
+                    <!-- Wi-Fi -->
+                    <button class="tv-card settings-card" onclick="openSettings('wifi')" data-title="Wi-Fi & Jaringan" data-desc="Kelola sambungan Wi-Fi, IP, dan status koneksi internet." data-badge="KONEKSI" tabindex="-1">
+                        <img src="assets/wifi.png" alt="Wi-Fi" class="settings-icon">
+                        <span class="card-title">Wi-Fi & Jaringan</span>
+                        <span class="card-sub">Status & IP TV</span>
+                    </button>
+
+                    <!-- Bluetooth -->
+                    <button class="tv-card settings-card" onclick="openSettings('bluetooth')" data-title="Remote & Aksesoris" data-desc="Hubungkan remote Bluetooth, speaker nirkabel, dan gamepad." data-badge="BLUETOOTH" tabindex="-1">
+                        <img src="assets/bluetooth.png" alt="Bluetooth" class="settings-icon">
+                        <span class="card-title">Remote & Bluetooth</span>
+                        <span class="card-sub">Perangkat Nirkabel</span>
+                    </button>
+
+                    <!-- Kelola Aplikasi -->
+                    <button class="tv-card settings-card" onclick="openSettings('apps')" data-title="Kelola Aplikasi" data-desc="Copot pemasangan atau bersihkan cache aplikasi." data-badge="MEMORI" tabindex="-1">
+                        <img src="assets/apps.png" alt="Aplikasi" class="settings-icon">
+                        <span class="card-title">Kelola Aplikasi</span>
+                        <span class="card-sub">Manajemen Storage</span>
+                    </button>
+
+                    <!-- Setelan Perangkat -->
+                    <button class="tv-card settings-card" onclick="openSettings('device')" data-title="Setelan Perangkat Lengkap" data-desc="Buka panel pengaturan inti Android TV 9." data-badge="SISTEM" tabindex="-1">
+                        <img src="assets/settings.png" alt="Sistem" class="settings-icon">
+                        <span class="card-title">Setelan Perangkat</span>
+                        <span class="card-sub">Pengaturan Android</span>
+                    </button>
+                </div>
+                <div class="secret-hint" aria-hidden="true">
+                    <span>💡 Tips Navigasi: Gunakan tombol D-Pad untuk menjelajah menu.</span>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <!-- DIALOG MODAL PIN KATEGORI 18+ (NATIVE HTML5 <dialog>) -->
-    <dialog id="adult-pin-dialog" aria-labelledby="pin-dialog-title" aria-modal="true">
-        <div class="dialog-header">
-            <h3 id="pin-dialog-title">Kunci Pengaman 18+</h3>
-            <p>Masukkan 4-digit PIN menggunakan Remote D-Pad</p>
-        </div>
-        <div id="pin-display" class="pin-display">----</div>
-        <div class="pin-keypad">
-            <button class="pin-btn" onclick="inputPinDigit('1')">1</button>
-            <button class="pin-btn" onclick="inputPinDigit('2')">2</button>
-            <button class="pin-btn" onclick="inputPinDigit('3')">3</button>
-            <button class="pin-btn" onclick="inputPinDigit('4')">4</button>
-            <button class="pin-btn" onclick="inputPinDigit('5')">5</button>
-            <button class="pin-btn" onclick="inputPinDigit('6')">6</button>
-            <button class="pin-btn" onclick="inputPinDigit('7')">7</button>
-            <button class="pin-btn" onclick="inputPinDigit('8')">8</button>
-            <button class="pin-btn" onclick="inputPinDigit('9')">9</button>
-            <button class="pin-btn" onclick="clearPinInput()">C</button>
-            <button class="pin-btn" onclick="inputPinDigit('0')">0</button>
-            <button class="pin-btn" onclick="closePinDialog()">✕</button>
+    <!-- STEALTH 18+ VAULT DIALOG (TRIGGERED BY SECRET REMOTE COMBO UP-UP-DOWN-DOWN) -->
+    <dialog id="vault-modal" class="modal-dialog" aria-labelledby="vault-modal-title" aria-modal="true">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="vault-modal-title">🔐 Brankas Rahasia 18+</h3>
+                <p id="vault-modal-desc">Masukkan 4-digit PIN menggunakan Remote D-Pad.</p>
+            </div>
+
+            <div id="vault-pin-display" class="pin-display">----</div>
+            <p id="vault-status-msg" class="vault-status-msg" aria-live="polite"></p>
+
+            <div class="pin-keypad" id="vault-keypad">
+                <button type="button" class="pin-btn" data-key="1">1</button>
+                <button type="button" class="pin-btn" data-key="2">2</button>
+                <button type="button" class="pin-btn" data-key="3">3</button>
+                <button type="button" class="pin-btn" data-key="4">4</button>
+                <button type="button" class="pin-btn" data-key="5">5</button>
+                <button type="button" class="pin-btn" data-key="6">6</button>
+                <button type="button" class="pin-btn" data-key="7">7</button>
+                <button type="button" class="pin-btn" data-key="8">8</button>
+                <button type="button" class="pin-btn" data-key="9">9</button>
+                <button type="button" class="pin-btn btn-danger" data-key="clear">Hapus</button>
+                <button type="button" class="pin-btn" data-key="0">0</button>
+                <button type="button" class="pin-btn btn-primary" data-key="submit">OK</button>
+            </div>
+
+            <!-- UNLOCKED VAULT CONTENT -->
+            <div id="vault-content" class="vault-content" hidden>
+                <div class="vault-banner">
+                    <span class="vault-badge">SESI RAHASIA AKTIF</span>
+                    <button type="button" id="btn-close-vault" class="btn-lock">🔒 Kunci Kembali</button>
+                </div>
+                <div class="shelf-grid channels-shelf" id="adult-channels-grid">
+                    <!-- Populated dynamically when unlocked -->
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" id="btn-cancel-vault" class="btn-secondary">Tutup</button>
+            </div>
         </div>
     </dialog>
 
-    <!-- OVERLAY PEMUTAR VIDEO FULLSCREEN -->
-    <div id="video-overlay" role="region" aria-label="Pemutar Video Layar Penuh">
-        <video id="main-player" playsinline></video>
-        <div id="player-osd">
-            <span id="osd-title" style="font-weight: 700; font-size: 1.1rem;">Live TV</span>
-            <span class="status-badge status-online">LIVE</span>
-            <span style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">Tekan Back untuk keluar</span>
+    <!-- FULLSCREEN HLS VIDEO PLAYER OVERLAY -->
+    <div id="video-overlay" class="video-overlay" hidden>
+        <div class="video-top-bar">
+            <button id="btn-back-player" class="btn-back">← Kembali</button>
+            <div class="player-channel-info">
+                <span id="player-channel-name" class="player-channel-name">Channel Live</span>
+                <span class="player-live-badge">● LIVE HD</span>
+            </div>
         </div>
+        <video id="tv-video-player" class="tv-video-player" controls autoplay playsinline></video>
+        <div class="player-hud-hint">Tekan BACK di remote untuk keluar | D-Pad Kiri/Kanan ganti channel</div>
     </div>
 
-    <!-- TOAST NOTIFIKASI -->
-    <div id="toast-notification" role="status" aria-live="polite"></div>
-
-    <!-- SCRIPT UTAMA KONTROLER -->
-    <script src="hls.min.js"></script>
+    <!-- HLS.JS & LOGIC SCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

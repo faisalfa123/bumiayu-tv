@@ -25,6 +25,7 @@
             <action android:name="android.media.tv.action.VIEW_INPUTS" />
         </intent>
         <package android:name="org.smarttube.stable" />
+        <package android:name="io.gh.reisxd.tizentube.cobalt" />
         <package android:name="com.teamsmart.videomanager.tv" />
         <package android:name="com.netflix.ninja" />
         <package android:name="com.amazon.amazonvideo.livingroom" />

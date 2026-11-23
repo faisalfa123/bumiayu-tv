@@ -1,275 +1,671 @@
-/* ==========================================================================
-   RESET & DASAR TEMA GELAP MEWAH (ANTI-LAG) - XIAOMI MI TV 4A (RAM 1GB)
-   ========================================================================== */
+/* ==============================================================================
+   BUMIAYU TV - GOOGLE TV / APPLE TV MODERN EDITION
+   Hardware Optimized for Xiaomi Smart TV 4A 32" (1GB RAM / Mali-450 GPU)
+   Strict Performance Guard: ZERO backdrop-filter: blur()
+   ============================================================================== */
+
+:root {
+    --bg-canvas: #0a0b10;
+    --surface-card: #161822;
+    --surface-card-hover: #212534;
+    --surface-card-focus: #282e42;
+    --surface-border: rgba(255, 255, 255, 0.12);
+    --focus-cyan: #38bdf8;
+    --accent-red: #ef4444;
+    --text-pri: #f8fafc;
+    --text-sec: #94a3b8;
+    --text-muted: #64748b;
+    --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --radius-card: 14px;
+    --radius-pill: 999px;
+    --trans-fast: 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Reset & Viewport Constraints */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', 'Segoe UI', -apple-system, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
-body {
-    background: #0d0e12; /* Solid dark ala Apple TV Dark Mode */
-    color: #ffffff;
-    overflow: hidden;
+html, body {
     width: 100vw;
     height: 100vh;
-    padding: 40px 50px;
-    user-select: none;
+    background-color: var(--bg-canvas);
+    color: var(--text-pri);
+    font-family: var(--font-stack);
+    overflow: hidden;
+    touch-action: none;
 }
 
-/* ==========================================================================
-   HEADER RINGKAS
-   ========================================================================== */
-.header-bar {
+/* ==============================================================================
+   TOP NAVIGATION & STATUS BAR
+   ============================================================================== */
+.top-nav-bar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    height: 58px;
+    padding: 0 40px;
+    background-color: #0d0f16;
+    border-bottom: 1px solid var(--surface-border);
+    position: relative;
+    z-index: 100;
+}
+
+.brand-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand-dot {
+    width: 12px;
+    height: 12px;
+    background-color: var(--focus-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--focus-cyan);
 }
 
 .brand-title {
-    font-size: 1.75rem;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-pri);
+}
+
+/* Nav Category Tabs */
+.nav-tabs {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    color: var(--text-sec);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: var(--trans-fast);
+}
+
+.nav-tab.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-pri);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.nav-tab:focus {
+    transform: scale(1.08);
+    background: var(--surface-card-focus);
+    color: var(--text-pri);
+    border-color: var(--focus-cyan);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.5);
+}
+
+/* Header Right Clock & Status */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.net-pill {
+    font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.5px;
-    color: #ffffff;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
 .clock-display {
-    font-size: 1.25rem;
-    font-weight: 300;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-pri);
 }
 
-/* ==========================================================================
-   GRID KARTU APLIKASI ASIMETRIS & BERSIH
-   ========================================================================== */
-.container {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    height: calc(100vh - 100px);
-    overflow-y: auto;
-    scroll-behavior: smooth;
-    padding-bottom: 50px;
-}
-
-.container::-webkit-scrollbar {
-    display: none;
-}
-
-.row-title {
-    font-size: 1.35rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-    color: rgba(255, 255, 255, 0.65);
-}
-
-.grid-row {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding: 10px 4px;
-}
-
-.grid-row::-webkit-scrollbar {
-    display: none;
-}
-
-/* Desain Kartu Standar */
-.tv-card {
-    min-width: 240px;
-    height: 135px;
-    background: rgba(255, 255, 255, 0.05); /* Solid semi-transparan tanpa blur */
-    border: 2px solid transparent;
-    border-radius: 16px;
+/* ==============================================================================
+   DYNAMIC HERO BILLBOARD BANNER
+   ============================================================================== */
+.hero-billboard {
+    height: 180px;
+    padding: 24px 40px;
+    background: linear-gradient(180deg, #12141f 0%, #0a0b10 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.billboard-badge {
+    display: inline-block;
+    align-self: flex-start;
+    padding: 3px 10px;
+    background: var(--focus-cyan);
+    color: #07090e;
+    font-size: 0.70rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.billboard-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-pri);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+}
+
+.billboard-desc {
+    font-size: 0.92rem;
+    color: var(--text-sec);
+    max-width: 800px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+}
+
+.billboard-meta {
+    display: flex;
+    gap: 8px;
+}
+
+.meta-tag {
+    font-size: 0.70rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-sec);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==============================================================================
+   MAIN VIEWPORT & SHELF LAYOUT
+   ============================================================================== */
+.main-viewport {
+    height: calc(100vh - 238px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px 40px 60px;
+}
+
+/* Custom Lean Scrollbar */
+.main-viewport::-webkit-scrollbar {
+    width: 6px;
+}
+.main-viewport::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.shelf-section {
+    margin-bottom: 28px;
+}
+
+.shelf-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-sec);
+    margin-bottom: 14px;
+    display: flex;
     align-items: center;
-    gap: 12px;
-    cursor: none;
-    transform: scale(1);
-    transition: transform 0.18s cubic-bezier(0.25, 1, 0.5, 1), 
-                background 0.18s ease, 
-                border-color 0.18s ease, 
-                box-shadow 0.18s ease;
+    gap: 8px;
+}
+
+.shelf-grid {
+    display: grid;
+    gap: 20px;
+}
+
+/* Grid Layouts */
+.dual-yt-shelf {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.channels-shelf {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.channels-full-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.apps-shelf, .settings-shelf {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ==============================================================================
+   CARD SYSTEM & D-PAD FOCUS ENGINE
+   ============================================================================== */
+.tv-card {
+    background-color: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-card);
+    cursor: pointer;
+    outline: none;
     position: relative;
-    outline: none;
-    color: #ffffff;
+    overflow: hidden;
+    text-align: left;
+    transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+                border-color 160ms ease,
+                box-shadow 160ms ease,
+                background-color 160ms ease;
 }
 
-/* ==========================================================================
-   EFEK FOKUS REMOTE INSTAN (SPATIAL NAVIGATION EFFECT)
-   ========================================================================== */
 .tv-card:focus {
-    outline: none;
     transform: scale(1.06);
-    background: rgba(255, 255, 255, 0.15);
-    border-color: #ffffff;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
-    z-index: 10;
+    background-color: var(--surface-card-focus);
+    border-color: var(--focus-cyan);
+    box-shadow: 0 0 22px rgba(56, 189, 248, 0.45);
+    z-index: 20;
 }
 
-.tv-card .icon {
-    width: 48px;
-    height: 48px;
+/* YouTube Hero Card (16:9 Aspect) */
+.yt-hero-card, .music-hero-card {
+    height: 140px;
+    display: flex;
+    align-items: center;
+    padding: 18px;
+    gap: 16px;
+}
+
+.card-thumb-wrap {
+    width: 90px;
+    height: 90px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 12px;
+}
+
+.card-logo {
+    width: 60px;
+    height: 60px;
     object-fit: contain;
 }
 
-.tv-card .title {
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.85);
+.card-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
 }
 
-.tv-card:focus .title {
-    color: #ffffff;
+.card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-/* ==========================================================================
-   BADGE STATUS CHANNEL LIVE
-   ========================================================================== */
-.status-badge {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
+.card-title {
+    font-size: 1.10rem;
     font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    color: var(--text-pri);
 }
-.status-online { background: #2ecc71; color: #ffffff; }
-.status-offline { background: #e74c3c; color: #ffffff; }
-.status-checking { background: #f1c40f; color: #000000; }
 
-/* Toast Feedback */
-#toast-notification {
-    position: fixed;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e222b;
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 10px 24px;
+.card-sub {
+    font-size: 0.82rem;
+    color: var(--text-sec);
+}
+
+/* Channel 16:9 Card */
+.channel-card {
+    display: flex;
+    flex-direction: column;
+    height: 170px;
+    padding: 0;
+}
+
+.channel-poster-wrap {
+    width: 100%;
+    height: 115px;
+    position: relative;
+    background: #11141e;
+}
+
+.channel-poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.channel-live-pill {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 7px;
+    background: var(--accent-red);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+}
+
+.channel-card-body {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.channel-name {
     font-size: 0.95rem;
-    display: none;
+    font-weight: 700;
+    color: var(--text-pri);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.channel-genre {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+/* App & Settings Card */
+.app-card, .settings-card {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    text-align: center;
+    gap: 8px;
+}
+
+.app-icon, .settings-icon {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+}
+
+.secret-hint {
+    margin-top: 14px;
+    font-size: 0.80rem;
+    color: var(--text-muted);
+}
+
+/* ==============================================================================
+   STEALTH 18+ VAULT DIALOG & KEYPAD
+   ============================================================================== */
+.modal-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    max-width: 90vw;
+    background: #0f121b;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 18px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+    padding: 0;
+    color: var(--text-pri);
+    outline: none;
     z-index: 1000;
 }
 
-/* ==========================================================================
-   DIALOG MODAL PIN REMOTE (NATIVE <dialog>)
-   ========================================================================== */
-dialog#adult-pin-dialog {
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    background: #14171f;
-    color: #ffffff;
-    padding: 24px 30px;
-    margin: auto;
-    width: 360px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+.modal-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.85);
 }
 
-dialog#adult-pin-dialog::backdrop {
-    background: rgba(0, 0, 0, 0.8);
-    overscroll-behavior: contain;
+.modal-card {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.dialog-header {
+.modal-header {
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 }
 
-.dialog-header h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
+.modal-header h3 {
+    font-size: 1.4rem;
+    font-weight: 800;
     margin-bottom: 6px;
 }
 
-.dialog-header p {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
+.modal-header p {
+    font-size: 0.88rem;
+    color: var(--text-sec);
 }
 
 .pin-display {
-    background: #0d0e12;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    letter-spacing: 12px;
-    margin-bottom: 16px;
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 0.35em;
+    color: var(--focus-cyan);
+    margin: 10px 0;
+    padding: 6px 20px;
+    background: #06080d;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.vault-status-msg {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--focus-cyan);
+    margin-bottom: 12px;
+    min-height: 20px;
+}
+
+.vault-status-msg.error {
+    color: #f87171;
 }
 
 .pin-keypad {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(3, 72px);
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .pin-btn {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid transparent;
-    border-radius: 10px;
-    color: #ffffff;
+    height: 52px;
     font-size: 1.25rem;
-    font-weight: 600;
-    height: 48px;
+    font-weight: 700;
+    background: #1a1e2b;
+    border: 1px solid var(--surface-border);
+    border-radius: 10px;
+    color: var(--text-pri);
+    cursor: pointer;
     outline: none;
-    cursor: none;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    transition: var(--trans-fast);
 }
 
 .pin-btn:focus {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: #ffffff;
-    transform: scale(1.08);
+    transform: scale(1.12);
+    background: var(--focus-cyan);
+    color: #07090e;
+    border-color: #fff;
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
 }
 
-/* ==========================================================================
-   PEMUTAR VIDEO FULLSCREEN TERINTEGRASI
-   ========================================================================== */
-#video-overlay {
+.btn-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: rgba(56, 189, 248, 0.25);
+    color: var(--focus-cyan);
+    font-size: 0.95rem;
+}
+
+.vault-content {
+    width: 100%;
+    margin-top: 10px;
+}
+
+.vault-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.vault-badge {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.15);
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+}
+
+.btn-lock {
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+    font-size: 0.80rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+}
+
+.btn-lock:focus {
+    transform: scale(1.08);
+    background: var(--accent-red);
+    color: #fff;
+}
+
+.modal-footer {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-sec);
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    outline: none;
+}
+
+.btn-secondary:focus {
+    transform: scale(1.06);
+    background: var(--surface-card-hover);
+    color: var(--text-pri);
+    border-color: var(--focus-cyan);
+}
+
+/* ==============================================================================
+   FULLSCREEN VIDEO PLAYER OVERLAY
+   ============================================================================== */
+.video-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100vw;
     height: 100vh;
-    background: #000000;
-    display: none;
-    z-index: 9999;
+    background: #000;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
 }
 
-#main-player {
+.video-overlay[hidden] {
+    display: none !important;
+}
+
+.video-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+    z-index: 2010;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #fff;
+    font-size: 0.90rem;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+}
+
+.btn-back:focus {
+    transform: scale(1.08);
+    background: var(--focus-cyan);
+    color: #000;
+}
+
+.player-channel-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-channel-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.player-live-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: var(--accent-red);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 3px;
+}
+
+.tv-video-player {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    background: #000;
 }
 
-#player-osd {
+.player-hud-hint {
     position: absolute;
-    bottom: 30px;
-    left: 40px;
-    background: rgba(13, 14, 18, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    padding: 12px 20px;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    transition: opacity 0.4s ease;
-}
-
-#player-osd.hidden {
-    opacity: 0;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: var(--text-sec);
+    padding: 6px 18px;
+    border-radius: var(--radius-pill);
+    font-size: 0.80rem;
+    font-weight: 600;
     pointer-events: none;
 }
