@@ -9,6 +9,30 @@ The versioning format follows our project SOP defined in `VERSIONING_RULES.md`:
 
 ---
 
+## [2.0.4 Nightly Dev] - 2026-11-24
+
+### 🚀 Fitur Baru & Peningkatan Sub-Tab M3U Global
+
+#### 1. Toolbar Sekat Sub-Filter di Tab Live TV
+- **Filter Kategori Terpadu:** Menambahkan bar navigasi sub-kategori di atas daftar siaran Live TV:
+  - Semua Saluran: Menampilkan seluruh 36+ saluran TV nasional dan M3U terverifikasi.
+  - TV Nasional: Menyaring khusus siaran televisi nasional Indonesia (Trans7, Trans TV, Metro TV, TVRI Nasional & Daerah, RTV, Nusantara TV, Jawa Pos TV, TV9 Nusantara, BRTV, dll.).
+  - M3U Global & Movies: Menampilkan saluran pilihan M3U global (Red Bull TV, 00s Cinema Replay, 1HD Music TV, Persiana Music, Blender Cinema HD, Akamai Ultra Live).
+  - Favorit: Akses cepat ke deretan saluran siaran utama.
+- **Navigasi D-Pad Mulus:** Pengguna dapat menavigasikan remote D-Pad Atas/Bawah antara Tab Kategori Utama, Toolbar Subfilter, dan Kartu Siaran tanpa konflik fokus.
+
+#### 2. Validasi Stream M3U Aktif & Proteksi Konten 18+
+- **Pre-Flight Stream Check:** Setiap URL saluran M3U diverifikasi status HTTP 200 sebelum disajikan ke aplikasi untuk mencegah error channel mati atau buffering abadi.
+- **Isolasi Konten Dewasa:** Saluran dewasa otomatis disaring dan hanya dapat dibuka di dalam Brankas Privasi (*Vault 18+*) dengan PIN 4-digit pribadi.
+- **Poster Sinematik 16:9:** Dibuatkan artwork poster beresolusi tinggi (480x270) untuk seluruh saluran M3U baru.
+
+#### 3. Cross-Platform Universal ABI & Dokumen Panduan Render
+- **Multi-Arsitektur Android:** Konfigurasi Gradle diperluas mendukung penuh arsitektur 32-bit dan 64-bit (rmeabi-v7a, rm64-v8a, x86, x86_64).
+- **Dokumentasi RENDER_RULES.md:** Menetapkan standar teknis GPU rendering, larangan blur filter, dan arsitektur buffer HLS anti-lag.
+- **Dokumentasi Visual README.md:** Menambahkan galeri tangkapan layar live dari Mi TV ke repositori GitHub.
+
+---
+
 ## [2.0.1 Nightly Dev] - 2026-11-23
 
 ### 🎨 Desain Antarmuka Sinematik & Peningkatan Fitur (Google TV Modern Edition)
