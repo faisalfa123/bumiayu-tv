@@ -9,6 +9,29 @@ The versioning format follows our project SOP defined in `VERSIONING_RULES.md`:
 
 ---
 
+## [2.1.2] - 2026-11-24
+
+### 🚀 Rilis Stabil Versi 2.1.2 & Multi-ABI Cross-Platform Engine
+
+#### 1. Rilis Resmi Multi-ABI APK di GitHub Release
+- **Paket APK Spesifik Arsitektur:** Rilis GitHub kini menyediakan file APK mandiri siap pasang untuk setiap tipe arsitektur prosesor:
+  - `bumiayu-tv-armeabi-v7a-32bit.apk`: Khusus TV RAM 1GB / Smart TV hemat daya (Xiaomi TV 4A 32", Coocaa, Changhong, RealMe TV).
+  - `bumiayu-tv-arm64-v8a-64bit.apk`: Khusus Android TV Box & Google TV modern 64-bit (Xiaomi TV Box S Gen 2, Nvidia Shield, Chromecast TV).
+  - `bumiayu-tv-x86-32bit.apk`: Khusus emulator Android TV 32-bit dan sistem Intel x86.
+  - `bumiayu-tv-x86_64-64bit.apk`: Khusus emulator Android TV 64-bit dan TV Box arsitektur x86_64.
+  - `bumiayu-tv-universal.apk`: Paket universal multi-arsitektur lengkap siap pasang di semua tipe perangkat Android TV.
+
+#### 2. Master Plan Arsitektur Proyek (`MASTER.md`)
+- **Dokumen Kitab Suci Pengembangan:** Menambahkan file `MASTER.md` di root repositori mencakup visi Media Hub Sinematik, standar UI/UX baru anti-monoton, roadmap Fase 1 (Rebranding TizenTube ke icon YouTube resmi & UptoID ke Store TV), serta SOP performa GPU Mali-450.
+
+#### 3. Restorasi Kecepatan Animasi Sistem
+- **Skala Animasi Standar 1.0x:** Mengembalikan `window_animation_scale`, `transition_animation_scale`, dan `animator_duration_scale` dari `0.5x` menjadi `1.0x` murni untuk transisi halus alami tanpa efek patah.
+
+#### 4. Sekat Sub-Filter Live TV & M3U Global Streaming
+- Menghadirkan toolbar filter kategori di tab Live TV (`Semua Saluran`, `TV Nasional`, `M3U Global & Movies`, `Favorit`) dengan pra-validasi HTTP 200 dan isolasi konten dewasa ke Brankas PIN 18+.
+
+---
+
 ## [2.0.4 Nightly Dev] - 2026-11-24
 
 ### 🚀 Fitur Baru & Peningkatan Sub-Tab M3U Global

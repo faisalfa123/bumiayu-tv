@@ -11,19 +11,20 @@ android {
         applicationId = "com.bumiayu.tvlauncher"
         minSdk = 21
         targetSdk = 33
-        versionCode = 6
-        versionName = "2.0.4"
+        versionCode = 7
+        versionName = "2.1.2"
 
-        // Cross-Platform ABI Filters: 32-bit & 64-bit ARM, 32-bit & 64-bit x86
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
         }
     }
 
-    // Support Universal Cross-Platform APK & Optional ABI Splitting
+    // Split per-ABI APKs (arm, arm64, x86, x86_64) + Universal APK
     splits {
         abi {
-            isEnable = false // Universal APK enabled by default for seamless 1-click install on all Android TV boxes
+            isEnable = true
+            reset()
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true
         }
     }

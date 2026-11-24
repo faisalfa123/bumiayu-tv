@@ -412,8 +412,8 @@ Write-Success "Total paket bloatware yang berhasil dinonaktifkan: $DisabledCount
 Write-Header "OPTIMASI KECEPATAN & ANIMASI UI (APPLE TV TWEAKS)"
 
 Write-Info "Mengatur skala animasi ke 0.5x untuk respon instan tanpa jeda..."
-& $AdbCmd shell settings put global window_animation_scale 0.5
-& $AdbCmd shell settings put global transition_animation_scale 0.5
+& $AdbCmd shell settings put global window_animation_scale 1
+& $AdbCmd shell settings put global transition_animation_scale 1
 & $AdbCmd shell settings put global animator_duration_scale 0.5
 Write-Success "Skala animasi disetel ke 0.5x (Ultra Fast)."
 
