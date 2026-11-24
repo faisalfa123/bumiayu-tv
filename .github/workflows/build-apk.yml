@@ -40,20 +40,30 @@ jobs:
       - name: Organize & Rename Multi-ABI APKs
         run: |
           mkdir -p release-apks
-          cd tv-hub-android/app/build/outputs/apk/debug/
-          for f in *.apk; do
-            echo "Processing $f"
-            case "$f" in
-              *armeabi-v7a*) cp "$f" ../../../../../release-apks/bumiayu-tv-armeabi-v7a-32bit.apk ;;
-              *arm64-v8a*)   cp "$f" ../../../../../release-apks/bumiayu-tv-arm64-v8a-64bit.apk ;;
-              *x86_64*)      cp "$f" ../../../../../release-apks/bumiayu-tv-x86_64-64bit.apk ;;
-              *x86*)         cp "$f" ../../../../../release-apks/bumiayu-tv-x86-32bit.apk ;;
-              *universal*)   cp "$f" ../../../../../release-apks/bumiayu-tv-universal.apk ;;
-              *)             cp "$f" ../../../../../release-apks/bumiayu-tv-debug.apk ;;
-            esac
+          echo "Listing all generated APK files:"
+          find tv-hub-android/app/build/outputs/apk/ -type f -name "*.apk"
+          
+          # Copy each generated apk safely
+          for f in $(find tv-hub-android/app/build/outputs/apk/ -type f -name "*.apk"); do
+            filename=$(basename "$f")
+            echo "Processing $filename"
+            if [[ "$filename" == *"armeabi-v7a"* ]]; then
+              cp "$f" release-apks/bumiayu-tv-armeabi-v7a-32bit.apk
+            elif [[ "$filename" == *"arm64-v8a"* ]]; then
+              cp "$f" release-apks/bumiayu-tv-arm64-v8a-64bit.apk
+            elif [[ "$filename" == *"x86_64"* ]]; then
+              cp "$f" release-apks/bumiayu-tv-x86_64-64bit.apk
+            elif [[ "$filename" == *"x86"* ]]; then
+              cp "$f" release-apks/bumiayu-tv-x86-32bit.apk
+            elif [[ "$filename" == *"universal"* ]]; then
+              cp "$f" release-apks/bumiayu-tv-universal.apk
+            else
+              cp "$f" release-apks/"$filename"
+            fi
           done
-          cd ../../../../../release-apks/
-          ls -la
+          
+          echo "Files in release-apks:"
+          ls -la release-apks/
 
       - name: Upload Multi-ABI Artifacts
         uses: actions/upload-artifact@v4
